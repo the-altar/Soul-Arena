@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EnableEffects = exports.AlterEffectValue = void 0;
+exports.DisableEffects = exports.EnableEffects = exports.AlterEffectValue = void 0;
 const base_1 = require("./base");
 class AlterEffectValue extends base_1.Effect {
     constructor(data, caster) {
@@ -9,7 +9,7 @@ class AlterEffectValue extends base_1.Effect {
         this.effectType = data.effectType;
         this.anyEffect = data.anyEffect || false;
         this.anySkill = data.anySkill || false;
-        this.targetSkillName = '';
+        this.targetSkillName = "";
         this.incrementVal = data.incrementVal || 0;
         this.changedEffects = [];
         this.applied = data.applied || false;
@@ -28,7 +28,9 @@ class AlterEffectValue extends base_1.Effect {
                 effect.setAltValue(this.value);
                 effect.mods.increment.value = this.incrementVal;
                 this.changedEffects.push({
-                    effect, originalAltValue, originalIncrement
+                    effect,
+                    originalAltValue,
+                    originalIncrement,
                 });
             }
             this.targetSkillName = skill.name;
@@ -84,4 +86,35 @@ class EnableEffects extends base_1.Effect {
     }
 }
 exports.EnableEffects = EnableEffects;
+class DisableEffects extends base_1.Effect {
+    constructor(data, caster) {
+        super(data, caster);
+        this.effectsId = data.effectsId;
+        this.parentSkillId = data.parentSkillId;
+    }
+    functionality(char, origin, world) {
+        if (this.hasBeenApplied)
+            return;
+        const targetedSkill = char.findSkillById(this.parentSkillId);
+        for (const e of targetedSkill.effects) {
+            if (this.effectsId.includes(e.id)) {
+                e.triggerRate = -1;
+            }
+        }
+        this.targetedSkill = targetedSkill;
+        this.hasBeenApplied = true;
+    }
+    generateToolTip() {
+        this.message = `'${this.targetedSkill.name}' has been disabled`;
+    }
+    effectConclusion() {
+        for (let i = this.targetedSkill.effects.length - 1; i >= 0; i--) {
+            const e = this.targetedSkill.effects[i];
+            if (this.effectsId.includes(e.id)) {
+                e.triggerRate = 100;
+            }
+        }
+    }
+}
+exports.DisableEffects = DisableEffects;
 //# sourceMappingURL=alterEffectValue.js.map

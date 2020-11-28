@@ -109,7 +109,6 @@ class Buffs {
     clearAbsorbDamage() {
         this.absorbDamage = {};
     }
-    clearDestructibleDefense() { }
     setDestructibleDefense(dd) {
         this.destructibleDefense += dd;
     }

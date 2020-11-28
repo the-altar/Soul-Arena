@@ -39,7 +39,7 @@ class HealthDrain extends damageRelated_1.Damage {
     functionality(character, origin, world) {
         this.triggered = true;
         const reduction = this.getDamageReductionFromCaster(this.caster, this, origin, world);
-        let damage = (this.value - reduction);
+        let damage = this.value - reduction;
         if (damage < 0)
             damage = 0;
         const hp = character.geHitPoints() - Math.round(damage / 5) * 5;
@@ -47,7 +47,7 @@ class HealthDrain extends damageRelated_1.Damage {
         const { char } = world.findCharacterById(this.caster);
         if (char.isKnockedOut())
             return;
-        char.setHitPoints((char.geHitPoints() + Math.round(damage / 5) * 5));
+        char.setHitPoints(char.geHitPoints() + Math.round(damage / 5) * 5);
     }
     generateToolTip() {
         if (this.triggerClause !== enums_1.triggerClauseType.None && !this.triggered) {

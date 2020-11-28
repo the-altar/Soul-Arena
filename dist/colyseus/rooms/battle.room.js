@@ -13,6 +13,7 @@ exports.Battle = void 0;
 const colyseus_1 = require("colyseus");
 const engine_1 = require("../../engine");
 const db_1 = require("../../db");
+const logger_1 = require("../../logger");
 class Battle extends colyseus_1.Room {
     constructor() {
         super(...arguments);
@@ -22,7 +23,7 @@ class Battle extends colyseus_1.Room {
     }
     // When room is initialized
     onCreate(options) {
-        this.onMessage('end-game-turn', (client, payload) => __awaiter(this, void 0, void 0, function* () {
+        this.onMessage("end-game-turn", (client, payload) => __awaiter(this, void 0, void 0, function* () {
             this.delay.reset();
             this.arena.processTurn(payload);
             const { isOver, gameData, winner, loser } = this.arena.startGame(true);
@@ -34,53 +35,57 @@ class Battle extends colyseus_1.Room {
                 const payload2 = endMatch(loser, winner, false);
                 this.broadcast("end-game", {
                     winner: { playerData: Object.assign({}, winner), results: Object.assign({}, payload1) },
-                    loser: { playerData: Object.assign({}, loser), results: Object.assign({}, payload2) }
+                    loser: { playerData: Object.assign({}, loser), results: Object.assign({}, payload2) },
                 });
                 this.disconnect();
             }
         }));
-        this.onMessage('add-skill-to-queue', (client, cordinates) => {
+        this.onMessage("add-skill-to-queue", (client, cordinates) => {
             const payload = this.arena.addSkillToTempQueue(cordinates);
-            client.send('update-temp-queue', payload);
+            client.send("update-temp-queue", payload);
         });
-        this.onMessage('remove-skill-from-queue', (client, cordinates) => {
+        this.onMessage("remove-skill-from-queue", (client, cordinates) => {
             const payload = this.arena.removeSkillFromTempQueue(cordinates);
-            client.send('update-temp-queue', payload);
+            client.send("update-temp-queue", payload);
         });
-        this.onMessage('exchange-energypool', (client, payload) => {
+        this.onMessage("exchange-energypool", (client, payload) => {
             client.send("exchanged-energy", this.arena.exchangeEnergyPool(payload));
         });
-        this.onMessage('surrender', (client, id) => __awaiter(this, void 0, void 0, function* () {
+        this.onMessage("surrender", (client, id) => __awaiter(this, void 0, void 0, function* () {
             const { winner, loser } = this.arena.surrender(id);
             yield this.updateMissionGoals(winner, loser);
             const payload1 = endMatch(winner, loser, true);
             const payload2 = endMatch(loser, winner, false);
             this.broadcast("end-game", {
                 winner: { playerData: Object.assign({}, winner), results: Object.assign({}, payload1) },
-                loser: { playerData: Object.assign({}, loser), results: Object.assign({}, payload2) }
+                loser: { playerData: Object.assign({}, loser), results: Object.assign({}, payload2) },
             });
             this.disconnect();
         }));
     }
     // Authorize client based on provided options before WebSocket handshake is complete
     onAuth(client, options, request) {
+        if (this.constructed >= 2)
+            return false;
         return true;
     }
     // When client successfully join the room
     onJoin(client, options, auth) {
         this.arena.addPlayer(options.player, options.team);
         this.constructed++;
-        if (this.constructed === 2)
+        logger_1.log.info("Client has joined a game!");
+        if (this.constructed === 2) {
             this.gameClock();
+        }
     }
     // When a client leaves the room
     onLeave(client, consented) { }
     // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
     onDispose() {
-        return __awaiter(this, void 0, void 0, function* () {
-        });
+        return __awaiter(this, void 0, void 0, function* () { });
     }
     gameClock() {
+        logger_1.log.info("A new game has begun");
         const { gameData } = this.arena.startGame();
         this.broadcast("game-started", gameData);
         this.delay = this.clock.setInterval(() => __awaiter(this, void 0, void 0, function* () {
@@ -93,7 +98,7 @@ class Battle extends colyseus_1.Room {
                 const payload2 = endMatch(loser, winner, false);
                 this.broadcast("end-game", {
                     winner: { playerData: Object.assign({}, winner), results: Object.assign({}, payload1) },
-                    loser: { playerData: Object.assign({}, loser), results: Object.assign({}, payload2) }
+                    loser: { playerData: Object.assign({}, loser), results: Object.assign({}, payload2) },
                 });
                 this.disconnect();
             }
@@ -149,7 +154,7 @@ class Battle extends colyseus_1.Room {
                     yield client.query(sql, [stats.mission_id, stats.user_id]);
                     const sql2 = "INSERT INTO public.obtained_entity (entity_id, user_id) VALUES($1, $2);";
                     yield client.query(sql2, [stats.entity_id, stats.user_id]);
-                    yield client.query('DELETE FROM tracking_mission where user_id = $1 and mission_id = $2', [stats.user_id, stats.mission_id]);
+                    yield client.query("DELETE FROM tracking_mission where user_id = $1 and mission_id = $2", [stats.user_id, stats.mission_id]);
                     yield client.query("COMMIT");
                 }
                 catch (e) {
@@ -163,7 +168,11 @@ class Battle extends colyseus_1.Room {
             if (completeTracks < stats.goals.length) {
                 try {
                     const sql = "UPDATE public.tracking_mission SET goals=$3 WHERE user_id=$1 AND mission_id=$2;";
-                    yield db_1.pool.query(sql, [stats.user_id, stats.mission_id, JSON.stringify(stats.trackingGoals)]);
+                    yield db_1.pool.query(sql, [
+                        stats.user_id,
+                        stats.mission_id,
+                        JSON.stringify(stats.trackingGoals),
+                    ]);
                 }
                 catch (err) {
                     throw err;
@@ -195,7 +204,11 @@ class Battle extends colyseus_1.Room {
             }
             try {
                 const sql = "UPDATE public.tracking_mission SET goals=$3 WHERE user_id=$1 AND mission_id=$2;";
-                yield db_1.pool.query(sql, [stats.user_id, stats.mission_id, JSON.stringify(stats.trackingGoals)]);
+                yield db_1.pool.query(sql, [
+                    stats.user_id,
+                    stats.mission_id,
+                    JSON.stringify(stats.trackingGoals),
+                ]);
             }
             catch (err) {
                 throw err;
@@ -205,7 +218,7 @@ class Battle extends colyseus_1.Room {
 }
 exports.Battle = Battle;
 function probability(r1, r2) {
-    return 1.0 * 1.0 / (1 + 1.0 * Math.pow(10, 1.0 * (r1 - r2) / 400));
+    return (1.0 * 1.0) / (1 + 1.0 * Math.pow(10, (1.0 * (r1 - r2)) / 400));
 }
 function calculateElo(p1, p2, isWinner) {
     const Pb = probability(p1.season.elo, p2.season.elo);
@@ -224,17 +237,19 @@ function calculateExpGain(player, p2, isWinner) {
         player.season.exp += expGained;
         levelUp(player, hasLeveledUp);
         return {
-            leveledUp: hasLeveledUp[0], expGained
+            leveledUp: hasLeveledUp[0],
+            expGained,
         };
     }
     else {
         const levelDifference = player.season.seasonLevel - p2.season.seasonLevel;
         const expLost = Math.min(Math.max(50 * levelDifference, 50), 300);
         let hasLeveledDown = [false];
-        player.season.exp = Math.max(0, (player.season.exp - expLost));
+        player.season.exp = Math.max(0, player.season.exp - expLost);
         levelDown(player, hasLeveledDown);
         return {
-            leveledDown: hasLeveledDown, expLost
+            leveledDown: hasLeveledDown,
+            expLost,
         };
     }
 }
@@ -317,7 +332,7 @@ function endMatch(p1, p2, isWinner) {
         seasonLevel: p1.season.seasonLevel || 0,
         seasonRank: p1.season.seasonRank || "Rookie",
         season: 1,
-        coins: p1.coins
+        coins: p1.coins,
     });
     return Object.assign({ playerId: p1.getId(), coins }, results);
 }
@@ -339,14 +354,25 @@ function updateGameResults(payload) {
         season_level = $7,
         season_rank = $8;`;
         const userText = `update users set coins=$1 where id=$2`;
-        const { wins, losses, streak, elo, id, exp, maxStreak, seasonLevel, seasonRank, coins } = payload;
-        const values = [wins, losses, elo, streak, maxStreak, exp, seasonLevel, seasonRank, 0, id];
+        const { wins, losses, streak, elo, id, exp, maxStreak, seasonLevel, seasonRank, coins, } = payload;
+        const values = [
+            wins,
+            losses,
+            elo,
+            streak,
+            maxStreak,
+            exp,
+            seasonLevel,
+            seasonRank,
+            0,
+            id,
+        ];
         try {
             yield db_1.pool.query(text, values);
             yield db_1.pool.query(userText, [coins, id]);
         }
         catch (err) {
-            throw (err);
+            throw err;
         }
     });
 }

@@ -1,6 +1,6 @@
 import { effectType } from "../../enums";
 import { Effect } from "./base";
-import { Invulnerability } from "./invulnerability";
+import { IgnoreInvulnerability, Invulnerability } from "./invulnerability";
 import {
   Damage,
   DamageReduction,
@@ -8,6 +8,7 @@ import {
   DecreaseDamageTaken,
   DamageIncreasal,
   AbsorbDamage,
+  IgnoreDecreaseDamageTaken,
 } from "./damageRelated";
 import { Healing, HealthDrain } from "./healthRelated";
 import {
@@ -20,7 +21,11 @@ import { Stun } from "./stunRelated";
 import { SkillCostChange, SkillTargetMod } from "./skillTargetMod";
 import { Counter } from "./counter";
 import { EffectRemoval } from "./effectRemoval";
-import { AlterEffectValue, EnableEffects } from "./alterEffectValue";
+import {
+  AlterEffectValue,
+  DisableEffects,
+  EnableEffects,
+} from "./alterEffectValue";
 import { DestructibleDefense } from "./destructibleDefense";
 
 export * from "./base";
@@ -92,6 +97,15 @@ export const effectFactory = function (effect: any, caster: number): Effect {
     }
     case effectType.SkillCostChange: {
       return new SkillCostChange(effect, caster);
+    }
+    case effectType.IgnoreDecreaseDamageTaken: {
+      return new IgnoreDecreaseDamageTaken(effect, caster);
+    }
+    case effectType.IgnoreInvulnerability: {
+      return new IgnoreInvulnerability(effect, caster);
+    }
+    case effectType.DisableEffects: {
+      return new DisableEffects(effect, caster);
     }
     default: {
       return new Effect(effect, caster);

@@ -52,6 +52,9 @@ var effectType;
     effectType[effectType["DestructibleDefense"] = 21] = "DestructibleDefense";
     effectType[effectType["EnableEffects"] = 22] = "EnableEffects";
     effectType[effectType["SkillCostChange"] = 23] = "SkillCostChange";
+    effectType[effectType["IgnoreDecreaseDamageTaken"] = 24] = "IgnoreDecreaseDamageTaken";
+    effectType[effectType["IgnoreInvulnerability"] = 25] = "IgnoreInvulnerability";
+    effectType[effectType["DisableEffects"] = 26] = "DisableEffects";
 })(effectType = exports.effectType || (exports.effectType = {}));
 var activationType;
 (function (activationType) {

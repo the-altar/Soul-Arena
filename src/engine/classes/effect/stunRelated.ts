@@ -1,28 +1,29 @@
-import { Character } from ".."
-import { Effect } from "./base"
-import { Arena } from "../../arena"
-import { DebuffTypes } from "../../enums"
-import { Skill } from "../skill"
-
+import { Character } from "..";
+import { Effect } from "./base";
+import { Arena } from "../../arena";
+import { Skill } from "../skill";
+import { SkillClassType } from "../../enums";
 
 export class Stun extends Effect {
-    /* "specific"  refers to a specific skill type. E.g: Fire, Water, Grass...  
+  /* "specific"  refers to a specific skill type. E.g: Fire, Water, Grass...  
     if not specified it this effect should stun a character completely*/
-    private stunClass: number
-    constructor(data: any, caster: number) {
-        super(data, caster)
-        this.stunClass = data.stunClass
-    }
+  private stunClass: SkillClassType;
+  constructor(data: any, caster: number) {
+    super(data, caster);
+    this.stunClass = data.stunClass;
+  }
 
-    public functionality(char: Character, origin:Skill, world?: Arena) {
-        char.disableSkills()
-        char.setDebuff({
-            debuffType: DebuffTypes.Stun,
-            specific: this.stunClass
-        })
-    }
+  public functionality(char: Character, origin: Skill, world?: Arena) {
+    char.disableSkills();
+    char.getDebuffs().stun[this.stunClass] = true;
+  }
 
-    generateToolTip(){
-        this.message = "This character is stunned"
-    }
+  generateToolTip() {
+    if (this.stunClass === SkillClassType.Any)
+      this.message = "This character is stunned";
+    else
+      this.message = `This character's ${
+        SkillClassType[this.stunClass]
+      } skills are stunned`;
+  }
 }

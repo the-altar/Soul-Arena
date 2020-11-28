@@ -150,9 +150,6 @@ export class Buffs {
     public clearAbsorbDamage() {
         this.absorbDamage = {}
     }
-
-    public clearDestructibleDefense() { }
-
     public setDestructibleDefense(dd: number) {
         this.destructibleDefense += dd;
     }

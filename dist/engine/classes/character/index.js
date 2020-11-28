@@ -79,7 +79,7 @@ class Character {
     }
     validadeSkillsCompletely(pool, chars, playerId, self) {
         for (const skill of this.skills) {
-            if (this.isStunned()) {
+            if (this.isStunned() || this.isStunned(skill)) {
                 skill.disable();
             }
             else {
@@ -92,7 +92,7 @@ class Character {
     }
     validateSkillsCost(pool) {
         for (const skill of this.skills) {
-            if (this.isStunned()) {
+            if (this.isStunned() || this.isStunned(skill)) {
                 skill.disable();
             }
             else {
@@ -122,7 +122,7 @@ class Character {
         this.skills[index].startCooldown(n);
     }
     enableSkills() {
-        this.skills.forEach(s => {
+        this.skills.forEach((s) => {
             s.disabled = false;
         });
     }
@@ -134,7 +134,7 @@ class Character {
         return this.knockedOut;
     }
     disableSkills() {
-        this.skills.forEach(s => {
+        this.skills.forEach((s) => {
             s.disable();
         });
     }
@@ -161,11 +161,6 @@ class Character {
             case enums_1.DebuffTypes.CooldownIncreasal:
                 {
                     this.debuffs.setCooldownIncreasal(params);
-                }
-                break;
-            case enums_1.DebuffTypes.Stun:
-                {
-                    this.debuffs.setStun(params);
                 }
                 break;
         }
@@ -201,7 +196,9 @@ class Character {
     getTyping() {
         return this.type;
     }
-    isStunned() {
+    isStunned(skill) {
+        if (skill)
+            return this.debuffs.isStunned(skill.class);
         return this.debuffs.isStunned(enums_1.SkillClassType.Any);
     }
     getSkills() {

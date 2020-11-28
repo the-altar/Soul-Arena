@@ -18,24 +18,26 @@ export class DestructibleDefense extends Effect {
   }
 
   public functionality(char: Character, origin: Skill) {
-    if (this.hasBeenApplied) return;
-    char.setBuff({
-      buffType: BuffTypes.DestructibleDefense,
-      value: this.value,
-    });
+    //if (this.hasBeenApplied) {}
+    char.getBuffs().destructibleDefense += this.value;
     this.targetChar = char;
     this.hasBeenApplied = true;
   }
 
   public progressTurn() {
-    if (
-      this.targetChar !== null &&
-      this.value > this.targetChar.getBuffs().destructibleDefense
-    ) {
-      this.value = this.targetChar.getBuffs().destructibleDefense;
-    }
-
     this.delay--;
+    if (this.targetChar !== null) {
+      this.value = Math.min(
+        this.targetChar.getBuffs().destructibleDefense,
+        this.value
+      );
+      this.targetChar.getBuffs().destructibleDefense = Math.max(
+        0,
+        this.targetChar.getBuffs().destructibleDefense - this.value
+      );
+    }
+    this.generateToolTip()
+
     if (this.delay <= 0) this.duration--;
     /*  An even tick means it's your opponent's turn, odd means its yours.*/
     /*  The default behavior is for your skills to activate on odd ticks*/
@@ -51,16 +53,15 @@ export class DestructibleDefense extends Effect {
 
     if (this.terminate) this.effectConclusion();
   }
-
-  public effectConclusion() {
-    if (this.targetChar !== null && this.value > 0)
-      this.targetChar.getBuffs().destructibleDefense = Math.max(
-        0,
-        this.targetChar.getBuffs().destructibleDefense - this.value
-      );
-  }
-
+  
   public generateToolTip() {
     this.message = `This character has ${this.value} destructible defense`;
+  }
+
+  shouldApply() {
+    const triggerRate = Math.floor(Math.random() * 101);
+    if (triggerRate <= this.triggerRate && this.delay <= 0)
+      this.activate = true;
+    else this.activate = false;
   }
 }

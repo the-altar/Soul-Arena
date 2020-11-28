@@ -93,6 +93,15 @@ exports.effectFactory = function (effect, caster) {
         case enums_1.effectType.SkillCostChange: {
             return new skillTargetMod_1.SkillCostChange(effect, caster);
         }
+        case enums_1.effectType.IgnoreDecreaseDamageTaken: {
+            return new damageRelated_1.IgnoreDecreaseDamageTaken(effect, caster);
+        }
+        case enums_1.effectType.IgnoreInvulnerability: {
+            return new invulnerability_1.IgnoreInvulnerability(effect, caster);
+        }
+        case enums_1.effectType.DisableEffects: {
+            return new alterEffectValue_1.DisableEffects(effect, caster);
+        }
         default: {
             return new base_1.Effect(effect, caster);
         }

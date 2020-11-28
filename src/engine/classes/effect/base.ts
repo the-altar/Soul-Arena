@@ -118,8 +118,9 @@ export class Effect {
     } else this.activate = true;
 
     if (this.duration < 0 && !this.infinite) this.terminate = true;
+    else if (this.targets.length === 0) this.terminate = true;
     else this.terminate = false;
-
+    
     if (this.terminate) this.effectConclusion();
   }
 

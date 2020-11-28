@@ -119,8 +119,9 @@ class Arena {
         for (let i = this.skillQueue.length - 1; i >= 0; i--) {
             const skill = this.skillQueue[i];
             const terminate = skill.tickEffectsDuration(this, skill);
-            if (terminate)
+            if (terminate) {
                 this.skillQueue.splice(i, 1);
+            }
         }
     }
     executeSkills() {

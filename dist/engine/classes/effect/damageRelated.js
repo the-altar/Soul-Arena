@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AbsorbDamage = exports.DecreaseDamageTaken = exports.IncreaseDamageTaken = exports.DamageIncreasal = exports.DamageReduction = exports.Damage = void 0;
+exports.IgnoreDecreaseDamageTaken = exports.AbsorbDamage = exports.DecreaseDamageTaken = exports.IncreaseDamageTaken = exports.DamageIncreasal = exports.DamageReduction = exports.Damage = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
 class Damage extends base_1.Effect {
@@ -12,16 +12,24 @@ class Damage extends base_1.Effect {
         const reduction = this.getDamageReductionFromCaster(this.caster, this, origin, world);
         const increasalTaken = this.getIncreasedDamageTaken(char, this, origin);
         const increasalDealt = this.getIncreasedDamageFromCaster(this.caster, this, origin, world);
-        const { decreased } = char.getBuffs().getDecreaseDamageTaken({ damageType: this.damageType, skillType: origin.class });
-        const { conversionRate } = char.getBuffs().getAbsorbDamage({ skillType: origin.class, damageType: this.damageType });
+        let { decreased } = char.getBuffs().getDecreaseDamageTaken({
+            damageType: this.damageType,
+            skillType: origin.class,
+        });
+        if (char.getDebuffs().ignoreDecreaseDamageTaken)
+            decreased = 0;
+        const { conversionRate } = char.getBuffs().getAbsorbDamage({
+            skillType: origin.class,
+            damageType: this.damageType,
+        });
         let destructibleDefense = char.getBuffs().destructibleDefense || 0;
         let damageVal = Number(this.altValue) || this.value;
-        let damage = (damageVal - ((reduction + decreased) - increasalTaken - increasalDealt));
+        let damage = damageVal - (reduction + decreased - increasalTaken - increasalDealt);
         if (destructibleDefense > 0) {
             const ogDamage = damage;
             damage -= destructibleDefense;
             damage = Math.max(0, damage);
-            char.getBuffs().destructibleDefense = Math.max(0, (destructibleDefense - ogDamage));
+            char.getBuffs().destructibleDefense = Math.max(0, destructibleDefense - ogDamage);
         }
         const absorbed = damage * (conversionRate / 100);
         const hp = char.geHitPoints() - damage + Math.round(absorbed / 5) * 5;
@@ -33,7 +41,7 @@ class Damage extends base_1.Effect {
         const c = buff.byDamage[effect.damageType] || 0;
         const d = buff.bySkillId[skill.getId()] || 0;
         const e = buff.bySkillClass[skill.class] || 0;
-        return (c + d + e);
+        return c + d + e;
     }
     getDamageReductionFromCaster(caster, effect, skill, world) {
         const effectCaster = world.findCharacterById(caster).char;
@@ -41,13 +49,13 @@ class Damage extends base_1.Effect {
         const c = buff.byDamage[effect.damageType] || 0;
         const d = buff.bySkillId[skill.getId()] || 0;
         const e = buff.bySkillClass[skill.class] || 0;
-        return (c + d + e);
+        return c + d + e;
     }
     getIncreasedDamageTaken(char, effect, skill) {
         const c = char.getDebuffs().increaseDamageTaken.byDamage[effect.damageType] || 0;
         const d = char.getDebuffs().increaseDamageTaken.bySkillId[skill.getId()] || 0;
         const e = char.getDebuffs().increaseDamageTaken.bySkillClass[skill.class] || 0;
-        return (c + d + e);
+        return c + d + e;
     }
     generateToolTip() {
         const damageVal = Number(this.altValue) || this.value;
@@ -65,14 +73,19 @@ class DamageReduction extends base_1.Effect {
     functionality(char, origin, world) {
         const buff = char.getDebuffs().damageReduction;
         if (this.skillType) {
-            buff.bySkillClass[this.skillType] = (buff.bySkillClass[this.skillType] || 0) + this.value;
+            buff.bySkillClass[this.skillType] =
+                (buff.bySkillClass[this.skillType] || 0) + this.value;
         }
         else if (this.specificSkill) {
-            buff.bySkillId[this.specificSkill] = (buff.bySkillId[this.specificSkill] || 0) + this.value;
-            this.specificSkillName = world.findCharacterById(this.caster).char.findSkillById(this.specificSkill).name;
+            buff.bySkillId[this.specificSkill] =
+                (buff.bySkillId[this.specificSkill] || 0) + this.value;
+            this.specificSkillName = world
+                .findCharacterById(this.caster)
+                .char.findSkillById(this.specificSkill).name;
         }
         else if (this.damageType) {
-            buff.byDamage[this.damageType] = (buff.byDamage[this.damageType] || 0) + this.value;
+            buff.byDamage[this.damageType] =
+                (buff.byDamage[this.damageType] || 0) + this.value;
         }
     }
     generateToolTip() {
@@ -98,14 +111,19 @@ class DamageIncreasal extends base_1.Effect {
     functionality(char, origin, world) {
         const buff = char.getBuffs().damageIncreasal;
         if (this.skillType) {
-            buff.bySkillClass[this.skillType] = (buff.bySkillClass[this.skillType] || 0) + this.value;
+            buff.bySkillClass[this.skillType] =
+                (buff.bySkillClass[this.skillType] || 0) + this.value;
         }
         else if (this.specificSkill) {
-            buff.bySkillId[this.specificSkill] = (buff.bySkillId[this.specificSkill] || 0) + this.value;
-            this.specificSkillName = world.findCharacterById(this.caster).char.findSkillById(this.specificSkill).name;
+            buff.bySkillId[this.specificSkill] =
+                (buff.bySkillId[this.specificSkill] || 0) + this.value;
+            this.specificSkillName = world
+                .findCharacterById(this.caster)
+                .char.findSkillById(this.specificSkill).name;
         }
         else if (this.damageType) {
-            buff.byDamage[this.damageType] = (buff.byDamage[this.damageType] || 0) + this.value;
+            buff.byDamage[this.damageType] =
+                (buff.byDamage[this.damageType] || 0) + this.value;
         }
     }
     generateToolTip() {
@@ -131,14 +149,19 @@ class IncreaseDamageTaken extends base_1.Effect {
     functionality(char, origin, world) {
         const debuff = char.getDebuffs().increaseDamageTaken;
         if (this.skillType) {
-            debuff.bySkillClass[this.skillType] = (debuff.bySkillClass[this.skillType] || 0) + this.value;
+            debuff.bySkillClass[this.skillType] =
+                (debuff.bySkillClass[this.skillType] || 0) + this.value;
         }
         else if (this.specificSkill) {
-            debuff.bySkillId[this.specificSkill] = (debuff.bySkillId[this.specificSkill] || 0) + this.value;
-            this.specificSkillName = world.findCharacterById(this.caster).char.findSkillById(this.specificSkill).name;
+            debuff.bySkillId[this.specificSkill] =
+                (debuff.bySkillId[this.specificSkill] || 0) + this.value;
+            this.specificSkillName = world
+                .findCharacterById(this.caster)
+                .char.findSkillById(this.specificSkill).name;
         }
         else if (this.damageType) {
-            debuff.byDamage[this.damageType] = (debuff.byDamage[this.damageType] || 0) + this.value;
+            debuff.byDamage[this.damageType] =
+                (debuff.byDamage[this.damageType] || 0) + this.value;
         }
     }
     generateToolTip() {
@@ -165,8 +188,7 @@ class DecreaseDamageTaken extends base_1.Effect {
             damageType: this.damageType,
             value: this.value,
             skillType: this.skillType,
-            buffType: enums_1.BuffTypes.DecreaseDamageTaken
-            //class?: SkillClassType;
+            buffType: enums_1.BuffTypes.DecreaseDamageTaken,
         });
     }
     generateToolTip() {
@@ -185,8 +207,7 @@ class AbsorbDamage extends base_1.Effect {
             damageType: this.damageType,
             value: this.value,
             skillType: this.skillType,
-            buffType: enums_1.BuffTypes.AbsorbDamage
-            //class?: SkillClassType;
+            buffType: enums_1.BuffTypes.AbsorbDamage,
         });
     }
     generateToolTip() {
@@ -197,4 +218,16 @@ class AbsorbDamage extends base_1.Effect {
     }
 }
 exports.AbsorbDamage = AbsorbDamage;
+class IgnoreDecreaseDamageTaken extends base_1.Effect {
+    constructor(data, caster) {
+        super(data, caster);
+    }
+    functionality(char, origin) {
+        char.getDebuffs().ignoreDecreaseDamageTaken = true;
+    }
+    generateToolTip() {
+        this.message = "This character cannot reduce damage";
+    }
+}
+exports.IgnoreDecreaseDamageTaken = IgnoreDecreaseDamageTaken;
 //# sourceMappingURL=damageRelated.js.map

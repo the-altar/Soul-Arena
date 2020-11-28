@@ -10,21 +10,18 @@ class DestructibleDefense extends base_1.Effect {
         this.hasBeenApplied = false;
     }
     functionality(char, origin) {
-        if (this.hasBeenApplied)
-            return;
-        char.setBuff({
-            buffType: enums_1.BuffTypes.DestructibleDefense,
-            value: this.value,
-        });
+        //if (this.hasBeenApplied) {}
+        char.getBuffs().destructibleDefense += this.value;
         this.targetChar = char;
         this.hasBeenApplied = true;
     }
     progressTurn() {
-        if (this.targetChar !== null &&
-            this.value > this.targetChar.getBuffs().destructibleDefense) {
-            this.value = this.targetChar.getBuffs().destructibleDefense;
-        }
         this.delay--;
+        if (this.targetChar !== null) {
+            this.value = Math.min(this.targetChar.getBuffs().destructibleDefense, this.value);
+            this.targetChar.getBuffs().destructibleDefense = Math.max(0, this.targetChar.getBuffs().destructibleDefense - this.value);
+        }
+        this.generateToolTip();
         if (this.delay <= 0)
             this.duration--;
         /*  An even tick means it's your opponent's turn, odd means its yours.*/
@@ -45,12 +42,15 @@ class DestructibleDefense extends base_1.Effect {
         if (this.terminate)
             this.effectConclusion();
     }
-    effectConclusion() {
-        if (this.targetChar !== null && this.value > 0)
-            this.targetChar.getBuffs().destructibleDefense = Math.max(0, this.targetChar.getBuffs().destructibleDefense - this.value);
-    }
     generateToolTip() {
         this.message = `This character has ${this.value} destructible defense`;
+    }
+    shouldApply() {
+        const triggerRate = Math.floor(Math.random() * 101);
+        if (triggerRate <= this.triggerRate && this.delay <= 0)
+            this.activate = true;
+        else
+            this.activate = false;
     }
 }
 exports.DestructibleDefense = DestructibleDefense;

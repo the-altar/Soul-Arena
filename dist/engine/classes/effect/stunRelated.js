@@ -10,13 +10,13 @@ class Stun extends base_1.Effect {
     }
     functionality(char, origin, world) {
         char.disableSkills();
-        char.setDebuff({
-            debuffType: enums_1.DebuffTypes.Stun,
-            specific: this.stunClass
-        });
+        char.getDebuffs().stun[this.stunClass] = true;
     }
     generateToolTip() {
-        this.message = "This character is stunned";
+        if (this.stunClass === enums_1.SkillClassType.Any)
+            this.message = "This character is stunned";
+        else
+            this.message = `This character's ${enums_1.SkillClassType[this.stunClass]} skills are stunned`;
     }
 }
 exports.Stun = Stun;

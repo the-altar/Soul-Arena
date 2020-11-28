@@ -6,20 +6,23 @@ class Debuffs {
         this.increaseDamageTaken = {
             byDamage: {},
             bySkillClass: {},
-            bySkillId: {}
+            bySkillId: {},
         };
         this.damageReduction = {
             byDamage: {},
             bySkillClass: {},
-            bySkillId: {}
+            bySkillId: {},
         };
         this.cooldownIncreasal = { any: 0 };
+        this.ignoreInvulnerability = false;
+        this.ignoreDecreaseDamageTaken = false;
         this.stun = {};
     }
     setCooldownIncreasal(params) {
         const { specific, value } = params;
         if (specific) {
-            this.cooldownIncreasal[specific] = value + (0 || this.cooldownIncreasal[specific]);
+            this.cooldownIncreasal[specific] =
+                value + (0 || this.cooldownIncreasal[specific]);
         }
         else {
             this.cooldownIncreasal.any = value + this.cooldownIncreasal.any;
@@ -35,9 +38,6 @@ class Debuffs {
         }
         return r;
     }
-    setStun(params) {
-        this.stun[params.specific] = true;
-    }
     isStunned(params) {
         if (this.stun[params])
             return true;
@@ -47,15 +47,17 @@ class Debuffs {
         this.damageReduction = {
             byDamage: {},
             bySkillClass: {},
-            bySkillId: {}
+            bySkillId: {},
         };
         this.cooldownIncreasal = { any: 0 };
         this.increaseDamageTaken = {
             byDamage: {},
             bySkillClass: {},
-            bySkillId: {}
+            bySkillId: {},
         };
         this.stun = {};
+        this.ignoreDecreaseDamageTaken = false;
+        this.ignoreInvulnerability = false;
     }
 }
 exports.Debuffs = Debuffs;
