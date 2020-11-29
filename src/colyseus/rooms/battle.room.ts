@@ -86,7 +86,6 @@ export class Battle extends Room {
   onJoin(client: Client, options: any, auth: any) {
     this.arena.addPlayer(options.player, options.team);
     this.constructed++;
-    log.info("Client has joined a game!");
 
     if (this.constructed === 2) {
       this.gameClock();
