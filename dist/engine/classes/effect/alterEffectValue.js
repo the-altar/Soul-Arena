@@ -73,7 +73,7 @@ class EnableEffects extends base_1.Effect {
         this.hasBeenApplied = true;
     }
     generateToolTip() {
-        this.message = `'${this.targetedSkill.name}' has been improved`;
+        this.message = this.message || `'${this.targetedSkill.name}' has been improved`;
     }
     effectConclusion() {
         for (let i = this.targetedSkill.effects.length - 1; i >= 0; i--) {
@@ -105,7 +105,7 @@ class DisableEffects extends base_1.Effect {
         this.hasBeenApplied = true;
     }
     generateToolTip() {
-        this.message = `'${this.targetedSkill.name}' has been disabled`;
+        this.message = null;
     }
     effectConclusion() {
         for (let i = this.targetedSkill.effects.length - 1; i >= 0; i--) {

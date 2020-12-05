@@ -44,6 +44,7 @@ export class Effect {
   constructor(data: any, caster: number) {
     this.value = data.value;
     this.tick = 1;
+    this.message = data.message || null
     this.duration = data.duration;
     this.infinite = data.infinite || false;
     this.delay = data.delay || 0;

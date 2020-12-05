@@ -5,6 +5,7 @@ const router: Router = Router()
 
 
 router.get("/character", userCharacters)
+router.get("/unlocked",)
 router.post("/register", register)
 router.post("/login", login)
 router.post("/logout", logout)

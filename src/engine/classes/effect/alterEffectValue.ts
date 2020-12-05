@@ -3,7 +3,7 @@ import { effectType, SkillClassType, Types } from "../../enums";
 import { Character } from "../character";
 import { Skill } from "..";
 import { Arena } from "../../arena";
-
+import {log} from "../../../logger"
 export class AlterEffectValue extends Effect {
   private anyEffect: boolean;
   private anySkill: boolean;
@@ -99,7 +99,7 @@ export class EnableEffects extends Effect {
   }
 
   generateToolTip() {
-    this.message = `'${this.targetedSkill.name}' has been improved`;
+    this.message = this.message || `'${this.targetedSkill.name}' has been improved`;
   }
 
   effectConclusion() {
@@ -139,7 +139,7 @@ export class DisableEffects extends Effect {
   }
 
   generateToolTip() {
-    this.message = `'${this.targetedSkill.name}' has been disabled`;
+    this.message = null;
   }
 
   effectConclusion() {

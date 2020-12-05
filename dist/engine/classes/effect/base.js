@@ -6,6 +6,7 @@ class Effect {
     constructor(data, caster) {
         this.value = data.value;
         this.tick = 1;
+        this.message = data.message || null;
         this.duration = data.duration;
         this.infinite = data.infinite || false;
         this.delay = data.delay || 0;

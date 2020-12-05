@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
-import { CharacterDB, ICharacterModel } from "../../models/character"
 import { join } from 'path'
-import { unlink, existsSync } from 'fs'
+//import { unlink, existsSync } from 'fs'
 import { pool } from "../../db"
 
 export const create = async (req: Request, res: Response) => {
@@ -36,35 +35,6 @@ export const find = async (req: Request, res: Response) => {
     }
 }
 
-export const remove = async (req: Request, res: Response) => {
-    const char: ICharacterModel = req.body
-    let pics: Array<string> = []
-
-    char.skills.forEach(s => {
-        pics.push(s.skillpic)
-        pics.push(s.banner)
-    })
-
-    pics.push(char.facepic)
-    pics.push(char.banner)
-
-    pics.forEach(pic => {
-        const p: string = join(process.cwd(), '/public/img/game/', pic + ".jpg")
-        if (existsSync(p)) {
-            unlink(p, () => { })
-        }
-    })
-
-    try {
-        await CharacterDB.deleteOne({ _id: char._id })
-        return res.json({ code: 1 })
-    }
-
-    catch (err) {
-        console.error(err)
-        return res.json({ code: 0 })
-    }
-}
 
 export const getAll = async (req: Request, res: Response) => {
     try {

@@ -9,10 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadFiles = exports.upload = exports.purchase = exports.getIds = exports.getAll = exports.remove = exports.find = exports.update = exports.create = void 0;
-const character_1 = require("../../models/character");
+exports.uploadFiles = exports.upload = exports.purchase = exports.getIds = exports.getAll = exports.find = exports.update = exports.create = void 0;
 const path_1 = require("path");
-const fs_1 = require("fs");
+//import { unlink, existsSync } from 'fs'
 const db_1 = require("../../db");
 exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // Req.body = [released, charData, isFree]
@@ -40,30 +39,6 @@ exports.find = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const char = yield db_1.pool.query("SELECT * from entity where entity.id = $1", [req.params.id]);
         return res.json(char.rows[0]);
-    }
-    catch (err) {
-        console.error(err);
-        return res.json({ code: 0 });
-    }
-});
-exports.remove = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const char = req.body;
-    let pics = [];
-    char.skills.forEach(s => {
-        pics.push(s.skillpic);
-        pics.push(s.banner);
-    });
-    pics.push(char.facepic);
-    pics.push(char.banner);
-    pics.forEach(pic => {
-        const p = path_1.join(process.cwd(), '/public/img/game/', pic + ".jpg");
-        if (fs_1.existsSync(p)) {
-            fs_1.unlink(p, () => { });
-        }
-    });
-    try {
-        yield character_1.CharacterDB.deleteOne({ _id: char._id });
-        return res.json({ code: 1 });
     }
     catch (err) {
         console.error(err);

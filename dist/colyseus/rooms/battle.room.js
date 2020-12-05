@@ -119,8 +119,9 @@ class Battle extends colyseus_1.Room {
             tm.user_id = $1 or tm.user_id = $2;`;
             const res = yield db_1.pool.query(sql, [winner.id, loser.id]);
             for (const data of res.rows) {
-                if (data.user_id === winner.id)
+                if (data.user_id === winner.id) {
                     this.progressMission(winner, data);
+                }
                 else
                     this.breakMissionStreaks(loser, data);
             }
@@ -131,13 +132,20 @@ class Battle extends colyseus_1.Room {
             if (player.id < 0)
                 return;
             let completeTracks = 0;
+            let includesTarget;
             const chars = this.arena.getCharactersLiteralIdByIndex(player.getMyCharsIndex());
             const challenger = this.arena.getChallengerLiteralIds(player.getMyCharsIndex());
             for (const i in stats.trackingGoals) {
                 let goal = stats.trackingGoals[i];
-                if (goal.with !== -1 && chars.includes(goal.with))
+                if (goal.completed) {
+                    completeTracks++;
                     continue;
-                if (goal.against !== 1 && challenger.includes(goal.against))
+                }
+                includesTarget = chars.includes(goal.with);
+                if (goal.with !== -1 && includesTarget === false)
+                    continue;
+                includesTarget = challenger.includes(goal.against);
+                if (goal.against !== -1 && includesTarget === false)
                     continue;
                 goal.battlesWon++;
                 if (goal.battlesWon >= stats.goals[i].battlesWon) {
@@ -164,7 +172,7 @@ class Battle extends colyseus_1.Room {
                     client.release();
                 }
             }
-            if (completeTracks < stats.goals.length) {
+            else if (completeTracks < stats.goals.length) {
                 try {
                     const sql = "UPDATE public.tracking_mission SET goals=$3 WHERE user_id=$1 AND mission_id=$2;";
                     yield db_1.pool.query(sql, [
@@ -190,10 +198,10 @@ class Battle extends colyseus_1.Room {
                 if (goal.completed)
                     continue;
                 if (goal.inRow) {
-                    if (goal.with !== -1 && chars.includes(goal.with)) {
+                    if (chars.includes(goal.with)) {
                         goal.battlesWon = 0;
                     }
-                    else if (goal.against !== 1 && challenger.includes(goal.against)) {
+                    else if (challenger.includes(goal.against)) {
                         goal.battlesWon = 0;
                     }
                     else if (goal.against === -1 && goal.with === -1) {
@@ -229,71 +237,69 @@ function calculateElo(p1, p2, isWinner) {
     p1.season.elo = Math.floor(eloGained);
 }
 function calculateExpGain(player, p2, isWinner) {
+    const levelStatus = [0];
+    let exp;
+    let levelDifference = Math.abs(p2.season.seasonLevel - player.season.seasonLevel);
+    if (!isWinner && player.season.seasonLevel < p2.season.seasonLevel)
+        levelDifference *= -1;
+    else if (isWinner && player.season.seasonLevel > p2.season.seasonLevel)
+        levelDifference = 0;
+    exp = Math.min(Math.max(50 * levelDifference, 150), 600);
     if (isWinner) {
-        const levelDifference = p2.season.seasonLevel - player.season.seasonLevel;
-        const expGained = Math.min(Math.max(50 * levelDifference, 150), 600);
-        let hasLeveledUp = [false];
-        player.season.exp += expGained;
-        levelUp(player, hasLeveledUp);
-        return {
-            leveledUp: hasLeveledUp[0],
-            expGained,
-        };
+        player.season.exp += exp;
+        levelUp(player, levelStatus);
     }
     else {
-        const levelDifference = player.season.seasonLevel - p2.season.seasonLevel;
-        const expLost = Math.min(Math.max(50 * levelDifference, 50), 300);
-        let hasLeveledDown = [false];
-        player.season.exp = Math.max(0, player.season.exp - expLost);
-        levelDown(player, hasLeveledDown);
-        return {
-            leveledDown: hasLeveledDown,
-            expLost,
-        };
+        player.season.exp = Math.max(0, player.season.exp - exp);
+        levelDown(player, levelStatus);
     }
+    return {
+        levelStatus: levelStatus[0],
+        exp,
+    };
 }
 function levelUp(p, hasLeveledUp) {
     const n = p.season.seasonLevel;
-    const reqExp = ((n * (n + 1)) / 2) * 350;
+    const reqExp = ((n * (n + 1)) / 2) * 150;
     if (p.season.exp < reqExp)
         return;
     else {
         p.season.seasonLevel++;
         validateRanking(p);
-        hasLeveledUp[0] = true;
+        hasLeveledUp[0] = 1;
         levelUp(p, hasLeveledUp);
     }
 }
 function levelDown(p, hasLeveledDown) {
     const n = p.season.seasonLevel - 1;
-    const reqExp = ((n * (n + 1)) / 2) * 350;
+    const reqExp = ((n * (n + 1)) / 2) * 150;
     if (p.season.exp < reqExp) {
         p.season.seasonLevel--;
         validateRanking(p);
-        hasLeveledDown[0] = true;
+        hasLeveledDown[0] = 2;
         levelDown(p, hasLeveledDown);
     }
 }
 function validateRanking(p) {
     const lvl = p.season.seasonLevel;
     if (lvl <= 5)
-        p.season.seasonRank = "Rookie";
+        p.season.seasonRank = "Substitute Shinigami";
     else if (lvl >= 6 && lvl <= 10)
-        p.season.seasonRank = "Novice";
+        p.season.seasonRank = "Shinigami";
     else if (lvl >= 11 && lvl <= 15)
-        p.season.seasonRank = "Trainer";
+        p.season.seasonRank = "3rd Seat";
     else if (lvl >= 16 && lvl <= 20)
-        p.season.seasonRank = "Ace";
+        p.season.seasonRank = "Lieutenant";
     else if (lvl >= 21 && lvl <= 25)
-        p.season.seasonRank = "Veteran";
+        p.season.seasonRank = "Arrancar";
     else if (lvl >= 26 && lvl <= 30)
-        p.season.seasonRank = "Gym Leader";
+        p.season.seasonRank = "Captain";
     else if (lvl >= 31 && lvl <= 35)
-        p.season.seasonRank = "Challenger";
+        p.season.seasonRank = "Vasto Lorde";
     else if (lvl >= 36 && lvl <= 40)
-        p.season.seasonRank = "Elite 4";
+        p.season.seasonRank = "Captain Commander";
     else
-        p.season.seasonRank = "Champion";
+        p.season.seasonRank = "Royal Guard";
 }
 function calculateMaxStreak(player) {
     if (player.season.streak > player.season.maxStreak)
@@ -329,7 +335,7 @@ function endMatch(p1, p2, isWinner) {
         exp: p1.season.exp || 0,
         maxStreak: p1.season.maxStreak || 0,
         seasonLevel: p1.season.seasonLevel || 0,
-        seasonRank: p1.season.seasonRank || "Rookie",
+        seasonRank: p1.season.seasonRank || "Substitute Shinigami",
         season: 1,
         coins: p1.coins,
     });

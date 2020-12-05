@@ -36,7 +36,6 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.1.9",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.9.17",
     "npm": "^7.0.9",
     "pg": "^8.3.2"
   }
