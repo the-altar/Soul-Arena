@@ -4,7 +4,12 @@ exports.Buffs = void 0;
 const enums_1 = require("../../enums");
 class Buffs {
     constructor() {
-        this.invulnerability = { toFriendly: false, toHarmful: false, toSkillClass: new Set(), toSpecificSkill: new Set() };
+        this.invulnerability = {
+            toFriendly: false,
+            toHarmful: false,
+            toSkillClass: new Set(),
+            toSpecificSkill: new Set(),
+        };
         this.cooldownReduction = { ofAllSkills: 0, ofSkillId: {} };
         this.decreaseDamageTaken = {};
         this.damageIncreasal = { byDamage: {}, bySkillClass: {}, bySkillId: {} };
@@ -12,6 +17,8 @@ class Buffs {
         this.destructibleDefense = 0;
     }
     isInvulnerable(skill, effect) {
+        if (this.invulnerability.toSkillClass.has(enums_1.SkillClassType.Any))
+            return true;
         if (this.invulnerability.toHarmful && skill.isHarmful)
             return true;
         if (this.invulnerability.toFriendly && !skill.isHarmful)
@@ -25,7 +32,7 @@ class Buffs {
         const { damageType, value, skillType } = params;
         if (this.decreaseDamageTaken[skillType] === undefined) {
             this.decreaseDamageTaken[skillType] = {
-                [damageType]: value
+                [damageType]: value,
             };
         }
         else {
@@ -36,16 +43,19 @@ class Buffs {
         const { skillType, damageType } = params;
         const res = {
             decreased: 0,
-            hasBeenDecreased: false
+            hasBeenDecreased: false,
         };
         if (this.decreaseDamageTaken[enums_1.SkillClassType.Any] !== undefined) {
-            res.decreased += this.decreaseDamageTaken[enums_1.SkillClassType.Any][damageType] || 0;
-            res.decreased += this.decreaseDamageTaken[enums_1.SkillClassType.Any][enums_1.DamageType.True] || 0;
+            res.decreased +=
+                this.decreaseDamageTaken[enums_1.SkillClassType.Any][damageType] || 0;
+            res.decreased +=
+                this.decreaseDamageTaken[enums_1.SkillClassType.Any][enums_1.DamageType.True] || 0;
             res.hasBeenDecreased = true;
         }
         if (skillType !== enums_1.SkillClassType.Any) {
             if (this.decreaseDamageTaken[skillType] !== undefined) {
-                res.decreased += this.decreaseDamageTaken[skillType][enums_1.DamageType.True] || 0;
+                res.decreased +=
+                    this.decreaseDamageTaken[skillType][enums_1.DamageType.True] || 0;
                 if (this.decreaseDamageTaken[skillType][damageType] !== undefined) {
                     res.decreased += this.decreaseDamageTaken[skillType][damageType] || 0;
                     res.hasBeenDecreased = true;
@@ -58,7 +68,7 @@ class Buffs {
         const { skillType, damageType, value } = params;
         if (this.absorbDamage[skillType] === undefined) {
             this.absorbDamage[skillType] = {
-                [damageType]: value
+                [damageType]: value,
             };
         }
         else {
@@ -69,11 +79,12 @@ class Buffs {
         const { skillType, damageType } = params;
         const res = {
             conversionRate: 0,
-            hasBeenAbsorbed: false
+            hasBeenAbsorbed: false,
         };
         if (this.absorbDamage[enums_1.SkillClassType.Any] !== undefined) {
             const t = this.absorbDamage[enums_1.SkillClassType.Any][enums_1.DamageType.True] || 0;
-            res.conversionRate += (this.absorbDamage[enums_1.SkillClassType.Any][damageType] || 0) + t;
+            res.conversionRate +=
+                (this.absorbDamage[enums_1.SkillClassType.Any][damageType] || 0) + t;
             res.hasBeenAbsorbed = true;
         }
         if (skillType !== enums_1.SkillClassType.Any) {

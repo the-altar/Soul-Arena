@@ -65,7 +65,7 @@ class Skill {
     }
     lowerCooldown(extra) {
         if (this.cooldown > 0)
-            this.cooldown -= (1 + extra);
+            this.cooldown -= 1 + extra;
     }
     startCooldown(extra) {
         this.cooldown = Math.max(1, this.baseCooldown + (1 + extra));
@@ -74,6 +74,10 @@ class Skill {
         let t = [];
         const targetMode = this.getTargetMod() || this.targetMode;
         switch (targetMode) {
+            case enums_1.targetType.Any: {
+                t.push(choice);
+                return t;
+            }
             case enums_1.targetType.Self: {
                 t.push(choice);
                 return t;
@@ -191,7 +195,7 @@ class Skill {
                             id: origin.getId(),
                             msg: "An effect has ended",
                             skillName: origin.name,
-                            skillpic: origin.skillpic
+                            skillpic: origin.skillpic,
                         });
                     }
                 }
@@ -224,7 +228,9 @@ class Skill {
     getId() {
         return this.id;
     }
-    isHarmful() { return this.harmful; }
+    isHarmful() {
+        return this.harmful;
+    }
 }
 exports.Skill = Skill;
 //# sourceMappingURL=index.js.map

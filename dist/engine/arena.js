@@ -100,15 +100,17 @@ class Arena {
             gameData: this.getClientData(),
             isOver: false,
             winner: player1,
-            loser: player2
+            loser: player2,
         };
     }
     executeNewSkills() {
         const list = this.tempQueue;
         for (const cordinates of list) {
             const char = this.characters[cordinates.caster];
-            const skill = char.getCopySkillByIndex(cordinates.skill);
             char.setSkillCooldownByIndex(cordinates.skill);
+            if (cordinates.cancelled)
+                continue;
+            const skill = char.getCopySkillByIndex(cordinates.skill);
             skill.setTargets(cordinates.targets);
             skill.executeEffects(this);
             this.skillQueue.push(skill);
@@ -172,8 +174,8 @@ class Arena {
         player.removeFromPayupCart(s.getCost());
         this.hasUsedSKill[cordinates.caster] = false;
         this.validateTeamCosts(index);
-        const r = this.tempQueue.findIndex(s => {
-            return (s.caster === cordinates.caster && s.skill === cordinates.skill);
+        const r = this.tempQueue.findIndex((s) => {
+            return s.caster === cordinates.caster && s.skill === cordinates.skill;
         });
         this.tempQueue.splice(r, 1);
         return {
@@ -181,7 +183,7 @@ class Arena {
             characters: this.characters,
             energyPool: player.getEnergyPool(),
             payupCart: player.getPayupCart(),
-            playerIndex: index
+            playerIndex: index,
         };
     }
     addSkillToTempQueue(cordinates) {
@@ -201,14 +203,14 @@ class Arena {
         this.tempQueue.push({
             caster: cordinates.caster,
             skill: cordinates.skill,
-            targets: s.getValidatedTargets(cordinates.target)
+            targets: s.getValidatedTargets(cordinates.target),
         });
         return {
             tempQueue: this.tempQueue,
             energyPool: player.getEnergyPool(),
             characters: this.characters,
             payupCart: player.getPayupCart(),
-            playerIndex: index
+            playerIndex: index,
         };
     }
     findCharacterById(id) {
@@ -217,7 +219,7 @@ class Arena {
             if (char.getId() === id)
                 return {
                     char,
-                    index: Number(i)
+                    index: Number(i),
                 };
         }
     }
@@ -306,7 +308,7 @@ class Arena {
         return {
             players: this.players,
             characters: this.characters,
-            skillQueue: this.skillQueue
+            skillQueue: this.skillQueue,
         };
     }
     findPlayerById(id) {
@@ -314,7 +316,7 @@ class Arena {
             if (this.players[i].getId() === id) {
                 return {
                     player: this.players[i],
-                    index: i
+                    index: i,
                 };
             }
         }
@@ -352,7 +354,7 @@ class Arena {
             gameData: {},
             isOver: true,
             winner,
-            loser
+            loser,
         };
     }
     exchangeEnergyPool(replace) {
@@ -362,7 +364,7 @@ class Arena {
         return {
             playerIndex: this.turnCount % 2,
             energyPool: player.energyPool,
-            characters: this.characters
+            characters: this.characters,
         };
     }
 }

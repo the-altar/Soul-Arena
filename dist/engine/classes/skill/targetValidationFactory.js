@@ -7,6 +7,16 @@ exports.targetSetter = function (skill, targetMode, characters, playerId, self) 
     choices.choice = [];
     choices.auto = [];
     switch (targetMode) {
+        case enums_1.targetType.Any: {
+            characters.forEach((char, index) => {
+                if (!char.isKnockedOut()) {
+                    const isInvulnerable = char.isInvulnerable(skill);
+                    if (!isInvulnerable)
+                        choices.choice.push(index);
+                }
+            });
+            return choices;
+        }
         case enums_1.targetType.OneEnemy: {
             characters.forEach((char, index) => {
                 if (!char.belongsTo(playerId) && !char.isKnockedOut()) {

@@ -27,15 +27,22 @@ class Counter extends base_1.Effect {
                 return;
             if (skill.uncounterable)
                 return;
-            if ((this.counterType === enums_1.SkillClassType.Any || skill.class == this.counterType) && char.getId() === target.getId()) {
+            if ((this.counterType === enums_1.SkillClassType.Any ||
+                skill.class == this.counterType) &&
+                char.getId() === target.getId()) {
                 temp.splice(i, 1);
-                char.addNotification({ msg: "This character has been countered", id: origin.getId(), skillpic: origin.skillpic, skillName: origin.name });
+                char.addNotification({
+                    msg: "This character has been countered",
+                    id: origin.getId(),
+                    skillpic: origin.skillpic,
+                    skillName: origin.name,
+                });
                 this.value--;
             }
         }
     }
     DefensiveCounter(target, origin, world) {
-        const temp = world.getTempSkills();
+        const temp = world.getTempSkills().reverse();
         for (let i = temp.length - 1; i >= 0; i--) {
             if (this.value === 0)
                 return;
@@ -44,18 +51,49 @@ class Counter extends base_1.Effect {
             const skill = char.getRealSkillByIndex(cordinates.skill);
             if (skill.uncounterable)
                 continue;
-            if (this.counterType === enums_1.SkillClassType.Any || skill.class === this.counterType) {
+            if (this.counterType === enums_1.SkillClassType.Any ||
+                skill.class === this.counterType) {
                 for (const t of cordinates.targets) {
                     const sufferer = world.getCharactersByIndex([t])[0];
                     if (sufferer.getId() === target.getId()) {
-                        temp.splice(i, 1);
-                        char.addNotification({ msg: "This character has been countered", id: origin.getId(), skillpic: origin.skillpic, skillName: origin.name });
+                        temp[i].cancelled = true;
+                        char.addNotification({
+                            msg: "This character has been countered",
+                            id: origin.getId(),
+                            skillpic: origin.skillpic,
+                            skillName: origin.name,
+                        });
                         this.value--;
                         break;
                     }
                 }
             }
         }
+    }
+    progressTurn() {
+        this.delay--;
+        if (this.delay <= 0)
+            this.duration--;
+        /*  An even tick means it's your opponent's turn, odd means its yours.*/
+        /*  The default behavior is for your skills to activate on odd ticks*/
+        if (this.tick % 2 === enums_1.PlayerPhase.MyTurn) {
+            this.activate = false;
+        }
+        else
+            this.activate = true;
+        if (this.duration < 0 && !this.infinite)
+            this.terminate = true;
+        else if (this.targets.length === 0)
+            this.terminate = true;
+        else if (this.value === 0)
+            this.terminate = true;
+        else
+            this.terminate = false;
+        if (this.terminate)
+            this.effectConclusion();
+    }
+    generateToolTip() {
+        this.message = "Skills used on this character will be countered";
     }
 }
 exports.Counter = Counter;
