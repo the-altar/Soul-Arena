@@ -1,24 +1,24 @@
-import { targetType } from "../../enums"
+import { effectType, targetType } from "../../enums";
+import {log} from "../../../logger"
 export class SkillMods {
-    private targetMod: targetType
+  private targetMod: targetType;
 
-    constructor(params: any) {
-        if (params) {
-            this.targetMod = params.targetMod
-        } else {
-            this.targetMod = null
-        }
-    }
+  public increaseDuration: number;
 
-    public setTargetMod(target: targetType) {
-        this.targetMod = target;
-    }
+  constructor(data:any) {
+    this.targetMod = data.targetMod || null;
+    this.increaseDuration = data.increaseDuration || 0;
+  }
 
-    public getTargetMod(): targetType {
-        return this.targetMod
-    }
+  public setTargetMod(target: targetType) {
+    this.targetMod = target;
+  }
 
-    public clearTargetMod() {
-        this.targetMod = null
-    }
+  public getTargetMod(): targetType {
+    return this.targetMod;
+  }
+
+  public clearTargetMod() {
+    this.targetMod = null;
+  }
 }

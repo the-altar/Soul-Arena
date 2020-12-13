@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SkillCostChange = exports.SkillTargetMod = void 0;
+exports.IncreaseTargetSkillDuration = exports.IncreaseCasterSkillDuration = exports.SkillCostChange = exports.SkillTargetMod = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
+const logger_1 = require("../../../logger");
 class SkillTargetMod extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -82,6 +83,62 @@ class SkillCostChange extends base_1.Effect {
     }
 }
 exports.SkillCostChange = SkillCostChange;
+class IncreaseCasterSkillDuration extends base_1.Effect {
+    constructor(data, caster) {
+        super(data, caster);
+        this.targetSkillId = data.targetSkillId;
+        this.noRepeat = false;
+    }
+    functionality(char, origin, world) {
+        if (this.noRepeat)
+            return;
+        this.noRepeat = true;
+        const skill = char.getRealSkillById(this.targetSkillId);
+        if (!skill)
+            return;
+        skill.mods.increaseDuration += this.value;
+        this.skillReference = skill;
+        this.targetedSkillName = skill.name;
+        logger_1.log.info(`Duration of ${skill.name} has been extended by ${skill.mods.increaseDuration}`);
+    }
+    generateToolTip() {
+        if (this.targetedSkillName) {
+            this.message = `'${this.targetedSkillName}' will last ${this.value / 2} additional turn`;
+        }
+    }
+    effectConclusion() {
+        logger_1.log.info("EFFECT CONCLUSION");
+        this.skillReference.mods.increaseDuration -= this.value;
+    }
+}
+exports.IncreaseCasterSkillDuration = IncreaseCasterSkillDuration;
+class IncreaseTargetSkillDuration extends base_1.Effect {
+    constructor(data, caster) {
+        super(data, caster);
+        this.targetSkillId = data.targetSkillId;
+    }
+    functionality(char, origin, world) {
+        if (this.noRepeat)
+            return;
+        this.noRepeat = true;
+        const val = char.getDebuffs().increaseSkillDuration[this.targetSkillId];
+        char.getDebuffs().increaseSkillDuration[this.targetSkillId] =
+            (val || 0) + this.value;
+        this.targetedSkillName = world
+            .findCharacterById(this.caster)
+            .char.findSkillById(this.targetSkillId).name;
+        this.charReference = char;
+    }
+    generateToolTip() {
+        if (this.targetedSkillName) {
+            this.message = `'${this.targetedSkillName}' will last ${this.value / 2} additional turn if used on this character`;
+        }
+    }
+    effectConclusion() {
+        delete this.charReference.getDebuffs().increaseSkillDuration[this.targetSkillId];
+    }
+}
+exports.IncreaseTargetSkillDuration = IncreaseTargetSkillDuration;
 function generateMessage(specificIndex, tType, skill) {
     let m = "";
     switch (tType) {

@@ -16,6 +16,7 @@ class Debuffs {
         this.cooldownIncreasal = { any: 0 };
         this.ignoreInvulnerability = false;
         this.ignoreDecreaseDamageTaken = false;
+        this.increaseSkillDuration = {};
         this.stun = {};
     }
     setCooldownIncreasal(params) {

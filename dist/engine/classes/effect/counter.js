@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Counter = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
+const logger_1 = require("../../../logger");
 class Counter extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -10,42 +11,58 @@ class Counter extends base_1.Effect {
         this.isDefensive = data.isDefensive || false;
         this.counterType = data.counterType || false;
         this.counterEffectType = data.counterEffectType || false;
+        this.triggerOnCounter = data.triggerOnCounter || [];
     }
     functionality(target, origin, world) {
+        let isTriggered;
         if (this.isDefensive)
-            this.DefensiveCounter(target, origin, world);
+            isTriggered = this.DefensiveCounter(target, origin, world);
         else
-            this.OffensiveCounter(target, origin, world);
+            isTriggered = this.OffensiveCounter(target, origin, world);
+        if (isTriggered.activated) {
+            const casterIndex = world.findCharacterById(this.caster).index;
+            const casterChar = world.findCharacterById(this.caster).char;
+            logger_1.log.info(`Caster is ${casterChar.name}`);
+            const targetsIndex = isTriggered.indexes;
+            this.applyLinkedEffects(origin, casterIndex, targetsIndex);
+        }
     }
     OffensiveCounter(target, origin, world) {
         const temp = world.getTempSkills();
+        const indexes = [];
+        let hasCountered = { activated: false, indexes };
         for (let i = temp.length - 1; i >= 0; i--) {
             const cordinates = temp[i];
-            const char = world.getCharactersByIndex([cordinates.caster])[0];
-            const skill = char.getRealSkillByIndex(cordinates.skill);
+            const caster = world.getCharactersByIndex([cordinates.caster])[0];
+            const skill = caster.getRealSkillByIndex(cordinates.skill);
             if (this.value === 0)
-                return;
+                return hasCountered;
             if (skill.uncounterable)
-                return;
+                continue;
             if ((this.counterType === enums_1.SkillClassType.Any ||
                 skill.class == this.counterType) &&
-                char.getId() === target.getId()) {
+                caster.getId() === target.getId()) {
                 temp.splice(i, 1);
-                char.addNotification({
+                caster.addNotification({
                     msg: "This character has been countered",
                     id: origin.getId(),
                     skillpic: origin.skillpic,
                     skillName: origin.name,
                 });
+                hasCountered.activated = true;
+                hasCountered.indexes.push(cordinates.caster);
                 this.value--;
             }
         }
+        return hasCountered;
     }
     DefensiveCounter(target, origin, world) {
         const temp = world.getTempSkills().reverse();
+        const indexes = [];
+        let hasCountered = { activated: false, indexes };
         for (let i = temp.length - 1; i >= 0; i--) {
             if (this.value === 0)
-                return;
+                return hasCountered;
             const cordinates = temp[i];
             const char = world.getCharactersByIndex([cordinates.caster])[0];
             const skill = char.getRealSkillByIndex(cordinates.skill);
@@ -64,8 +81,26 @@ class Counter extends base_1.Effect {
                             skillName: origin.name,
                         });
                         this.value--;
+                        hasCountered.activated = true;
+                        hasCountered.indexes.push(cordinates.caster);
                         break;
                     }
+                }
+            }
+        }
+        return hasCountered;
+    }
+    applyLinkedEffects(origin, caster, targets) {
+        logger_1.log.info(`Looking for effects to apply on ${origin.name}`);
+        for (const trigger of this.triggerOnCounter) {
+            for (const effect of origin.inactiveEffects) {
+                if (effect.id !== trigger.id)
+                    continue;
+                if (trigger.self) {
+                    effect.triggerRate = 100;
+                    effect.setTargets([caster]);
+                    logger_1.log.info("COUNTER applied effect on character " + caster);
+                    origin.effects.push(effect);
                 }
             }
         }

@@ -14,7 +14,7 @@ class Buffs {
         this.decreaseDamageTaken = {};
         this.damageIncreasal = { byDamage: {}, bySkillClass: {}, bySkillId: {} };
         this.absorbDamage = {};
-        this.destructibleDefense = 0;
+        this.destructibleDefense = {};
     }
     isInvulnerable(skill, effect) {
         if (this.invulnerability.toSkillClass.has(enums_1.SkillClassType.Any))
@@ -101,6 +101,13 @@ class Buffs {
         }
         return res;
     }
+    validateDD() {
+        for (const k in this.destructibleDefense) {
+            if (this.destructibleDefense[k].value <= 0) {
+                delete this.destructibleDefense[k];
+            }
+        }
+    }
     clearCooldownReduction() {
         this.cooldownReduction.ofAllSkills = 0;
         this.cooldownReduction.ofSkillId = {};
@@ -119,9 +126,6 @@ class Buffs {
     }
     clearAbsorbDamage() {
         this.absorbDamage = {};
-    }
-    setDestructibleDefense(dd) {
-        this.destructibleDefense += dd;
     }
     getDestructibleDefense() {
         return this.destructibleDefense;

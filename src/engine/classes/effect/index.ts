@@ -18,7 +18,12 @@ import {
 } from "./cooldownRelated";
 import { EnergyGain, EnergyRemoval } from "./energyRelated";
 import { Stun } from "./stunRelated";
-import { SkillCostChange, SkillTargetMod } from "./skillTargetMod";
+import {
+  SkillCostChange,
+  SkillTargetMod,
+  IncreaseCasterSkillDuration,
+  IncreaseTargetSkillDuration,
+} from "./skillTargetMod";
 import { Counter } from "./counter";
 import { EffectRemoval } from "./effectRemoval";
 import {
@@ -106,6 +111,12 @@ export const effectFactory = function (effect: any, caster: number): Effect {
     }
     case effectType.DisableEffects: {
       return new DisableEffects(effect, caster);
+    }
+    case effectType.IncreaseCasterSkillDuration: {
+      return new IncreaseCasterSkillDuration(effect, caster);
+    }
+    case effectType.IncreaseTargetSkillDuration: {
+      return new IncreaseTargetSkillDuration(effect, caster);
     }
     default: {
       return new Effect(effect, caster);

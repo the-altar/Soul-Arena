@@ -51,6 +51,8 @@ export enum effectType {
   IgnoreDecreaseDamageTaken,
   IgnoreInvulnerability,
   DisableEffects,
+  IncreaseCasterSkillDuration,
+  IncreaseTargetSkillDuration
 }
 
 export enum activationType {

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IgnoreDecreaseDamageTaken = exports.AbsorbDamage = exports.DecreaseDamageTaken = exports.IncreaseDamageTaken = exports.DamageIncreasal = exports.DamageReduction = exports.Damage = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
+const logger_1 = require("../../../logger");
 class Damage extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -22,17 +23,12 @@ class Damage extends base_1.Effect {
             skillType: origin.class,
             damageType: this.damageType,
         });
-        let destructibleDefense = char.getBuffs().destructibleDefense || 0;
-        let damageVal = Number(this.altValue) || this.value;
-        let damage = damageVal - (reduction + decreased - increasalTaken - increasalDealt);
-        if (destructibleDefense > 0) {
-            const ogDamage = damage;
-            damage -= destructibleDefense;
-            damage = Math.max(0, damage);
-            char.getBuffs().destructibleDefense = Math.max(0, destructibleDefense - ogDamage);
-        }
+        let damage = Number(this.altValue) || this.value;
+        damage = damage - (reduction + decreased - increasalTaken - increasalDealt);
+        damage = this.destroyDestructibleDefense(char, damage);
         const absorbed = damage * (conversionRate / 100);
         const hp = char.geHitPoints() - damage + Math.round(absorbed / 5) * 5;
+        logger_1.log.info(`Character's health has been set to ${hp}`);
         char.setHitPoints(hp);
     }
     getIncreasedDamageFromCaster(caster, effect, skill, world) {
@@ -56,6 +52,20 @@ class Damage extends base_1.Effect {
         const d = char.getDebuffs().increaseDamageTaken.bySkillId[skill.getId()] || 0;
         const e = char.getDebuffs().increaseDamageTaken.bySkillClass[skill.class] || 0;
         return c + d + e;
+    }
+    destroyDestructibleDefense(char, damage) {
+        const dd_effect_list = char.getBuffs().destructibleDefense;
+        if (damage <= 0)
+            return;
+        for (const key in dd_effect_list) {
+            const dd_effect = dd_effect_list[key];
+            const stack = dd_effect.value;
+            dd_effect.value = Math.max(0, dd_effect.value - damage);
+            damage = Math.max(0, damage - stack);
+            if (damage === 0)
+                return 0;
+        }
+        return damage;
     }
     generateToolTip() {
         const damageVal = Number(this.altValue) || this.value;

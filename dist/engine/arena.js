@@ -112,7 +112,7 @@ class Arena {
                 continue;
             const skill = char.getCopySkillByIndex(cordinates.skill);
             skill.setTargets(cordinates.targets);
-            skill.executeEffects(this);
+            skill.executeInitEffects(this);
             this.skillQueue.push(skill);
         }
         this.tempQueue = [];
@@ -168,7 +168,7 @@ class Arena {
     removeSkillFromTempQueue(cordinates) {
         const char = this.characters[cordinates.caster];
         const id = char.getOwner();
-        const s = char.getCopySkillByIndex(cordinates.skill);
+        const s = char.skills[cordinates.skill];
         const { player, index } = this.findPlayerById(id);
         player.returnEnergy(s.getCost());
         player.removeFromPayupCart(s.getCost());
@@ -193,7 +193,7 @@ class Arena {
             return;
         }
         const id = char.getOwner();
-        const s = char.getCopySkillByIndex(cordinates.skill);
+        const s = char.skills[cordinates.skill];
         const { player, index } = this.findPlayerById(id);
         player.consumeEnergy(s.getCost());
         player.addToPayupCart(s.getCost());
@@ -261,12 +261,13 @@ class Arena {
     }
     endPlayerPhase(player) {
         let bodyCount = 0;
-        //console.log("-> clearing debuff, lowering cooldowns and increas energy pool")
+        //console.log("-> clearing debuff, lowering cooldowns and increase energy pool")
         for (const i of player.getMyCharsIndex()) {
             const c = this.characters[i];
             if (!c.isKnockedOut()) {
                 c.lowerCooldowns(c);
                 c.clearDebuffs();
+                c.getBuffs().validateDD();
                 const energyIndex = c.generateEnergy();
                 player.increaseEnergyPool(energyIndex);
             }

@@ -55,6 +55,8 @@ var effectType;
     effectType[effectType["IgnoreDecreaseDamageTaken"] = 24] = "IgnoreDecreaseDamageTaken";
     effectType[effectType["IgnoreInvulnerability"] = 25] = "IgnoreInvulnerability";
     effectType[effectType["DisableEffects"] = 26] = "DisableEffects";
+    effectType[effectType["IncreaseCasterSkillDuration"] = 27] = "IncreaseCasterSkillDuration";
+    effectType[effectType["IncreaseTargetSkillDuration"] = 28] = "IncreaseTargetSkillDuration";
 })(effectType = exports.effectType || (exports.effectType = {}));
 var activationType;
 (function (activationType) {

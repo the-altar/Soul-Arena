@@ -7,6 +7,7 @@ const skill_1 = require("../skill");
 const buffs_1 = require("./buffs");
 const notifications_1 = require("./notifications");
 const debuffs_1 = require("./debuffs");
+const logger_1 = require("../../../logger");
 class Character {
     constructor(data, playerId) {
         this.buffs = new buffs_1.Buffs();
@@ -48,6 +49,10 @@ class Character {
         return this.hitPoints;
     }
     setHitPoints(hp) {
+        if (!hp && hp !== 0) {
+            logger_1.log.info("problem setting health");
+            return;
+        }
         this.hitPoints = hp;
         if (this.hitPoints <= 0) {
             this.hitPoints = 0;
@@ -103,6 +108,7 @@ class Character {
         }
     }
     getCopySkillByIndex(index) {
+        logger_1.log.info(`Skill selected: ${this.skills[index].name}`);
         const newObj = JSON.parse(JSON.stringify(this.skills[index]));
         return new skill_1.Skill(newObj, this.id);
     }
@@ -114,6 +120,7 @@ class Character {
             if (skill.getId() === id)
                 return skill;
         }
+        return null;
     }
     setSkillCooldownByIndex(index) {
         const cdr1 = this.buffs.cooldownReduction.ofAllSkills || 0;
@@ -151,9 +158,6 @@ class Character {
                     this.buffs.setAbsorbDamage(params);
                 }
                 break;
-            case enums_1.BuffTypes.DestructibleDefense: {
-                this.buffs.setDestructibleDefense(params.value);
-            }
         }
     }
     setDebuff(params) {
@@ -174,6 +178,7 @@ class Character {
         this.buffs.clearDecreaseDamageTaken();
         this.buffs.clearAbsorbDamage();
         this.buffs.clearDamageIncreasal();
+        this.buffs.validateDD();
     }
     clearEnemyPhaseBuffs() {
         this.buffs.clearInvulnerability();

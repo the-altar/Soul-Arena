@@ -7,11 +7,11 @@ import {
   SkillClassType,
 } from "../../enums";
 import { Skill } from "../skill";
-
 // IMPORTANT TO THIS CLASS ONLY
 import { Buffs, iBuffParams } from "./buffs";
 import { Notification } from "./notifications";
 import { Debuffs, iDebuffParams } from "./debuffs";
+import { log } from "../../../logger";
 
 export class Character {
   public name: string;
@@ -79,6 +79,11 @@ export class Character {
   }
 
   public setHitPoints(hp: number): void {
+    if (!hp && hp !== 0) {
+      log.info("problem setting health");
+      return;
+    }
+
     this.hitPoints = hp;
     if (this.hitPoints <= 0) {
       this.hitPoints = 0;
@@ -145,6 +150,7 @@ export class Character {
   }
 
   public getCopySkillByIndex(index: number): Skill {
+    log.info(`Skill selected: ${this.skills[index].name}`)
     const newObj = JSON.parse(JSON.stringify(this.skills[index]));
     return new Skill(newObj, this.id);
   }
@@ -157,6 +163,7 @@ export class Character {
     for (const skill of this.skills) {
       if (skill.getId() === id) return skill;
     }
+    return null;
   }
 
   public setSkillCooldownByIndex(index: number) {
@@ -202,9 +209,6 @@ export class Character {
           this.buffs.setAbsorbDamage(params);
         }
         break;
-      case BuffTypes.DestructibleDefense: {
-        this.buffs.setDestructibleDefense(params.value);
-      }
     }
   }
 
@@ -228,6 +232,7 @@ export class Character {
     this.buffs.clearDecreaseDamageTaken();
     this.buffs.clearAbsorbDamage();
     this.buffs.clearDamageIncreasal();
+    this.buffs.validateDD();
   }
 
   public clearEnemyPhaseBuffs() {

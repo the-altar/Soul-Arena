@@ -11,6 +11,7 @@ import {
 import { Character } from "../character";
 import { Skill } from "..";
 import { Arena } from "../../arena";
+import { log } from "../../../logger";
 
 export class Damage extends Effect {
   private damageType: DamageType;
@@ -26,7 +27,6 @@ export class Damage extends Effect {
       origin,
       world
     );
-
     const increasalTaken = this.getIncreasedDamageTaken(char, this, origin);
     const increasalDealt = this.getIncreasedDamageFromCaster(
       this.caster,
@@ -47,23 +47,14 @@ export class Damage extends Effect {
       damageType: this.damageType,
     });
 
-    let destructibleDefense = char.getBuffs().destructibleDefense || 0;
-    let damageVal = Number(this.altValue) || this.value;
-    let damage =
-      damageVal - (reduction + decreased - increasalTaken - increasalDealt);
+    let damage = Number(this.altValue) || this.value;
+    damage = damage - (reduction + decreased - increasalTaken - increasalDealt);
 
-    if (destructibleDefense > 0) {
-      const ogDamage = damage;
-      damage -= destructibleDefense;
-      damage = Math.max(0, damage);
-      char.getBuffs().destructibleDefense = Math.max(
-        0,
-        destructibleDefense - ogDamage
-      );
-    }
+    damage = this.destroyDestructibleDefense(char, damage);
 
     const absorbed = damage * (conversionRate / 100);
     const hp = char.geHitPoints() - damage + Math.round(absorbed / 5) * 5;
+    log.info(`Character's health has been set to ${hp}`)
     char.setHitPoints(hp);
   }
 
@@ -109,6 +100,20 @@ export class Damage extends Effect {
     const e =
       char.getDebuffs().increaseDamageTaken.bySkillClass[skill.class] || 0;
     return c + d + e;
+  }
+
+  protected destroyDestructibleDefense(char: Character, damage: number) {
+    const dd_effect_list = char.getBuffs().destructibleDefense;
+    if (damage <= 0) return;
+
+    for (const key in dd_effect_list) {
+      const dd_effect = dd_effect_list[key];
+      const stack = dd_effect.value;
+      dd_effect.value = Math.max(0, dd_effect.value - damage);
+      damage = Math.max(0, damage - stack);
+      if (damage === 0) return 0;
+    }
+    return damage;
   }
 
   public generateToolTip() {

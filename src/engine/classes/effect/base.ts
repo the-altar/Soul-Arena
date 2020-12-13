@@ -9,9 +9,10 @@ import {
 } from "../../enums";
 import { Arena } from "../../arena";
 import { Skill } from "../skill";
+import { log } from "../../../logger";
 
 export class Effect {
-  protected value: number;
+  public value: number;
   protected altValue: number | null;
   public tick: number;
   protected duration: number;
@@ -44,7 +45,7 @@ export class Effect {
   constructor(data: any, caster: number) {
     this.value = data.value;
     this.tick = 1;
-    this.message = data.message || null
+    this.message = data.message || null;
     this.duration = data.duration;
     this.infinite = data.infinite || false;
     this.delay = data.delay || 0;
@@ -94,6 +95,11 @@ export class Effect {
     this.targets = targets;
   }
 
+  public extendDuration(val: number) {
+    if (val) log.info("Effect extended by " + val);
+    this.duration += val;
+  }
+
   public shouldApply() {
     const triggerRate = Math.floor(Math.random() * 101);
     if (
@@ -121,7 +127,7 @@ export class Effect {
     if (this.duration < 0 && !this.infinite) this.terminate = true;
     else if (this.targets.length === 0) this.terminate = true;
     else this.terminate = false;
-    
+
     if (this.terminate) this.effectConclusion();
   }
 
@@ -239,6 +245,7 @@ export class Effect {
     if (!this.activate) return;
     if (char.isKnockedOut()) return;
     if (!char.isInvulnerable(origin)) {
+      this.activateTrigger(char, origin, world);
       this.functionality(char, origin, world);
     }
   }
@@ -252,5 +259,15 @@ export class Effect {
   public isVisible(): boolean {
     if (this.isInvisible) return false;
     return true;
+  }
+
+  public activateTrigger(char: Character, origin?: Skill, world?: Arena) {
+    log.info(`activate trigger: ${origin.name}[${this.triggered}]`)
+    if (this.triggered) return;
+    this.triggered = true;
+    log.info(char.getDebuffs().increaseSkillDuration)
+    this.duration =
+      this.duration +
+      (char.getDebuffs().increaseSkillDuration[origin.getId()] || 0);
   }
 }

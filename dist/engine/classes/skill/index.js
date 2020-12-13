@@ -23,7 +23,7 @@ class Skill {
         this.targetChoices = data.targetChoices || {};
         this.effects = [];
         this.inactiveEffects = [];
-        this.mods = new mods_1.SkillMods(data.mods);
+        this.mods = new mods_1.SkillMods(data.mods || {});
         this.id = data.id;
         this.harmful = data.harmful || false;
         data.effects = data.effects.sort((a, b) => {
@@ -33,8 +33,15 @@ class Skill {
             const built = effect_1.effectFactory(e, caster);
             if (built.triggerRate > 0)
                 this.effects.push(built);
-            else
+            else {
                 this.inactiveEffects.push(built);
+            }
+        }
+        if (data.inactiveEffects) {
+            for (const e of data.inactiveEffects) {
+                const built = effect_1.effectFactory(e, caster);
+                this.inactiveEffects.push(built);
+            }
         }
     }
     isDisabled() {
@@ -167,6 +174,16 @@ class Skill {
         for (const effect of this.effects) {
             effect.tick++;
             effect.shouldApply();
+            effect.execute(world, this);
+            effect.generateToolTip();
+        }
+    }
+    executeInitEffects(world) {
+        for (const effect of this.effects) {
+            effect.tick++;
+            effect.shouldApply();
+            const chars = world.getCharactersByIndex(this.targets);
+            effect.extendDuration(this.mods.increaseDuration);
             effect.setTargets(this.targets);
             effect.execute(world, this);
             effect.generateToolTip();

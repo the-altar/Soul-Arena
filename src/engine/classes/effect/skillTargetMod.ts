@@ -1,8 +1,9 @@
 import { Effect } from "./base";
-import { ReiatsuTypes, targetType } from "../../enums";
+import { effectType, ReiatsuTypes, targetType } from "../../enums";
 import { Character } from "../character";
 import { Arena } from "../../arena";
 import { Skill } from "../skill";
+import { log } from "../../../logger";
 
 export class SkillTargetMod extends Effect {
   private newTarget: targetType;
@@ -52,7 +53,7 @@ export class SkillCostChange extends Effect {
     super(data, caster);
     this.reiatsuCostType = data.reiatsuCostType;
     this.specificSkillTarget = data.specificSkillTarget;
-    this.targetedSkills = []
+    this.targetedSkills = [];
   }
 
   public functionality(char: Character, origin: Skill, world?: Arena) {
@@ -101,6 +102,83 @@ export class SkillCostChange extends Effect {
       if (this.value > 0) s.cost[this.reiatsuCostType] -= this.value;
       else s.cost[this.reiatsuCostType] += this.value * -1;
     }
+  }
+}
+
+export class IncreaseCasterSkillDuration extends Effect {
+  private targetSkillId: number;
+  private targetedSkillName: string;
+  private skillReference: Skill;
+  private noRepeat:boolean
+
+  constructor(data: any, caster: number) {
+    super(data, caster);
+    this.targetSkillId = data.targetSkillId;
+    this.noRepeat = false
+  }
+
+  functionality(char: Character, origin: Skill, world?: Arena) {
+    if (this.noRepeat) return;
+    this.noRepeat = true;
+    const skill = char.getRealSkillById(this.targetSkillId);
+    if (!skill) return;
+    skill.mods.increaseDuration += this.value;
+    this.skillReference = skill;
+    this.targetedSkillName = skill.name;
+    log.info(
+      `Duration of ${skill.name} has been extended by ${skill.mods.increaseDuration}`
+    );
+  }
+
+  generateToolTip() {
+    if (this.targetedSkillName) {
+      this.message = `'${this.targetedSkillName}' will last ${
+        this.value / 2
+      } additional turn`;
+    }
+  }
+
+  effectConclusion() {
+    log.info("EFFECT CONCLUSION");
+    this.skillReference.mods.increaseDuration -= this.value;
+  }
+}
+
+export class IncreaseTargetSkillDuration extends Effect {
+  private targetSkillId: number;
+  private targetedSkillName: string;
+  private charReference: Character;
+  private noRepeat:boolean
+
+  constructor(data: any, caster: number) {
+    super(data, caster);
+    this.targetSkillId = data.targetSkillId;
+  }
+
+  functionality(char: Character, origin: Skill, world?: Arena) {
+    if (this.noRepeat) return;
+    this.noRepeat= true;
+    const val = char.getDebuffs().increaseSkillDuration[this.targetSkillId];
+    char.getDebuffs().increaseSkillDuration[this.targetSkillId] =
+      (val || 0) + this.value;
+    this.targetedSkillName = world
+      .findCharacterById(this.caster)
+      .char.findSkillById(this.targetSkillId).name;
+    this.charReference = char;
+  }
+
+  generateToolTip() {
+    if (this.targetedSkillName) {
+      this.message = `'${this.targetedSkillName}' will last ${
+        this.value / 2
+      } additional turn if used on this character`;
+    }
+  }
+
+  effectConclusion() {
+    delete this.charReference.getDebuffs().increaseSkillDuration[
+      this.targetSkillId
+    ];
   }
 }
 

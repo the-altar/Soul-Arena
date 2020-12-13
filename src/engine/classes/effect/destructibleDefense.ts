@@ -9,34 +9,24 @@ import { Character } from "../character";
 import { Skill } from "../skill";
 
 export class DestructibleDefense extends Effect {
-  public targetChar: Character;
-  public hasBeenApplied: boolean;
+  private noRepeat:boolean
+  public uniqueId: number;
+
   constructor(data: any, caster: number) {
     super(data, caster);
-    this.targetChar = null;
-    this.hasBeenApplied = false;
+    this.noRepeat = false;
   }
 
   public functionality(char: Character, origin: Skill) {
-    //if (this.hasBeenApplied) {}
-    char.getBuffs().destructibleDefense += this.value;
-    this.targetChar = char;
-    this.hasBeenApplied = true;
+    if (this.noRepeat) return;
+    this.uniqueId = Date.now() + Math.random();
+    this.noRepeat = true;
+    char.getBuffs().destructibleDefense[this.uniqueId] = this;
   }
 
   public progressTurn() {
     this.delay--;
-    if (this.targetChar !== null) {
-      this.value = Math.min(
-        this.targetChar.getBuffs().destructibleDefense,
-        this.value
-      );
-      this.targetChar.getBuffs().destructibleDefense = Math.max(
-        0,
-        this.targetChar.getBuffs().destructibleDefense - this.value
-      );
-    }
-    this.generateToolTip()
+    this.generateToolTip();
 
     if (this.delay <= 0) this.duration--;
     /*  An even tick means it's your opponent's turn, odd means its yours.*/
@@ -53,7 +43,7 @@ export class DestructibleDefense extends Effect {
 
     if (this.terminate) this.effectConclusion();
   }
-  
+
   public generateToolTip() {
     this.message = `This character has ${this.value} destructible defense`;
   }
@@ -63,5 +53,9 @@ export class DestructibleDefense extends Effect {
     if (triggerRate <= this.triggerRate && this.delay <= 0)
       this.activate = true;
     else this.activate = false;
+  }
+
+  effectConclusion(){
+    this.value = 0
   }
 }

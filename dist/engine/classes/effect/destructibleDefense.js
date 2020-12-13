@@ -6,21 +6,17 @@ const enums_1 = require("../../enums");
 class DestructibleDefense extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
-        this.targetChar = null;
-        this.hasBeenApplied = false;
+        this.noRepeat = false;
     }
     functionality(char, origin) {
-        //if (this.hasBeenApplied) {}
-        char.getBuffs().destructibleDefense += this.value;
-        this.targetChar = char;
-        this.hasBeenApplied = true;
+        if (this.noRepeat)
+            return;
+        this.uniqueId = Date.now() + Math.random();
+        this.noRepeat = true;
+        char.getBuffs().destructibleDefense[this.uniqueId] = this;
     }
     progressTurn() {
         this.delay--;
-        if (this.targetChar !== null) {
-            this.value = Math.min(this.targetChar.getBuffs().destructibleDefense, this.value);
-            this.targetChar.getBuffs().destructibleDefense = Math.max(0, this.targetChar.getBuffs().destructibleDefense - this.value);
-        }
         this.generateToolTip();
         if (this.delay <= 0)
             this.duration--;
@@ -51,6 +47,9 @@ class DestructibleDefense extends base_1.Effect {
             this.activate = true;
         else
             this.activate = false;
+    }
+    effectConclusion() {
+        this.value = 0;
     }
 }
 exports.DestructibleDefense = DestructibleDefense;

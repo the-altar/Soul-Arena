@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Effect = void 0;
 const enums_1 = require("../../enums");
+const logger_1 = require("../../../logger");
 class Effect {
     constructor(data, caster) {
         this.value = data.value;
@@ -49,6 +50,11 @@ class Effect {
     }
     setTargets(targets) {
         this.targets = targets;
+    }
+    extendDuration(val) {
+        if (val)
+            logger_1.log.info("Effect extended by " + val);
+        this.duration += val;
     }
     shouldApply() {
         const triggerRate = Math.floor(Math.random() * 101);
@@ -178,6 +184,7 @@ class Effect {
         if (char.isKnockedOut())
             return;
         if (!char.isInvulnerable(origin)) {
+            this.activateTrigger(char, origin, world);
             this.functionality(char, origin, world);
         }
     }
@@ -189,6 +196,16 @@ class Effect {
         if (this.isInvisible)
             return false;
         return true;
+    }
+    activateTrigger(char, origin, world) {
+        logger_1.log.info(`activate trigger: ${origin.name}[${this.triggered}]`);
+        if (this.triggered)
+            return;
+        this.triggered = true;
+        logger_1.log.info(char.getDebuffs().increaseSkillDuration);
+        this.duration =
+            this.duration +
+                (char.getDebuffs().increaseSkillDuration[origin.getId()] || 0);
     }
 }
 exports.Effect = Effect;
