@@ -44,7 +44,7 @@ export class CooldownReduction extends Effect {
         this.ofAllSkills = data.ofAllSkills
     }
 
-    public functionality(char: Character, origin:Skill, world?:Arena) {
+    public functionality(char: Character, origin:Skill) {
         this.triggered = true
         const cd = char.getBuffs().cooldownReduction
         if(this.ofSkillId) {

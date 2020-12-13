@@ -9,10 +9,10 @@ class Damage extends base_1.Effect {
         super(data, caster);
         this.damageType = data.damageType;
     }
-    functionality(char, origin, world) {
-        const reduction = this.getDamageReductionFromCaster(this.caster, this, origin, world);
+    functionality(char, origin) {
+        const reduction = this.getDamageReductionFromCaster(this.caster, this, origin);
         const increasalTaken = this.getIncreasedDamageTaken(char, this, origin);
-        const increasalDealt = this.getIncreasedDamageFromCaster(this.caster, this, origin, world);
+        const increasalDealt = this.getIncreasedDamageFromCaster(this.caster, this, origin);
         let { decreased } = char.getBuffs().getDecreaseDamageTaken({
             damageType: this.damageType,
             skillType: origin.class,
@@ -31,16 +31,16 @@ class Damage extends base_1.Effect {
         logger_1.log.info(`Character's health has been set to ${hp}`);
         char.setHitPoints(hp);
     }
-    getIncreasedDamageFromCaster(caster, effect, skill, world) {
-        const effectCaster = world.findCharacterById(caster).char;
+    getIncreasedDamageFromCaster(caster, effect, skill) {
+        const effectCaster = this.arenaReference.findCharacterById(caster).char;
         const buff = effectCaster.getBuffs().damageIncreasal;
         const c = buff.byDamage[effect.damageType] || 0;
         const d = buff.bySkillId[skill.getId()] || 0;
         const e = buff.bySkillClass[skill.class] || 0;
         return c + d + e;
     }
-    getDamageReductionFromCaster(caster, effect, skill, world) {
-        const effectCaster = world.findCharacterById(caster).char;
+    getDamageReductionFromCaster(caster, effect, skill) {
+        const effectCaster = this.arenaReference.findCharacterById(caster).char;
         const buff = effectCaster.getDebuffs().damageReduction;
         const c = buff.byDamage[effect.damageType] || 0;
         const d = buff.bySkillId[skill.getId()] || 0;
@@ -80,7 +80,7 @@ class DamageReduction extends base_1.Effect {
         this.damageType = data.damageType || false;
         this.specificSkill = data.specificSkill || false;
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         const buff = char.getDebuffs().damageReduction;
         if (this.skillType) {
             buff.bySkillClass[this.skillType] =
@@ -89,7 +89,7 @@ class DamageReduction extends base_1.Effect {
         else if (this.specificSkill) {
             buff.bySkillId[this.specificSkill] =
                 (buff.bySkillId[this.specificSkill] || 0) + this.value;
-            this.specificSkillName = world
+            this.specificSkillName = this.arenaReference
                 .findCharacterById(this.caster)
                 .char.findSkillById(this.specificSkill).name;
         }
@@ -118,7 +118,7 @@ class DamageIncreasal extends base_1.Effect {
         this.damageType = data.damageType || false;
         this.specificSkill = data.specificSkill || false;
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         const buff = char.getBuffs().damageIncreasal;
         if (this.skillType) {
             buff.bySkillClass[this.skillType] =
@@ -127,7 +127,7 @@ class DamageIncreasal extends base_1.Effect {
         else if (this.specificSkill) {
             buff.bySkillId[this.specificSkill] =
                 (buff.bySkillId[this.specificSkill] || 0) + this.value;
-            this.specificSkillName = world
+            this.specificSkillName = this.arenaReference
                 .findCharacterById(this.caster)
                 .char.findSkillById(this.specificSkill).name;
         }
@@ -156,7 +156,7 @@ class IncreaseDamageTaken extends base_1.Effect {
         this.damageType = data.damageType || false;
         this.specificSkill = data.specificSkill || false;
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         const debuff = char.getDebuffs().increaseDamageTaken;
         if (this.skillType) {
             debuff.bySkillClass[this.skillType] =
@@ -165,7 +165,7 @@ class IncreaseDamageTaken extends base_1.Effect {
         else if (this.specificSkill) {
             debuff.bySkillId[this.specificSkill] =
                 (debuff.bySkillId[this.specificSkill] || 0) + this.value;
-            this.specificSkillName = world
+            this.specificSkillName = this.arenaReference
                 .findCharacterById(this.caster)
                 .char.findSkillById(this.specificSkill).name;
         }

@@ -35,7 +35,10 @@ class Effect {
             },
         };
     }
-    functionality(char, origin, world) {
+    setArenaReference(world) {
+        this.arenaReference = world;
+    }
+    functionality(char, origin) {
         console.log("This does nothing!");
         return;
     }
@@ -88,82 +91,90 @@ class Effect {
         if (this.terminate)
             this.effectConclusion();
     }
-    execute(world, origin) {
+    execute(origin) {
         const t = [];
         switch (this.behavior) {
             case enums_1.effectTargetBehavior.Default:
                 {
                     for (const i of this.targets) {
-                        const char = world.getCharactersByIndex([i])[0];
-                        this.activateOnTarget(char, origin, world, t, i);
+                        const char = this.arenaReference.getCharactersByIndex([i])[0];
+                        this.activateOnTarget(char, origin, t, i);
                     }
                 }
                 break;
             case enums_1.effectTargetBehavior.OnlyOne:
                 {
-                    const char = world.getCharactersByIndex([this.targets[0]])[0];
-                    this.activateOnTarget(char, origin, world, t, this.targets[0]);
+                    const char = this.arenaReference.getCharactersByIndex([
+                        this.targets[0],
+                    ])[0];
+                    this.activateOnTarget(char, origin, t, this.targets[0]);
                 }
                 break;
             case enums_1.effectTargetBehavior.AllOthers:
                 {
                     const slice = this.targets.slice(1, this.targets.length);
                     for (const i of slice) {
-                        const char = world.getCharactersByIndex([i])[0];
-                        this.activateOnTarget(char, origin, world, t, i);
+                        const char = this.arenaReference.getCharactersByIndex([i])[0];
+                        this.activateOnTarget(char, origin, t, i);
                     }
                 }
                 break;
             case enums_1.effectTargetBehavior.IfAlly:
                 {
-                    const { char } = world.findCharacterById(this.caster);
+                    const { char } = this.arenaReference.findCharacterById(this.caster);
                     const allies = char.getAllies();
                     for (const i of this.targets) {
                         if (allies.includes(i)) {
-                            const ally = world.getCharactersByIndex([i])[0];
-                            this.activateOnTarget(ally, origin, world, t, i);
+                            const ally = this.arenaReference.getCharactersByIndex([i])[0];
+                            this.activateOnTarget(ally, origin, t, i);
                         }
                     }
                 }
                 break;
             case enums_1.effectTargetBehavior.IfEnemy:
                 {
-                    const { char } = world.findCharacterById(this.caster);
+                    const { char } = this.arenaReference.findCharacterById(this.caster);
                     const enemies = char.getEnemies();
                     for (const i of enemies) {
                         if (this.targets.includes(i)) {
-                            const enemy = world.getCharactersByIndex([i])[0];
-                            this.activateOnTarget(enemy, origin, world, t, i);
+                            const enemy = this.arenaReference.getCharactersByIndex([i])[0];
+                            this.activateOnTarget(enemy, origin, t, i);
                         }
                     }
                 }
                 break;
             case enums_1.effectTargetBehavior.ifSelf:
                 {
-                    const { char, index } = world.findCharacterById(this.caster);
-                    this.activateOnTarget(char, origin, world, t, index);
+                    const { char, index } = this.arenaReference.findCharacterById(this.caster);
+                    this.activateOnTarget(char, origin, t, index);
                 }
                 break;
             case enums_1.effectTargetBehavior.First:
                 {
-                    const char = world.getCharactersByIndex([this.targets[0]])[0];
-                    this.activateOnTarget(char, origin, world, t, this.targets[0]);
+                    const char = this.arenaReference.getCharactersByIndex([
+                        this.targets[0],
+                    ])[0];
+                    this.activateOnTarget(char, origin, t, this.targets[0]);
                 }
                 break;
             case enums_1.effectTargetBehavior.Second:
                 {
                     if (this.targets.length < 2)
                         break;
-                    const char = world.getCharactersByIndex([this.targets[1]])[0];
-                    this.activateOnTarget(char, origin, world, t, this.targets[1]);
+                    const char = this.arenaReference.getCharactersByIndex([
+                        this.targets[1],
+                    ])[0];
+                    this.activateOnTarget(char, origin, t, this.targets[1]);
                 }
                 break;
             case enums_1.effectTargetBehavior.Third:
                 {
                     if (this.targets.length < 3)
                         break;
-                    const char = world.getCharactersByIndex([this.targets[2]])[0];
-                    this.activateOnTarget(char, origin, world, t, this.targets[2]);
+                    const char = this.arenaReference.getCharactersByIndex([
+                        this.targets[2],
+                    ])[0];
+                    this.activateOnTarget(char, origin, t, this.targets[2]);
                 }
                 break;
         }
@@ -177,16 +188,17 @@ class Effect {
         return this.type;
     }
     generateToolTip(triggered) { }
-    activateOnTarget(char, origin, world, targetList, charIndex) {
+    activateOnTarget(char, origin, targetList, charIndex) {
         targetList.push(charIndex);
-        if (!this.activate)
+        if (char.isInvulnerable(origin))
             return;
         if (char.isKnockedOut())
             return;
-        if (!char.isInvulnerable(origin)) {
-            this.activateTrigger(char, origin, world);
-            this.functionality(char, origin, world);
-        }
+        this.activateTrigger(char, origin);
+        if (!this.activate)
+            return;
+        this.functionality(char, origin);
+        logger_1.log.info("APPLIED");
     }
     effectConclusion() { }
     getTargets() {
@@ -197,15 +209,20 @@ class Effect {
             return false;
         return true;
     }
-    activateTrigger(char, origin, world) {
+    activateTrigger(char, origin) {
         logger_1.log.info(`activate trigger: ${origin.name}[${this.triggered}]`);
         if (this.triggered)
             return;
         this.triggered = true;
-        logger_1.log.info(char.getDebuffs().increaseSkillDuration);
+        logger_1.log.info(`extension mods: ${char.getDebuffs().increaseSkillDuration}`);
         this.duration =
             this.duration +
                 (char.getDebuffs().increaseSkillDuration[origin.getId()] || 0);
+    }
+    getPublicData() {
+        const publicData = Object.assign({}, this);
+        delete publicData.arenaReference;
+        return Object.assign({}, publicData);
     }
 }
 exports.Effect = Effect;

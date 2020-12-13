@@ -13,27 +13,27 @@ class Counter extends base_1.Effect {
         this.counterEffectType = data.counterEffectType || false;
         this.triggerOnCounter = data.triggerOnCounter || [];
     }
-    functionality(target, origin, world) {
+    functionality(target, origin) {
         let isTriggered;
         if (this.isDefensive)
-            isTriggered = this.DefensiveCounter(target, origin, world);
+            isTriggered = this.DefensiveCounter(target, origin);
         else
-            isTriggered = this.OffensiveCounter(target, origin, world);
+            isTriggered = this.OffensiveCounter(target, origin);
         if (isTriggered.activated) {
-            const casterIndex = world.findCharacterById(this.caster).index;
-            const casterChar = world.findCharacterById(this.caster).char;
+            const casterIndex = this.arenaReference.findCharacterById(this.caster).index;
+            const casterChar = this.arenaReference.findCharacterById(this.caster).char;
             logger_1.log.info(`Caster is ${casterChar.name}`);
             const targetsIndex = isTriggered.indexes;
             this.applyLinkedEffects(origin, casterIndex, targetsIndex);
         }
     }
-    OffensiveCounter(target, origin, world) {
-        const temp = world.getTempSkills();
+    OffensiveCounter(target, origin) {
+        const temp = this.arenaReference.getTempSkills();
         const indexes = [];
         let hasCountered = { activated: false, indexes };
         for (let i = temp.length - 1; i >= 0; i--) {
             const cordinates = temp[i];
-            const caster = world.getCharactersByIndex([cordinates.caster])[0];
+            const caster = this.arenaReference.getCharactersByIndex([cordinates.caster])[0];
             const skill = caster.getRealSkillByIndex(cordinates.skill);
             if (this.value === 0)
                 return hasCountered;
@@ -56,22 +56,22 @@ class Counter extends base_1.Effect {
         }
         return hasCountered;
     }
-    DefensiveCounter(target, origin, world) {
-        const temp = world.getTempSkills().reverse();
+    DefensiveCounter(target, origin) {
+        const temp = this.arenaReference.getTempSkills().reverse();
         const indexes = [];
         let hasCountered = { activated: false, indexes };
         for (let i = temp.length - 1; i >= 0; i--) {
             if (this.value === 0)
                 return hasCountered;
             const cordinates = temp[i];
-            const char = world.getCharactersByIndex([cordinates.caster])[0];
+            const char = this.arenaReference.getCharactersByIndex([cordinates.caster])[0];
             const skill = char.getRealSkillByIndex(cordinates.skill);
             if (skill.uncounterable)
                 continue;
             if (this.counterType === enums_1.SkillClassType.Any ||
                 skill.class === this.counterType) {
                 for (const t of cordinates.targets) {
-                    const sufferer = world.getCharactersByIndex([t])[0];
+                    const sufferer = this.arenaReference.getCharactersByIndex([t])[0];
                     if (sufferer.getId() === target.getId()) {
                         temp[i].cancelled = true;
                         char.addNotification({
@@ -128,7 +128,18 @@ class Counter extends base_1.Effect {
             this.effectConclusion();
     }
     generateToolTip() {
-        this.message = "Skills used on this character will be countered";
+        if (this.value === 1 && this.DefensiveCounter) {
+            this.message = `The first new skill used on this character will be countered`;
+        }
+        else if (this.value === 1 && this.OffensiveCounter) {
+            this.message = `The first new skill used by this character will be countered`;
+        }
+        else if (this.OffensiveCounter) {
+            this.message = "New skills used on this character will be countered";
+        }
+        else if (this.DefensiveCounter) {
+            this.message = "New skills used by this character will be countered";
+        }
     }
 }
 exports.Counter = Counter;

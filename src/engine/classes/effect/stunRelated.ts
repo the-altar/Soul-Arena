@@ -13,7 +13,7 @@ export class Stun extends Effect {
     this.stunClass = data.stunClass;
   }
 
-  public functionality(char: Character, origin: Skill, world?: Arena) {
+  public functionality(char: Character, origin: Skill) {
     char.disableSkills();
     char.getDebuffs().stun[this.stunClass] = true;
   }

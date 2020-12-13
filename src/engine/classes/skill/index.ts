@@ -35,8 +35,9 @@ export class Skill {
   private targetChoices: { [x: string]: Array<number> };
   private id: number;
   public caster: number;
+  private arenaReference: Arena;
 
-  constructor(data: any, caster: number) {
+  constructor(data: any, caster: number, world: Arena) {
     this.caster = data.caster;
     this.banner = data.banner;
     this.cooldown = 0 || data.startCooldown;
@@ -56,12 +57,14 @@ export class Skill {
     this.mods = new SkillMods(data.mods || {});
     this.id = data.id;
     this.harmful = data.harmful || false;
+    this.arenaReference = world;
 
     data.effects = data.effects.sort((a: any, b: any) => {
       return (a.priority || 0) - (b.priority || 0);
     });
     for (const e of data.effects) {
       const built = effectFactory(e, caster);
+      built.setArenaReference(this.arenaReference);
       if (built.triggerRate > 0) this.effects.push(built);
       else {
         this.inactiveEffects.push(built);
@@ -71,6 +74,7 @@ export class Skill {
     if (data.inactiveEffects) {
       for (const e of data.inactiveEffects) {
         const built = effectFactory(e, caster);
+        built.setArenaReference(this.arenaReference);
         this.inactiveEffects.push(built);
       }
     }
@@ -222,9 +226,11 @@ export class Skill {
     this.targets = targets;
   }
 
-  public removeCharFromTargets(char: Character, world: Arena) {
+  public removeCharFromTargets(char: Character) {
     for (let i = this.targets.length - 1; i >= 0; i--) {
-      const targeted = world.getCharactersByIndex([this.targets[i]])[0];
+      const targeted = this.arenaReference.getCharactersByIndex([
+        this.targets[i],
+      ])[0];
 
       if (targeted.getId() === char.getId()) {
         this.targets.splice(i, 1);
@@ -237,25 +243,25 @@ export class Skill {
     return this.targets;
   }
 
-  public executeEffects(world: Arena) {
+  public executeEffects() {
     for (const effect of this.effects) {
       effect.tick++;
       effect.shouldApply();
-      effect.execute(world, this);
+      effect.execute(this);
       effect.generateToolTip();
     }
   }
 
-  public executeInitEffects(world: Arena) {
+  public executeInitEffects() {
     for (const effect of this.effects) {
       effect.tick++;
       effect.shouldApply();
-      const chars = world.getCharactersByIndex(this.targets);
       effect.extendDuration(this.mods.increaseDuration);
       effect.setTargets(this.targets);
-      effect.execute(world, this);
+      effect.execute(this);
       effect.generateToolTip();
     }
+    log.info(`Effects of '${this.name}' [EXECUTED]`);
   }
 
   public getCost(): Array<number> {
@@ -329,5 +335,44 @@ export class Skill {
 
   public isHarmful(): boolean {
     return this.harmful;
+  }
+
+  public getPublicData() {
+    const publicData = { ...this };
+    delete publicData.arenaReference;
+    delete publicData.effects;
+    delete publicData.inactiveEffects;
+    delete publicData.mods;
+
+    const publicEffects = [];
+    for (const e of this.effects) {
+      publicEffects.push(e.getPublicData());
+    }
+    return { ...publicData, effects: publicEffects };
+  }
+
+  public getCopyData() {
+    log.info("Copy data");
+    const publicSkill = { ...this };
+    delete publicSkill.arenaReference;
+    delete publicSkill.effects;
+    delete publicSkill.inactiveEffects;
+    delete publicSkill.mods;
+    
+    const copyEffects = [];
+    for (const effect of this.effects) {
+      copyEffects.push(effect.getPublicData());
+    }
+
+    const copyInactiveEffects = [];
+    for (const effect of this.inactiveEffects) {
+      copyInactiveEffects.push(effect.getPublicData());
+    }
+
+    return {
+      ...publicSkill,
+      effects: copyEffects,
+      inactiveEffects: copyInactiveEffects,
+    };
   }
 }

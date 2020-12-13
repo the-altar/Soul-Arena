@@ -16,15 +16,15 @@ export class EffectRemoval extends Effect {
     super(data, caster);
     this.harmful = data.harmful || false;
     this.friendly = data.friendly || false;
-    this.specificEffect = data.specificEffect
+    this.specificEffect = data.specificEffect;
     this.specificSkillType = data.specificSkillType || false;
-    this.specificSkillId = data.specificSkillId
+    this.specificSkillId = data.specificSkillId;
   }
 
-  public functionality(char: Character, origin: Skill, world?: Arena) {
-    if (this.harmful) this.removeHarmfulEffects(world, char);
-    else if (this.friendly) this.removeFriendlyEffects(world, char);
-    else if (this.specificSkillId) this.removeSpecificSkill(world, char);
+  public functionality(char: Character, origin: Skill) {
+    if (this.harmful) this.removeHarmfulEffects(char);
+    else if (this.friendly) this.removeFriendlyEffects(char);
+    else if (this.specificSkillId) this.removeSpecificSkill(char);
   }
 
   public generateToolTip() {
@@ -38,36 +38,38 @@ export class EffectRemoval extends Effect {
     }
   }
 
-  removeHarmfulEffects(world: Arena, char: Character) {
-    const skills = world.getActiveSkills();
+  removeHarmfulEffects(char: Character) {
+    const skills = this.arenaReference.getActiveSkills();
+    for (const skill of skills) {
+      let wasRemoved = false;
+      for (const effect of skill.effects) {
+        if (!isHarmful(effect.getType())) continue;
+        wasRemoved = reduceTargets(effect, char, this.arenaReference);
+      }
+      if (wasRemoved) skill.removeCharFromTargets(char);
+    }
+  }
+
+  removeFriendlyEffects(char: Character) {
+    const skills = this.arenaReference.getActiveSkills();
     for (const skill of skills) {
       let wasRemoved = false;
       for (const effect of skill.effects) {
         if (isHarmful(effect.getType())) continue;
-        wasRemoved = reduceTargets(effect, char, world);
+        wasRemoved = reduceTargets(effect, char, this.arenaReference);
       }
-      if (wasRemoved) skill.removeCharFromTargets(char, world);
+      if (wasRemoved) skill.removeCharFromTargets(char);
     }
   }
-  removeFriendlyEffects(world: Arena, char: Character) {
-    const skills = world.getActiveSkills();
+
+  removeSpecificSkill(char: Character) {
+    const skills = this.arenaReference.getActiveSkills();
     for (const skill of skills) {
-      let wasRemoved = false;
+      if (skill.getId() !== this.specificSkillId) continue;
       for (const effect of skill.effects) {
-        if (isHarmful(effect.getType())) continue;
-        wasRemoved = reduceTargets(effect, char, world);
+        reduceTargets(effect, char, this.arenaReference);
       }
-      if (wasRemoved) skill.removeCharFromTargets(char, world);
-    }
-  }
-  removeSpecificSkill(world: Arena, char: Character) {
-    const skills = world.getActiveSkills();
-    for (const skill of skills) {
-      if(skill.getId() !== this.specificSkillId) continue
-      for (const effect of skill.effects) {
-        reduceTargets(effect, char, world);
-      }
-      skill.removeCharFromTargets(char, world);
+      skill.removeCharFromTargets(char);
     }
   }
 }

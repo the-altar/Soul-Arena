@@ -8,9 +8,9 @@ class EnergyGain extends base_1.Effect {
         super(data, caster);
         this.energyType = data.energyType;
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         this.triggered = true;
-        const p = world.findPlayerByCharacterIndex(this.caster);
+        const p = this.arenaReference.findPlayerByCharacterIndex(this.caster);
         let index;
         if (this.energyType === enums_1.CostTypes.Random)
             index = Math.floor(Math.random() * (3 - 0 + 1)) + 0;
@@ -42,12 +42,14 @@ class EnergyRemoval extends base_1.Effect {
         super(data, caster);
         this.energyType = data.energyType;
     }
-    functionality(char, origin, world) {
-        const p = world.findPlayerByChar(char);
+    functionality(char, origin) {
+        const p = this.arenaReference.findPlayerByChar(char);
         if (this.triggerClause === enums_1.triggerClauseType.IfTargeted) {
-            for (const cordinate of world.tempQueue) {
-                const isTargeted = world.getCharacterIdByIndexes(cordinate.targets).includes(char.getId());
-                const targetedBy = world.characters[cordinate.caster].skills[cordinate.skill].getId();
+            for (const cordinate of this.arenaReference.tempQueue) {
+                const isTargeted = this.arenaReference
+                    .getCharacterIdByIndexes(cordinate.targets)
+                    .includes(char.getId());
+                const targetedBy = this.arenaReference.characters[cordinate.caster].skills[cordinate.skill].getId();
                 if (isTargeted && origin.getId() !== targetedBy)
                     this.apply(p);
             }

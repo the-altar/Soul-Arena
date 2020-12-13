@@ -10,7 +10,7 @@ export class Healing extends Effect {
     super(data, caster);
   }
 
-  public functionality(char: Character, origin: Skill, world?: Arena) {
+  public functionality(char: Character, origin: Skill) {
     this.triggered = true;
     const hp = char.geHitPoints() + this.value;
     char.setHitPoints(hp);
@@ -38,13 +38,12 @@ export class HealthDrain extends Damage {
     super(data, caster);
   }
 
-  public functionality(character: Character, origin: Skill, world?: Arena) {
+  public functionality(character: Character, origin: Skill) {
     this.triggered = true;
     const reduction = this.getDamageReductionFromCaster(
       this.caster,
       this,
       origin,
-      world
     );
     let damage = this.value - reduction;
     if (damage < 0) damage = 0;
@@ -52,7 +51,7 @@ export class HealthDrain extends Damage {
     const hp = character.geHitPoints() - Math.round(damage / 5) * 5;
     character.setHitPoints(hp);
 
-    const { char } = world.findCharacterById(this.caster);
+    const { char } = this.arenaReference.findCharacterById(this.caster);
     if (char.isKnockedOut()) return;
     char.setHitPoints(char.geHitPoints() + Math.round(damage / 5) * 5);
   }

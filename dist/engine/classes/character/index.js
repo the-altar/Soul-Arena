@@ -3,13 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Character = void 0;
 const enums_1 = require("../../enums");
 const skill_1 = require("../skill");
-// IMPORTANT TO THIS CLASS ONLY
 const buffs_1 = require("./buffs");
 const notifications_1 = require("./notifications");
 const debuffs_1 = require("./debuffs");
 const logger_1 = require("../../../logger");
 class Character {
-    constructor(data, playerId) {
+    constructor(data, playerId, world) {
         this.buffs = new buffs_1.Buffs();
         this.debuffs = new debuffs_1.Debuffs();
         this.notifications = [];
@@ -29,8 +28,9 @@ class Character {
         this.allies = [];
         this.enemies = [];
         this.knockedOut = false;
+        this.arenaReference = world;
         for (const skill of data.skills) {
-            this.skills.push(new skill_1.Skill(skill, this.id));
+            this.skills.push(new skill_1.Skill(skill, this.id, this.arenaReference));
         }
     }
     setAllies(allies) {
@@ -109,8 +109,8 @@ class Character {
     }
     getCopySkillByIndex(index) {
         logger_1.log.info(`Skill selected: ${this.skills[index].name}`);
-        const newObj = JSON.parse(JSON.stringify(this.skills[index]));
-        return new skill_1.Skill(newObj, this.id);
+        const newObj = JSON.parse(JSON.stringify(this.skills[index].getCopyData()));
+        return new skill_1.Skill(newObj, this.id, this.arenaReference);
     }
     getRealSkillByIndex(index) {
         return this.skills[index];
@@ -136,6 +136,17 @@ class Character {
     knockOut() {
         this.knockedOut = true;
         this.disableSkills();
+        const myIndex = this.arenaReference.findCharacterById(this.id).index;
+        for (const activeSkill of this.arenaReference.getActiveSkills()) {
+            let i = activeSkill.getTargets().indexOf(myIndex);
+            if (i !== -1)
+                activeSkill.getTargets().splice(i, 1);
+            for (const activeEffects of activeSkill.effects) {
+                i = activeEffects.getTargets().indexOf(myIndex);
+                if (i !== -1)
+                    activeEffects.getTargets().splice(i, 1);
+            }
+        }
     }
     isKnockedOut() {
         return this.knockedOut;
@@ -225,6 +236,21 @@ class Character {
             if (skill.getId() === id)
                 return skill;
         }
+    }
+    getPublicData() {
+        const publicData = Object.assign({}, this);
+        delete publicData.arenaReference;
+        delete publicData.literalId;
+        delete publicData.enemies;
+        delete publicData.allies;
+        delete publicData.skills;
+        delete publicData.buffs;
+        delete publicData.debuffs;
+        const skillCopy = [];
+        for (const skill of this.skills) {
+            skillCopy.push(skill.getPublicData());
+        }
+        return Object.assign(Object.assign({}, publicData), { skills: skillCopy });
     }
 }
 exports.Character = Character;

@@ -12,6 +12,7 @@ import { Skill } from "../skill";
 import { log } from "../../../logger";
 
 export class Effect {
+  protected arenaReference: Arena;
   public value: number;
   protected altValue: number | null;
   public tick: number;
@@ -74,7 +75,10 @@ export class Effect {
     };
   }
 
-  public functionality(char: Character, origin?: Skill, world?: Arena) {
+  public setArenaReference(world: Arena) {
+    this.arenaReference = world;
+  }
+  public functionality(char: Character, origin?: Skill) {
     console.log("This does nothing!");
     return;
   }
@@ -131,23 +135,25 @@ export class Effect {
     if (this.terminate) this.effectConclusion();
   }
 
-  public execute(world: Arena, origin: Skill) {
+  public execute(origin: Skill) {
     const t: Array<number> = [];
 
     switch (this.behavior) {
       case effectTargetBehavior.Default:
         {
           for (const i of this.targets) {
-            const char = world.getCharactersByIndex([i])[0];
-            this.activateOnTarget(char, origin, world, t, i);
+            const char = this.arenaReference.getCharactersByIndex([i])[0];
+            this.activateOnTarget(char, origin, t, i);
           }
         }
         break;
 
       case effectTargetBehavior.OnlyOne:
         {
-          const char = world.getCharactersByIndex([this.targets[0]])[0];
-          this.activateOnTarget(char, origin, world, t, this.targets[0]);
+          const char = this.arenaReference.getCharactersByIndex([
+            this.targets[0],
+          ])[0];
+          this.activateOnTarget(char, origin, t, this.targets[0]);
         }
         break;
 
@@ -156,20 +162,20 @@ export class Effect {
           const slice = this.targets.slice(1, this.targets.length);
 
           for (const i of slice) {
-            const char = world.getCharactersByIndex([i])[0];
-            this.activateOnTarget(char, origin, world, t, i);
+            const char = this.arenaReference.getCharactersByIndex([i])[0];
+            this.activateOnTarget(char, origin, t, i);
           }
         }
         break;
 
       case effectTargetBehavior.IfAlly:
         {
-          const { char } = world.findCharacterById(this.caster);
+          const { char } = this.arenaReference.findCharacterById(this.caster);
           const allies = char.getAllies();
           for (const i of this.targets) {
             if (allies.includes(i)) {
-              const ally = world.getCharactersByIndex([i])[0];
-              this.activateOnTarget(ally, origin, world, t, i);
+              const ally = this.arenaReference.getCharactersByIndex([i])[0];
+              this.activateOnTarget(ally, origin, t, i);
             }
           }
         }
@@ -177,13 +183,13 @@ export class Effect {
 
       case effectTargetBehavior.IfEnemy:
         {
-          const { char } = world.findCharacterById(this.caster);
+          const { char } = this.arenaReference.findCharacterById(this.caster);
           const enemies = char.getEnemies();
 
           for (const i of enemies) {
             if (this.targets.includes(i)) {
-              const enemy = world.getCharactersByIndex([i])[0];
-              this.activateOnTarget(enemy, origin, world, t, i);
+              const enemy = this.arenaReference.getCharactersByIndex([i])[0];
+              this.activateOnTarget(enemy, origin, t, i);
             }
           }
         }
@@ -191,31 +197,39 @@ export class Effect {
 
       case effectTargetBehavior.ifSelf:
         {
-          const { char, index } = world.findCharacterById(this.caster);
-          this.activateOnTarget(char, origin, world, t, index);
+          const { char, index } = this.arenaReference.findCharacterById(
+            this.caster
+          );
+          this.activateOnTarget(char, origin, t, index);
         }
         break;
 
       case effectTargetBehavior.First:
         {
-          const char = world.getCharactersByIndex([this.targets[0]])[0];
-          this.activateOnTarget(char, origin, world, t, this.targets[0]);
+          const char = this.arenaReference.getCharactersByIndex([
+            this.targets[0],
+          ])[0];
+          this.activateOnTarget(char, origin, t, this.targets[0]);
         }
         break;
 
       case effectTargetBehavior.Second:
         {
           if (this.targets.length < 2) break;
-          const char = world.getCharactersByIndex([this.targets[1]])[0];
-          this.activateOnTarget(char, origin, world, t, this.targets[1]);
+          const char = this.arenaReference.getCharactersByIndex([
+            this.targets[1],
+          ])[0];
+          this.activateOnTarget(char, origin, t, this.targets[1]);
         }
         break;
 
       case effectTargetBehavior.Third:
         {
           if (this.targets.length < 3) break;
-          const char = world.getCharactersByIndex([this.targets[2]])[0];
-          this.activateOnTarget(char, origin, world, t, this.targets[2]);
+          const char = this.arenaReference.getCharactersByIndex([
+            this.targets[2],
+          ])[0];
+          this.activateOnTarget(char, origin, t, this.targets[2]);
         }
         break;
     }
@@ -236,18 +250,17 @@ export class Effect {
   private activateOnTarget(
     char: Character,
     origin: Skill,
-    world: Arena,
     targetList: Array<number>,
     charIndex: number
   ) {
     targetList.push(charIndex);
 
-    if (!this.activate) return;
+    if (char.isInvulnerable(origin)) return;
     if (char.isKnockedOut()) return;
-    if (!char.isInvulnerable(origin)) {
-      this.activateTrigger(char, origin, world);
-      this.functionality(char, origin, world);
-    }
+    this.activateTrigger(char, origin);
+    if (!this.activate) return;
+    this.functionality(char, origin);
+    log.info("APPLIED");
   }
 
   protected effectConclusion() {}
@@ -261,13 +274,20 @@ export class Effect {
     return true;
   }
 
-  public activateTrigger(char: Character, origin?: Skill, world?: Arena) {
-    log.info(`activate trigger: ${origin.name}[${this.triggered}]`)
+  public activateTrigger(char: Character, origin?: Skill) {
+    log.info(`activate trigger: ${origin.name}[${this.triggered}]`);
     if (this.triggered) return;
     this.triggered = true;
-    log.info(char.getDebuffs().increaseSkillDuration)
+    log.info(`extension mods: ${char.getDebuffs().increaseSkillDuration}`);
     this.duration =
       this.duration +
       (char.getDebuffs().increaseSkillDuration[origin.getId()] || 0);
+  }
+
+  public getPublicData() {
+    const publicData = { ...this };
+    delete publicData.arenaReference;
+
+    return {...publicData};
   }
 }

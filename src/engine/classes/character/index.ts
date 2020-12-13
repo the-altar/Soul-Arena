@@ -8,6 +8,7 @@ import {
 } from "../../enums";
 import { Skill } from "../skill";
 // IMPORTANT TO THIS CLASS ONLY
+import { Arena } from "../../arena";
 import { Buffs, iBuffParams } from "./buffs";
 import { Notification } from "./notifications";
 import { Debuffs, iDebuffParams } from "./debuffs";
@@ -32,8 +33,9 @@ export class Character {
   private energyGain: Array<number>;
   private belongs: { [key: number]: boolean };
   public skills: Array<Skill>;
+  private arenaReference: Arena;
 
-  constructor(data: iCharacter, playerId: number) {
+  constructor(data: iCharacter, playerId: number, world: Arena) {
     this.buffs = new Buffs();
     this.debuffs = new Debuffs();
     this.notifications = [];
@@ -53,8 +55,9 @@ export class Character {
     this.allies = [];
     this.enemies = [];
     this.knockedOut = false;
+    this.arenaReference = world;
     for (const skill of data.skills) {
-      this.skills.push(new Skill(skill, this.id));
+      this.skills.push(new Skill(skill, this.id, this.arenaReference));
     }
   }
 
@@ -150,9 +153,9 @@ export class Character {
   }
 
   public getCopySkillByIndex(index: number): Skill {
-    log.info(`Skill selected: ${this.skills[index].name}`)
-    const newObj = JSON.parse(JSON.stringify(this.skills[index]));
-    return new Skill(newObj, this.id);
+    log.info(`Skill selected: ${this.skills[index].name}`);
+    const newObj = JSON.parse(JSON.stringify(this.skills[index].getCopyData()));
+    return new Skill(newObj, this.id, this.arenaReference);
   }
 
   public getRealSkillByIndex(index: number): Skill {
@@ -184,6 +187,17 @@ export class Character {
   public knockOut() {
     this.knockedOut = true;
     this.disableSkills();
+    const myIndex = this.arenaReference.findCharacterById(this.id).index;
+
+    for (const activeSkill of this.arenaReference.getActiveSkills()) {
+      let i = activeSkill.getTargets().indexOf(myIndex);
+      if (i !== -1) activeSkill.getTargets().splice(i, 1);
+
+      for (const activeEffects of activeSkill.effects) {
+        i = activeEffects.getTargets().indexOf(myIndex);
+        if (i !== -1) activeEffects.getTargets().splice(i, 1);
+      }
+    }
   }
 
   public isKnockedOut(): boolean {
@@ -295,5 +309,29 @@ export class Character {
     for (const skill of this.skills) {
       if (skill.getId() === id) return skill;
     }
+  }
+
+  public getPublicData() {
+    const publicData = {
+      ...this,
+    };
+
+    delete publicData.arenaReference;
+    delete publicData.literalId;
+    delete publicData.enemies;
+    delete publicData.allies;
+    delete publicData.skills;
+    delete publicData.buffs;
+    delete publicData.debuffs;
+    
+    const skillCopy = [];
+    for (const skill of this.skills) {
+      skillCopy.push(skill.getPublicData());
+    }
+
+    return {
+      ...publicData,
+      skills: skillCopy,
+    };
   }
 }

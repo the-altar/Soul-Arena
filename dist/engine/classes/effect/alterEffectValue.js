@@ -51,6 +51,12 @@ class AlterEffectValue extends base_1.Effect {
             payload.effect.mods.increment.value = payload.originalIncrement;
         }
     }
+    getPublicData() {
+        const publicData = Object.assign({}, this);
+        delete publicData.arenaReference;
+        delete publicData.changedEffects;
+        return Object.assign({}, publicData);
+    }
 }
 exports.AlterEffectValue = AlterEffectValue;
 class EnableEffects extends base_1.Effect {
@@ -59,7 +65,7 @@ class EnableEffects extends base_1.Effect {
         this.effectsId = data.effectsId;
         this.parentSkillId = data.parentSkillId;
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         if (this.hasBeenApplied)
             return;
         const targetedSkill = char.findSkillById(this.parentSkillId);
@@ -73,7 +79,8 @@ class EnableEffects extends base_1.Effect {
         this.hasBeenApplied = true;
     }
     generateToolTip() {
-        this.message = this.message || `'${this.targetedSkill.name}' has been improved`;
+        this.message =
+            this.message || `'${this.targetedSkill.name}' has been improved`;
     }
     effectConclusion() {
         for (let i = this.targetedSkill.effects.length - 1; i >= 0; i--) {
@@ -84,6 +91,12 @@ class EnableEffects extends base_1.Effect {
             }
         }
     }
+    getPublicData() {
+        const publicData = Object.assign({}, this);
+        delete publicData.arenaReference;
+        delete publicData.targetedSkill;
+        return Object.assign({}, publicData);
+    }
 }
 exports.EnableEffects = EnableEffects;
 class DisableEffects extends base_1.Effect {
@@ -92,7 +105,7 @@ class DisableEffects extends base_1.Effect {
         this.effectsId = data.effectsId;
         this.parentSkillId = data.parentSkillId;
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         if (this.hasBeenApplied)
             return;
         const targetedSkill = char.findSkillById(this.parentSkillId);
@@ -114,6 +127,12 @@ class DisableEffects extends base_1.Effect {
                 e.triggerRate = 100;
             }
         }
+    }
+    getPublicData() {
+        const publicData = Object.assign({}, this);
+        delete publicData.arenaReference;
+        delete publicData.targetedSkill;
+        return Object.assign({}, publicData);
     }
 }
 exports.DisableEffects = DisableEffects;

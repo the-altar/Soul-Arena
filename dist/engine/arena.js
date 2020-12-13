@@ -21,7 +21,7 @@ class Arena {
         else if (this.players.length === 2)
             this.players[1].setMyCharsIndex([3, 4, 5]);
         for (let c of team) {
-            this.characters.push(new classes_1.Character(c, player.id));
+            this.characters.push(new classes_1.Character(c, player.id, this));
             const index = this.characters.length - 1;
             if (index < 3) {
                 this.characters[index].setEnemies([3, 4, 5]);
@@ -112,7 +112,7 @@ class Arena {
                 continue;
             const skill = char.getCopySkillByIndex(cordinates.skill);
             skill.setTargets(cordinates.targets);
-            skill.executeInitEffects(this);
+            skill.executeInitEffects();
             this.skillQueue.push(skill);
         }
         this.tempQueue = [];
@@ -129,7 +129,7 @@ class Arena {
     executeSkills() {
         for (const skill of this.skillQueue) {
             //.log("---> Executing: " + skill.name)
-            skill.executeEffects(this);
+            skill.executeEffects();
         }
     }
     getCharactersByIndex(indexes) {
@@ -180,7 +180,7 @@ class Arena {
         this.tempQueue.splice(r, 1);
         return {
             tempQueue: this.tempQueue,
-            characters: this.characters,
+            characters: this.publicCharactersData(),
             energyPool: player.getEnergyPool(),
             payupCart: player.getPayupCart(),
             playerIndex: index,
@@ -208,7 +208,7 @@ class Arena {
         return {
             tempQueue: this.tempQueue,
             energyPool: player.getEnergyPool(),
-            characters: this.characters,
+            characters: this.publicCharactersData(),
             payupCart: player.getPayupCart(),
             playerIndex: index,
         };
@@ -306,10 +306,14 @@ class Arena {
         });
     }
     getClientData() {
+        const publicSkillQueue = [];
+        for (const skill of this.skillQueue) {
+            publicSkillQueue.push(skill.getPublicData());
+        }
         return {
             players: this.players,
-            characters: this.characters,
-            skillQueue: this.skillQueue,
+            characters: this.publicCharactersData(),
+            skillQueue: publicSkillQueue,
         };
     }
     findPlayerById(id) {
@@ -365,8 +369,15 @@ class Arena {
         return {
             playerIndex: this.turnCount % 2,
             energyPool: player.energyPool,
-            characters: this.characters,
+            characters: this.publicCharactersData(),
         };
+    }
+    publicCharactersData() {
+        const publicChar = [];
+        for (const char of this.characters) {
+            publicChar.push(char.getPublicData());
+        }
+        return publicChar;
     }
 }
 exports.Arena = Arena;

@@ -5,8 +5,9 @@ const enums_1 = require("../../enums");
 const effect_1 = require("../effect");
 const targetValidationFactory_1 = require("./targetValidationFactory");
 const mods_1 = require("./mods");
+const logger_1 = require("../../../logger");
 class Skill {
-    constructor(data, caster) {
+    constructor(data, caster, world) {
         this.caster = data.caster;
         this.banner = data.banner;
         this.cooldown = 0 || data.startCooldown;
@@ -26,11 +27,13 @@ class Skill {
         this.mods = new mods_1.SkillMods(data.mods || {});
         this.id = data.id;
         this.harmful = data.harmful || false;
+        this.arenaReference = world;
         data.effects = data.effects.sort((a, b) => {
             return (a.priority || 0) - (b.priority || 0);
         });
         for (const e of data.effects) {
             const built = effect_1.effectFactory(e, caster);
+            built.setArenaReference(this.arenaReference);
             if (built.triggerRate > 0)
                 this.effects.push(built);
             else {
@@ -40,6 +43,7 @@ class Skill {
         if (data.inactiveEffects) {
             for (const e of data.inactiveEffects) {
                 const built = effect_1.effectFactory(e, caster);
+                built.setArenaReference(this.arenaReference);
                 this.inactiveEffects.push(built);
             }
         }
@@ -158,9 +162,11 @@ class Skill {
     setTargets(targets) {
         this.targets = targets;
     }
-    removeCharFromTargets(char, world) {
+    removeCharFromTargets(char) {
         for (let i = this.targets.length - 1; i >= 0; i--) {
-            const targeted = world.getCharactersByIndex([this.targets[i]])[0];
+            const targeted = this.arenaReference.getCharactersByIndex([
+                this.targets[i],
+            ])[0];
             if (targeted.getId() === char.getId()) {
                 this.targets.splice(i, 1);
                 break;
@@ -170,24 +176,24 @@ class Skill {
     getTargets() {
         return this.targets;
     }
-    executeEffects(world) {
+    executeEffects() {
         for (const effect of this.effects) {
             effect.tick++;
             effect.shouldApply();
-            effect.execute(world, this);
+            effect.execute(this);
             effect.generateToolTip();
         }
     }
-    executeInitEffects(world) {
+    executeInitEffects() {
         for (const effect of this.effects) {
             effect.tick++;
             effect.shouldApply();
-            const chars = world.getCharactersByIndex(this.targets);
             effect.extendDuration(this.mods.increaseDuration);
             effect.setTargets(this.targets);
-            effect.execute(world, this);
+            effect.execute(this);
             effect.generateToolTip();
         }
+        logger_1.log.info(`Effects of '${this.name}' [EXECUTED]`);
     }
     getCost() {
         return this.cost;
@@ -247,6 +253,35 @@ class Skill {
     }
     isHarmful() {
         return this.harmful;
+    }
+    getPublicData() {
+        const publicData = Object.assign({}, this);
+        delete publicData.arenaReference;
+        delete publicData.effects;
+        delete publicData.inactiveEffects;
+        delete publicData.mods;
+        const publicEffects = [];
+        for (const e of this.effects) {
+            publicEffects.push(e.getPublicData());
+        }
+        return Object.assign(Object.assign({}, publicData), { effects: publicEffects });
+    }
+    getCopyData() {
+        logger_1.log.info("Copy data");
+        const publicSkill = Object.assign({}, this);
+        delete publicSkill.arenaReference;
+        delete publicSkill.effects;
+        delete publicSkill.inactiveEffects;
+        delete publicSkill.mods;
+        const copyEffects = [];
+        for (const effect of this.effects) {
+            copyEffects.push(effect.getPublicData());
+        }
+        const copyInactiveEffects = [];
+        for (const effect of this.inactiveEffects) {
+            copyInactiveEffects.push(effect.getPublicData());
+        }
+        return Object.assign(Object.assign({}, publicSkill), { effects: copyEffects, inactiveEffects: copyInactiveEffects });
     }
 }
 exports.Skill = Skill;

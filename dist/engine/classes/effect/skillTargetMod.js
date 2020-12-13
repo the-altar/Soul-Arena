@@ -11,7 +11,7 @@ class SkillTargetMod extends base_1.Effect {
         this.targetSpecificSkill = data.targetSpecificSkill || false;
         this.specificSkillIndex = data.specificSkillIndex || -1;
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         const s = char.getRealSkillById(this.specificSkillIndex);
         if (this.targetSpecificSkill) {
             s.setTargetMod(this.newTarget);
@@ -30,6 +30,12 @@ class SkillTargetMod extends base_1.Effect {
     effectConclusion() {
         this.affectedSkill.mods.clearTargetMod();
     }
+    getPublicData() {
+        const publicData = Object.assign({}, this);
+        delete publicData.arenaReference;
+        delete publicData.affectedSkill;
+        return publicData;
+    }
 }
 exports.SkillTargetMod = SkillTargetMod;
 class SkillCostChange extends base_1.Effect {
@@ -39,7 +45,7 @@ class SkillCostChange extends base_1.Effect {
         this.specificSkillTarget = data.specificSkillTarget;
         this.targetedSkills = [];
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         if (this.specificSkillTarget) {
             for (const s of char.skills) {
                 if (s.getId() === this.specificSkillTarget) {
@@ -81,6 +87,12 @@ class SkillCostChange extends base_1.Effect {
                 s.cost[this.reiatsuCostType] += this.value * -1;
         }
     }
+    getPublicData() {
+        const publicData = Object.assign({}, this);
+        delete publicData.arenaReference;
+        delete publicData.targetedSkills;
+        return publicData;
+    }
 }
 exports.SkillCostChange = SkillCostChange;
 class IncreaseCasterSkillDuration extends base_1.Effect {
@@ -89,7 +101,7 @@ class IncreaseCasterSkillDuration extends base_1.Effect {
         this.targetSkillId = data.targetSkillId;
         this.noRepeat = false;
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         if (this.noRepeat)
             return;
         this.noRepeat = true;
@@ -117,14 +129,14 @@ class IncreaseTargetSkillDuration extends base_1.Effect {
         super(data, caster);
         this.targetSkillId = data.targetSkillId;
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         if (this.noRepeat)
             return;
         this.noRepeat = true;
         const val = char.getDebuffs().increaseSkillDuration[this.targetSkillId];
         char.getDebuffs().increaseSkillDuration[this.targetSkillId] =
             (val || 0) + this.value;
-        this.targetedSkillName = world
+        this.targetedSkillName = this.arenaReference
             .findCharacterById(this.caster)
             .char.findSkillById(this.targetSkillId).name;
         this.charReference = char;
@@ -136,6 +148,12 @@ class IncreaseTargetSkillDuration extends base_1.Effect {
     }
     effectConclusion() {
         delete this.charReference.getDebuffs().increaseSkillDuration[this.targetSkillId];
+    }
+    getPublicData() {
+        const publicData = Object.assign({}, this);
+        delete publicData.arenaReference;
+        delete publicData.charReference;
+        return Object.assign({}, publicData);
     }
 }
 exports.IncreaseTargetSkillDuration = IncreaseTargetSkillDuration;

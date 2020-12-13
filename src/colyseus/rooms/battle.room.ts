@@ -101,14 +101,13 @@ export class Battle extends Room {
   gameClock() {
     log.info("A new game has begun");
     const { gameData } = this.arena.startGame();
-
     this.broadcast("game-started", gameData);
 
     this.delay = this.clock.setInterval(async () => {
       const { isOver, gameData, winner, loser } = this.arena.startGame();
 
       if (!isOver) this.broadcast("start-new-turn", gameData);
-      else {
+      else {  
         await this.updateMissionGoals(winner, loser);
         const payload1 = endMatch(winner, loser, true);
         const payload2 = endMatch(loser, winner, false);

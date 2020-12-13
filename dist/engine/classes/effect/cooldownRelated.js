@@ -32,7 +32,7 @@ class CooldownReduction extends base_1.Effect {
         this.ofSkillId = data.ofSkillId;
         this.ofAllSkills = data.ofAllSkills;
     }
-    functionality(char, origin, world) {
+    functionality(char, origin) {
         this.triggered = true;
         const cd = char.getBuffs().cooldownReduction;
         if (this.ofSkillId) {

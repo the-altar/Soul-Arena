@@ -1,6 +1,6 @@
 import { Character, Player, Skill } from "./classes";
 import { iCharacter, iSkillQueue } from "./interfaces";
-import { triggerClauseType, activationType } from "./enums";
+import { log } from "../logger";
 
 export class Arena {
   private players: Array<Player>;
@@ -30,7 +30,7 @@ export class Arena {
       this.players[1].setMyCharsIndex([3, 4, 5]);
 
     for (let c of team) {
-      this.characters.push(new Character(c, player.id));
+      this.characters.push(new Character(c, player.id, this));
       const index = this.characters.length - 1;
 
       if (index < 3) {
@@ -127,9 +127,8 @@ export class Arena {
       char.setSkillCooldownByIndex(cordinates.skill);
       if (cordinates.cancelled) continue;
       const skill = char.getCopySkillByIndex(cordinates.skill);
-
       skill.setTargets(cordinates.targets);
-      skill.executeInitEffects(this);
+      skill.executeInitEffects();
       this.skillQueue.push(skill);
     }
 
@@ -149,7 +148,7 @@ export class Arena {
   public executeSkills() {
     for (const skill of this.skillQueue) {
       //.log("---> Executing: " + skill.name)
-      skill.executeEffects(this);
+      skill.executeEffects();
     }
   }
 
@@ -195,7 +194,7 @@ export class Arena {
   }) {
     const char = this.characters[cordinates.caster];
     const id = char.getOwner();
-    const s = char.skills[cordinates.skill]
+    const s = char.skills[cordinates.skill];
     const { player, index } = this.findPlayerById(id);
 
     player.returnEnergy(s.getCost());
@@ -211,7 +210,7 @@ export class Arena {
 
     return {
       tempQueue: this.tempQueue,
-      characters: this.characters,
+      characters: this.publicCharactersData(),
       energyPool: player.getEnergyPool(),
       payupCart: player.getPayupCart(),
       playerIndex: index,
@@ -245,11 +244,10 @@ export class Arena {
       skill: cordinates.skill,
       targets: s.getValidatedTargets(cordinates.target),
     });
-
     return {
       tempQueue: this.tempQueue,
       energyPool: player.getEnergyPool(),
-      characters: this.characters,
+      characters: this.publicCharactersData(),
       payupCart: player.getPayupCart(),
       playerIndex: index,
     };
@@ -355,10 +353,16 @@ export class Arena {
   }
 
   private getClientData() {
+
+    const publicSkillQueue = [];
+    for (const skill of this.skillQueue) {
+      publicSkillQueue.push(skill.getPublicData());
+    }
+
     return {
       players: this.players,
-      characters: this.characters,
-      skillQueue: this.skillQueue,
+      characters: this.publicCharactersData(),
+      skillQueue: publicSkillQueue,
     };
   }
 
@@ -424,7 +428,15 @@ export class Arena {
     return {
       playerIndex: this.turnCount % 2,
       energyPool: player.energyPool,
-      characters: this.characters,
+      characters: this.publicCharactersData(),
     };
+  }
+
+  public publicCharactersData(){
+    const publicChar:Array<any> = []
+    for(const char of this.characters){
+      publicChar.push(char.getPublicData())
+    }
+    return publicChar
   }
 }

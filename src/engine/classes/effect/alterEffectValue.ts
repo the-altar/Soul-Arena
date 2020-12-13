@@ -3,7 +3,7 @@ import { effectType, SkillClassType, Types } from "../../enums";
 import { Character } from "../character";
 import { Skill } from "..";
 import { Arena } from "../../arena";
-import {log} from "../../../logger"
+import { log } from "../../../logger";
 export class AlterEffectValue extends Effect {
   private anyEffect: boolean;
   private anySkill: boolean;
@@ -70,6 +70,14 @@ export class AlterEffectValue extends Effect {
       payload.effect.mods.increment.value = payload.originalIncrement;
     }
   }
+
+  public getPublicData() {
+    const publicData = { ...this };
+    delete publicData.arenaReference;
+    delete publicData.changedEffects;
+
+    return { ...publicData };
+  }
 }
 
 export class EnableEffects extends Effect {
@@ -84,7 +92,7 @@ export class EnableEffects extends Effect {
     this.parentSkillId = data.parentSkillId;
   }
 
-  functionality(char: Character, origin: Skill, world?: Arena) {
+  functionality(char: Character, origin: Skill) {
     if (this.hasBeenApplied) return;
 
     const targetedSkill = char.findSkillById(this.parentSkillId);
@@ -99,7 +107,8 @@ export class EnableEffects extends Effect {
   }
 
   generateToolTip() {
-    this.message = this.message || `'${this.targetedSkill.name}' has been improved`;
+    this.message =
+      this.message || `'${this.targetedSkill.name}' has been improved`;
   }
 
   effectConclusion() {
@@ -110,6 +119,14 @@ export class EnableEffects extends Effect {
         this.targetedSkill.effects.splice(i, 1);
       }
     }
+  }
+
+  public getPublicData() {
+    const publicData = { ...this };
+    delete publicData.arenaReference;
+    delete publicData.targetedSkill;
+
+    return { ...publicData };
   }
 }
 
@@ -125,7 +142,7 @@ export class DisableEffects extends Effect {
     this.parentSkillId = data.parentSkillId;
   }
 
-  functionality(char: Character, origin: Skill, world?: Arena) {
+  functionality(char: Character, origin: Skill) {
     if (this.hasBeenApplied) return;
 
     const targetedSkill = char.findSkillById(this.parentSkillId);
@@ -149,5 +166,12 @@ export class DisableEffects extends Effect {
         e.triggerRate = 100;
       }
     }
+  }
+
+  public getPublicData() {
+    const publicData = { ...this };
+    delete publicData.arenaReference;
+    delete publicData.targetedSkill;
+    return { ...publicData };
   }
 }
