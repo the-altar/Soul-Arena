@@ -4,7 +4,7 @@ exports.Coliseum = void 0;
 const colyseus_1 = require("colyseus");
 const http_1 = require("http");
 const express_1 = require("./express");
-const colyseus_2 = require("./colyseus");
+const colyseus_2 = require("./lib/colyseus");
 exports.Coliseum = class {
     constructor(port) {
         this.port = port;

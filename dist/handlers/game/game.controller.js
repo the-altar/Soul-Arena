@@ -10,10 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.missions = exports.deleteMissionTracks = exports.missionTracks = exports.trackMission = exports.user = exports.pokemonTypeEnums = exports.file = void 0;
-const enums_1 = require("../../engine/enums");
+const enums_1 = require("../../lib/engine/enums");
 const db_1 = require("../../db");
 exports.file = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    return res.sendFile('index.html', { root: './public/game' });
+    return res.sendFile("index.html", { root: "./public/game" });
 });
 exports.pokemonTypeEnums = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     return res.json({
@@ -70,7 +70,7 @@ exports.user = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(200).json(doc.rows[0]);
     }
     catch (err) {
-        throw (err);
+        throw err;
     }
 });
 exports.trackMission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -84,7 +84,7 @@ exports.trackMission = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
     catch (err) {
         res.status(501).json({ success: false });
-        throw (err);
+        throw err;
     }
 });
 exports.missionTracks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -97,7 +97,7 @@ exports.missionTracks = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
     catch (err) {
         res.status(401).json({ success: false });
-        throw (err);
+        throw err;
     }
 });
 exports.deleteMissionTracks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -115,7 +115,7 @@ exports.deleteMissionTracks = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
     catch (err) {
         res.status(501).json({ success: false });
-        throw (err);
+        throw err;
     }
 });
 exports.missions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -145,7 +145,7 @@ exports.missions = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
     catch (err) {
         res.status(501);
-        throw (err);
+        throw err;
     }
 });
 //# sourceMappingURL=game.controller.js.map

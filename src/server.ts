@@ -1,7 +1,7 @@
 import { Server } from 'colyseus'
 import { createServer } from 'http'
 import { App } from "./express"
-import {Battle, Lobby, RankedLobby} from "./colyseus"
+import {Battle, Lobby, RankedLobby} from "./lib/colyseus"
 
 export const Coliseum = class {
     private server: Server

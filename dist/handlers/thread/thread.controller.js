@@ -27,7 +27,7 @@ exports.news = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (err) {
         res.status(501).end();
-        throw (err);
+        throw err;
     }
 });
 exports.findThread = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -48,23 +48,23 @@ exports.findThread = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
     catch (err) {
         res.status(501).json({ success: false });
-        throw (err);
+        throw err;
     }
 });
 exports.postThread = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //const {author, content, siteArea, title} = req.body
-    const text = `insert into thread (site_area, title, content, author) values ($1, $2, $3, $4)`;
+    const text = `insert into thread (site_area, title, content, author, meta) values ($1, $2, $3, $4, $5)`;
     try {
         yield db_1.pool.query(text, req.body);
         return res.status(200).json({ success: true });
     }
     catch (err) {
         res.status(501).end();
-        throw (err);
+        throw err;
     }
 });
 exports.updateThread = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const text = `UPDATE thread SET content = $2 where id = $1`;
+    const text = `UPDATE thread SET content = $2, meta=$3 where id = $1`;
     try {
         yield db_1.pool.query(text, req.body);
         return res.status(200).json({ success: true, content: req.body[1] });
@@ -74,34 +74,55 @@ exports.updateThread = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.postComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const text = `INSERT INTO post ("content",author,thread_id,site_area) values ($1, $2, $3, $4)`;
-    const sql = `UPDATE thread SET post_count = post_count + 1 WHERE id = $1`;
+    // first query creates a post, returns ID
+    const sql1 = `INSERT INTO post ("content",author,thread_id,site_area,quotes) values ($1, $2, $3, $4, $5) RETURNING id, quotes;`;
+    // second query increases post count
+    const sql2 = `UPDATE thread SET post_count = post_count + 1 WHERE id = $1`;
+    // third and final queries updates quoted posts with the reply's id
+    const sql3 = `UPDATE post SET replies = array_append(replies,$2) where id = ANY($1)`;
+    const client = yield db_1.pool.connect();
     try {
-        yield db_1.pool.query(text, req.body);
-        yield db_1.pool.query(sql, [req.body[2]]);
+        //1st
+        client.query("BEGIN");
+        const post = yield client.query(sql1, req.body);
+        //2nd
+        const thread_id = req.body[2];
+        yield client.query(sql2, [thread_id]);
+        // 3rd
+        const reply = post.rows[0].id;
+        const quotesId = req.body[4];
+        if (quotesId.length) {
+            yield client.query(sql3, [quotesId, reply]);
+        }
+        yield client.query("COMMIT");
         return res.status(200).json({ success: true });
     }
     catch (err) {
+        client.query("ROLLBACK");
         res.status(501).end();
-        throw (err);
+        throw err;
+    }
+    finally {
+        client.release();
     }
 });
 exports.getPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const limit = Number(req.params.limit);
+    const offset = Number(req.params.limit);
     const threadId = Number(req.params.id);
     const sql = `
-        select post.id, post."content", post.created_at, jsonb_build_object('username', users.username, 'rank', user_rank."name", 'avatar', users.avatar) as "author"  from post 
+        select post.id, post."content", post.replies, post.quotes, post.created_at, post.deleted, jsonb_build_object('username', users.username, 'rank', user_rank."name", 'avatar', users.avatar) as "author"  from post 
         join users on post.author = users.id 
         join user_rank on user_rank.id = users.user_rank_id
-        where post.thread_id = $1 and post.id > $2 and post.id < $3;
+        where post.thread_id = $1
+        order by post.id;
     `;
     try {
-        const data = yield db_1.pool.query(sql, [threadId, (limit - 50), limit]);
+        const data = yield db_1.pool.query(sql, [threadId]);
         return res.status(200).json(data.rows);
     }
     catch (err) {
         res.status(501);
-        throw (err);
+        throw err;
     }
 });
 //# sourceMappingURL=thread.controller.js.map
