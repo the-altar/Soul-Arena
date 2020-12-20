@@ -41,7 +41,7 @@ export class App {
     this.app.use("/effect", effectRouter);
     this.app.use("/thread", threadRouter);
     this.app.use("/mission", missionRouter);
-    this.app.use("/*", rootRouter);
+    this.app.use("/", rootRouter);
   }
 
   public run(): Application {

@@ -40,7 +40,7 @@ class App {
         this.app.use("/effect", effect_router_1.effectRouter);
         this.app.use("/thread", thread_1.threadRouter);
         this.app.use("/mission", missions_router_1.missionRouter);
-        this.app.use("/*", root_router_1.rootRouter);
+        this.app.use("/", root_router_1.rootRouter);
     }
     run() {
         return this.app;
