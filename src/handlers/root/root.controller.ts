@@ -20,3 +20,40 @@ export const usersOnline = async (req: Request, res: Response) => {
     return res.status(500).json({ count: 0 });
   }
 };
+
+export const topLadder = async (req: Request, res: Response) => {
+  const sql = `select u.username, u.id, l.season_level, l.experience
+  from
+    ladderboard l
+  join users u on
+    u.id = l.user_id
+  order by l.season_level desc limit 10;`;
+
+  try {
+    const data = await pool.query(sql);
+    return res.status(200).json(data.rows);
+  } catch (e) {
+    log.error(e);
+    return res.status(500).json([]);
+  }
+};
+
+export const topStreak = async (req: Request, res: Response) => {
+  const sql = `select
+    u.username ,
+    u.id,
+    l.max_streak
+  from
+    ladderboard l
+  join users u on
+    u.id = l.user_id
+  order by l.max_streak desc;`;
+
+  try {
+    const data = await pool.query(sql);
+    return res.status(200).json(data.rows);
+  } catch (e) {
+    log.error(e);
+    return res.status(500).json([]);
+  }
+};
