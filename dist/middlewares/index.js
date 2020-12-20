@@ -20,12 +20,13 @@ function authenticate(req, res, next) {
             const u = yield jsonwebtoken_1.verify(token, process.env.TOKEN_SECRET);
             if (!u.auth)
                 return res.status(401);
+            req.res.locals.token = u;
             req.res.locals.id = u.id;
             next();
         }
         catch (err) {
             res.status(401);
-            throw (err);
+            throw err;
         }
     });
 }
@@ -39,12 +40,13 @@ function authUserGameSession(req, res, next) {
             const u = yield jsonwebtoken_1.verify(token, process.env.TOKEN_SECRET);
             if (!u.auth)
                 return res.status(200).json(generateGuest());
+            req.res.locals.token = u;
             req.res.locals.id = u.id;
             next();
         }
         catch (err) {
             res.status(200).json(generateGuest());
-            throw (err);
+            throw err;
         }
     });
 }
@@ -63,22 +65,22 @@ function authenticateAdmin(req, res, next) {
         }
         catch (err) {
             res.status(401).end();
-            throw (err);
+            throw err;
         }
     });
 }
 exports.authenticateAdmin = authenticateAdmin;
 const generateGuest = () => {
     return {
-        "rank": { "authLevel": -1, "rankName": "Guest" },
-        "id": Math.floor((Math.random() * 1000000) + 1) * -1,
-        "avatar": "1.jpg",
-        "coins": 0,
-        "username": `GUEST-${Math.random()
+        rank: { authLevel: -1, rankName: "Guest" },
+        id: Math.floor(Math.random() * 1000000 + 1) * -1,
+        avatar: "1.jpg",
+        coins: 0,
+        username: `GUEST-${Math.random()
             .toString(36)
             .replace(/[^a-z]+/g, "")
             .substr(0, 2)}`,
-        "season": {
+        season: {
             elo: 1000,
             wins: 0,
             losses: 0,
@@ -86,9 +88,9 @@ const generateGuest = () => {
             exp: 0,
             maxStreak: 0,
             seasonRank: "Rookie",
-            seasonLevel: 0
+            seasonLevel: 0,
         },
-        "unlocked": [Number]
+        unlocked: [Number],
     };
 };
 //# sourceMappingURL=index.js.map

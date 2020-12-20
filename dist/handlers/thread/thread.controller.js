@@ -9,11 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPosts = exports.postComment = exports.updateThread = exports.postThread = exports.findThread = exports.news = void 0;
+exports.getPosts = exports.deletePost = exports.postComment = exports.updateThread = exports.postThread = exports.findThread = exports.news = void 0;
+const logger_1 = require("../../lib/logger");
 const db_1 = require("../../db");
 exports.news = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const text = `
-        SELECT t.id, t.created_at, t.title, t."content", t.post_count, 
+        SELECT t.id, t.created_at, t.title, t."content", t.post_count, t.meta, t.locked,
             JSON_BUILD_OBJECT('username', u.username, 'avatar', u.avatar) as "author" 
         FROM thread AS t 
         LEFT JOIN users AS u 
@@ -34,7 +35,7 @@ exports.findThread = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     const id = Number(req.params.id);
     const siteArea = Number(req.params.siteArea);
     const text = `
-        SELECT t.id, t.created_at, t.post_count, t.title, t."content",
+        SELECT t.id, t.created_at, t.post_count, t.title, t."content", t.meta, t.locked,
         JSON_BUILD_OBJECT('username', u.username, 'avatar', u.avatar) as "author"
         FROM
             thread as t
@@ -106,11 +107,29 @@ exports.postComment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         client.release();
     }
 });
+exports.deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const sql = "UPDATE post set deleted = true WHERE id=$1";
+    const value = [Number(req.params.id)];
+    const authorId = Number(req.params.userId);
+    if (authorId !== req.res.locals.id && req.res.locals.token.authLevel < 100) {
+        logger_1.log.info(req.body);
+        logger_1.log.info(req.res.locals.token);
+        return res.status(401).json({});
+    }
+    try {
+        yield db_1.pool.query(sql, value);
+        return res.status(200).send("OK");
+    }
+    catch (e) {
+        logger_1.log.error(e);
+        return res.status(500).send("FAILED");
+    }
+});
 exports.getPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const offset = Number(req.params.limit);
     const threadId = Number(req.params.id);
     const sql = `
-        select post.id, post."content", post.replies, post.quotes, post.created_at, post.deleted, jsonb_build_object('username', users.username, 'rank', user_rank."name", 'avatar', users.avatar) as "author"  from post 
+        select post.id, post."content", post.replies, post.quotes, post.created_at, post.deleted, jsonb_build_object('username', users.username, 'rank', user_rank."name", 'avatar', users.avatar, 'id', users.id) as "author"  from post 
         join users on post.author = users.id 
         join user_rank on user_rank.id = users.user_rank_id
         where post.thread_id = $1

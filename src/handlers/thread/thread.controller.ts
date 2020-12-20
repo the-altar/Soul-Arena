@@ -1,10 +1,10 @@
-import { json } from "body-parser";
 import { Request, Response } from "express";
+import { log } from "../../lib/logger";
 import { pool } from "../../db";
 
 export const news = async (req: Request, res: Response) => {
   const text = `
-        SELECT t.id, t.created_at, t.title, t."content", t.post_count, 
+        SELECT t.id, t.created_at, t.title, t."content", t.post_count, t.meta, t.locked,
             JSON_BUILD_OBJECT('username', u.username, 'avatar', u.avatar) as "author" 
         FROM thread AS t 
         LEFT JOIN users AS u 
@@ -27,7 +27,7 @@ export const findThread = async (req: Request, res: Response) => {
   const siteArea = Number(req.params.siteArea);
 
   const text = `
-        SELECT t.id, t.created_at, t.post_count, t.title, t."content",
+        SELECT t.id, t.created_at, t.post_count, t.title, t."content", t.meta, t.locked,
         JSON_BUILD_OBJECT('username', u.username, 'avatar', u.avatar) as "author"
         FROM
             thread as t
@@ -100,12 +100,30 @@ export const postComment = async (req: Request, res: Response) => {
   }
 };
 
+export const deletePost = async (req: Request, res: Response) => {
+  const sql = "UPDATE post set deleted = true WHERE id=$1";
+  const value = [Number(req.params.id)];
+  const authorId = Number(req.params.userId);
+  if (authorId !== req.res.locals.id && req.res.locals.token.authLevel < 100) {
+    log.info(req.body);
+    log.info(req.res.locals.token);
+    return res.status(401).json({});
+  }
+  try {
+    await pool.query(sql, value);
+    return res.status(200).send("OK");
+  } catch (e) {
+    log.error(e);
+    return res.status(500).send("FAILED");
+  }
+};
+
 export const getPosts = async (req: Request, res: Response) => {
   const offset = Number(req.params.limit);
   const threadId = Number(req.params.id);
 
   const sql = `
-        select post.id, post."content", post.replies, post.quotes, post.created_at, post.deleted, jsonb_build_object('username', users.username, 'rank', user_rank."name", 'avatar', users.avatar) as "author"  from post 
+        select post.id, post."content", post.replies, post.quotes, post.created_at, post.deleted, jsonb_build_object('username', users.username, 'rank', user_rank."name", 'avatar', users.avatar, 'id', users.id) as "author"  from post 
         join users on post.author = users.id 
         join user_rank on user_rank.id = users.user_rank_id
         where post.thread_id = $1
