@@ -122,6 +122,12 @@ class IncreaseCasterSkillDuration extends base_1.Effect {
         logger_1.log.info("EFFECT CONCLUSION");
         this.skillReference.mods.increaseDuration -= this.value;
     }
+    getPublicData() {
+        const publicData = Object.assign({}, this);
+        delete publicData.arenaReference;
+        delete publicData.skillReference;
+        return Object.assign({}, publicData);
+    }
 }
 exports.IncreaseCasterSkillDuration = IncreaseCasterSkillDuration;
 class IncreaseTargetSkillDuration extends base_1.Effect {

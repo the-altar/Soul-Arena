@@ -161,4 +161,5 @@ export class Counter extends Effect {
       this.message = "New skills used by this character will be countered"
     }
   }
+  
 }
