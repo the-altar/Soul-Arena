@@ -73,6 +73,7 @@ class Battle extends colyseus_1.Room {
     onJoin(client, options, auth) {
         this.arena.addPlayer(options.player, options.team);
         this.constructed++;
+        logger_1.log.info("Somebody connected");
         if (this.constructed === 2) {
             this.gameClock();
         }
