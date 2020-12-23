@@ -55,6 +55,7 @@ class Effect {
         this.targets = targets;
     }
     extendDuration(val) {
+        logger_1.log.info("Effect extended by " + val);
         if (val)
             logger_1.log.info("Effect extended by " + val);
         this.duration += val;
@@ -82,7 +83,7 @@ class Effect {
         }
         else
             this.activate = true;
-        if (this.duration < 0 && !this.infinite)
+        if (this.duration <= 0 && !this.infinite)
             this.terminate = true;
         else if (this.targets.length === 0)
             this.terminate = true;
@@ -214,7 +215,7 @@ class Effect {
         if (this.triggered)
             return;
         this.triggered = true;
-        logger_1.log.info(`extension mods: ${char.getDebuffs().increaseSkillDuration}`);
+        logger_1.log.info(`extension mods: ${char.getDebuffs().increaseSkillDuration[origin.getId()]}`);
         this.duration =
             this.duration +
                 (char.getDebuffs().increaseSkillDuration[origin.getId()] || 0);
@@ -224,6 +225,7 @@ class Effect {
         delete publicData.arenaReference;
         return Object.assign({}, publicData);
     }
+    apply(char, origin) { }
 }
 exports.Effect = Effect;
 //# sourceMappingURL=base.js.map

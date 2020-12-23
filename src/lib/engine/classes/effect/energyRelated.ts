@@ -62,10 +62,11 @@ export class EnergyRemoval extends Effect {
         const targetedBy = this.arenaReference.characters[
           cordinate.caster
         ].skills[cordinate.skill].getId();
-        if (isTargeted && origin.getId() !== targetedBy) this.apply(p);
+        if (isTargeted && origin.getId() !== targetedBy)
+          this.apply(null, null, p);
       }
     } else {
-      this.apply(p);
+      this.apply(null, null, p);
     }
   }
 
@@ -81,7 +82,7 @@ export class EnergyRemoval extends Effect {
     }
   }
 
-  public apply(p?: Player) {
+  public apply(char: Character, origin: Skill, p?: Player) {
     let index: number;
     if (this.energyType === ReiatsuTypes.Random && p.getEnergyPool()[4] > 0) {
       do {

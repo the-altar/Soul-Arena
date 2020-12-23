@@ -84,6 +84,7 @@ class Character {
     }
     validadeSkillsCompletely(pool, chars, playerId, self) {
         for (const skill of this.skills) {
+            skill.setTurnCost();
             if (this.isStunned() || this.isStunned(skill)) {
                 skill.disable();
             }

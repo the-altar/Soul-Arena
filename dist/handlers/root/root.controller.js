@@ -30,7 +30,7 @@ exports.usersOnline = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.topLadder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const sql = `select u.username, u.id, l.season_level, l.experience
+    const sql = `select u.username, u.avatar, u.id, l.season_level, l.experience
   from
     ladderboard l
   join users u on
@@ -46,7 +46,7 @@ exports.topLadder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.topStreak = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const sql = `select
+    const sql = `select u.avatar,
     u.username ,
     u.id,
     l.max_streak

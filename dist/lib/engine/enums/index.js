@@ -167,5 +167,6 @@ var triggerClauseType;
     triggerClauseType[triggerClauseType["None"] = 0] = "None";
     triggerClauseType[triggerClauseType["onKnockOut"] = 1] = "onKnockOut";
     triggerClauseType[triggerClauseType["IfTargeted"] = 2] = "IfTargeted";
+    triggerClauseType[triggerClauseType["IfAlliesUseASkill"] = 3] = "IfAlliesUseASkill";
 })(triggerClauseType = exports.triggerClauseType || (exports.triggerClauseType = {}));
 //# sourceMappingURL=index.js.map

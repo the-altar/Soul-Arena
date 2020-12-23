@@ -51,11 +51,11 @@ class EnergyRemoval extends base_1.Effect {
                     .includes(char.getId());
                 const targetedBy = this.arenaReference.characters[cordinate.caster].skills[cordinate.skill].getId();
                 if (isTargeted && origin.getId() !== targetedBy)
-                    this.apply(p);
+                    this.apply(null, null, p);
             }
         }
         else {
-            this.apply(p);
+            this.apply(null, null, p);
         }
     }
     generateToolTip() {
@@ -66,7 +66,7 @@ class EnergyRemoval extends base_1.Effect {
             this.message = `If this character is targeted by a new skill they'll lose ${this.value} ${enums_1.ReiatsuTypes[this.energyType]} reiatsu`;
         }
     }
-    apply(p) {
+    apply(char, origin, p) {
         let index;
         if (this.energyType === enums_1.ReiatsuTypes.Random && p.getEnergyPool()[4] > 0) {
             do {

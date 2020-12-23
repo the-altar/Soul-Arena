@@ -35,6 +35,7 @@ export class Skill {
   private targetChoices: { [x: string]: Array<number> };
   private id: number;
   public caster: number;
+  public turnCost: Array<number>;
   private arenaReference: Arena;
 
   constructor(data: any, caster: number, world: Arena) {
@@ -58,9 +59,9 @@ export class Skill {
     this.id = data.id;
     this.harmful = data.harmful || false;
     this.arenaReference = world;
-
+    this.turnCost = [data.turnCost || data.cost];
     data.effects = data.effects.sort((a: any, b: any) => {
-      return (a.priority || 0) - (b.priority || 0);
+      return (b.priority || 0) - (a.priority || 0);
     });
     for (const e of data.effects) {
       const built = effectFactory(e, caster);
@@ -86,10 +87,10 @@ export class Skill {
 
   public validateCost(energyPool: Array<number>) {
     const totalPool = energyPool[4];
-    let totalCost = this.cost.reduce((ca, cv) => ca + cv);
+    let totalCost = this.turnCost.reduce((ca, cv) => ca + cv);
 
     for (let i = 0; i <= 4; i++) {
-      if (this.cost[i] > energyPool[i]) {
+      if (this.turnCost[i] > energyPool[i]) {
         this.disabled = true;
         return;
       }
@@ -265,7 +266,7 @@ export class Skill {
   }
 
   public getCost(): Array<number> {
-    return this.cost;
+    return this.turnCost;
   }
 
   public getSkillEffectsActivation(): { [x: string]: number } {
@@ -326,7 +327,7 @@ export class Skill {
   }
 
   public clearMods() {
-    this.mods.clearTargetMod();
+    this.mods.clearMods();
   }
 
   public getId(): number {
@@ -352,13 +353,11 @@ export class Skill {
   }
 
   public getCopyData() {
-    log.info("Copy data");
     const publicSkill = { ...this };
     delete publicSkill.arenaReference;
     delete publicSkill.effects;
     delete publicSkill.inactiveEffects;
-    delete publicSkill.mods;
-    
+
     const copyEffects = [];
     for (const effect of this.effects) {
       copyEffects.push(effect.getPublicData());
@@ -374,5 +373,11 @@ export class Skill {
       effects: copyEffects,
       inactiveEffects: copyInactiveEffects,
     };
+  }
+
+  public setTurnCost() {
+    for (const i in this.cost) {
+      this.turnCost[i] = Math.max(this.cost[i] + this.mods.costChange[i], 0);
+    }
   }
 }

@@ -28,8 +28,9 @@ class Skill {
         this.id = data.id;
         this.harmful = data.harmful || false;
         this.arenaReference = world;
+        this.turnCost = [data.turnCost || data.cost];
         data.effects = data.effects.sort((a, b) => {
-            return (a.priority || 0) - (b.priority || 0);
+            return (b.priority || 0) - (a.priority || 0);
         });
         for (const e of data.effects) {
             const built = effect_1.effectFactory(e, caster);
@@ -53,9 +54,9 @@ class Skill {
     }
     validateCost(energyPool) {
         const totalPool = energyPool[4];
-        let totalCost = this.cost.reduce((ca, cv) => ca + cv);
+        let totalCost = this.turnCost.reduce((ca, cv) => ca + cv);
         for (let i = 0; i <= 4; i++) {
-            if (this.cost[i] > energyPool[i]) {
+            if (this.turnCost[i] > energyPool[i]) {
                 this.disabled = true;
                 return;
             }
@@ -196,7 +197,7 @@ class Skill {
         logger_1.log.info(`Effects of '${this.name}' [EXECUTED]`);
     }
     getCost() {
-        return this.cost;
+        return this.turnCost;
     }
     getSkillEffectsActivation() {
         let checker = {};
@@ -246,7 +247,7 @@ class Skill {
         return this.mods.getTargetMod();
     }
     clearMods() {
-        this.mods.clearTargetMod();
+        this.mods.clearMods();
     }
     getId() {
         return this.id;
@@ -267,12 +268,10 @@ class Skill {
         return Object.assign(Object.assign({}, publicData), { effects: publicEffects });
     }
     getCopyData() {
-        logger_1.log.info("Copy data");
         const publicSkill = Object.assign({}, this);
         delete publicSkill.arenaReference;
         delete publicSkill.effects;
         delete publicSkill.inactiveEffects;
-        delete publicSkill.mods;
         const copyEffects = [];
         for (const effect of this.effects) {
             copyEffects.push(effect.getPublicData());
@@ -282,6 +281,11 @@ class Skill {
             copyInactiveEffects.push(effect.getPublicData());
         }
         return Object.assign(Object.assign({}, publicSkill), { effects: copyEffects, inactiveEffects: copyInactiveEffects });
+    }
+    setTurnCost() {
+        for (const i in this.cost) {
+            this.turnCost[i] = Math.max(this.cost[i] + this.mods.costChange[i], 0);
+        }
     }
 }
 exports.Skill = Skill;

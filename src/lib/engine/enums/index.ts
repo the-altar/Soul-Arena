@@ -52,7 +52,7 @@ export enum effectType {
   IgnoreInvulnerability,
   DisableEffects,
   IncreaseCasterSkillDuration,
-  IncreaseTargetSkillDuration
+  IncreaseTargetSkillDuration,
 }
 
 export enum activationType {
@@ -163,4 +163,5 @@ export enum triggerClauseType {
   None,
   onKnockOut,
   IfTargeted,
+  IfAlliesUseASkill
 }

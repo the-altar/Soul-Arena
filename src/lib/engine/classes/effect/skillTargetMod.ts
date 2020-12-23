@@ -1,7 +1,6 @@
 import { Effect } from "./base";
-import { effectType, ReiatsuTypes, targetType } from "../../enums";
+import { PlayerPhase, ReiatsuTypes, targetType } from "../../enums";
 import { Character } from "../character";
-import { Arena } from "../../arena";
 import { Skill } from "../skill";
 import { log } from "../../../logger";
 
@@ -40,7 +39,7 @@ export class SkillTargetMod extends Effect {
   }
 
   effectConclusion() {
-    this.affectedSkill.mods.clearTargetMod();
+    this.affectedSkill.mods.setTargetMod(null);
   }
 
   public getPublicData() {
@@ -55,28 +54,27 @@ export class SkillTargetMod extends Effect {
 export class SkillCostChange extends Effect {
   private reiatsuCostType: ReiatsuTypes;
   private specificSkillTarget: number;
-  private targetedSkills: Array<Skill>;
+  private targetedSkillName: string;
 
   constructor(data: any, caster: any) {
     super(data, caster);
     this.reiatsuCostType = data.reiatsuCostType;
     this.specificSkillTarget = data.specificSkillTarget;
-    this.targetedSkills = [];
+    this.targetedSkillName = "";
   }
 
   public functionality(char: Character, origin: Skill) {
     if (this.specificSkillTarget) {
       for (const s of char.skills) {
         if (s.getId() === this.specificSkillTarget) {
-          s.cost[this.reiatsuCostType] += this.value;
-          this.targetedSkills.push(s);
+          s.mods.costChange[this.reiatsuCostType] += this.value;
+          this.targetedSkillName = s.name
           break;
         }
       }
     } else {
       for (const s of char.skills) {
-        s.cost[this.reiatsuCostType] += this.value;
-        this.targetedSkills.push(s);
+        s.mods.costChange[this.reiatsuCostType] += this.value;
       }
     }
   }
@@ -98,24 +96,32 @@ export class SkillCostChange extends Effect {
       } reiatsu`;
     } else {
       this.message = `'${
-        this.targetedSkills[0].name
+        this.targetedSkillName
       }' will cost ${value} ${operation} ${
         ReiatsuTypes[this.reiatsuCostType]
       } reiatsu`;
     }
   }
 
-  effectConclusion() {
-    for (const s of this.targetedSkills) {
-      if (this.value > 0) s.cost[this.reiatsuCostType] -= this.value;
-      else s.cost[this.reiatsuCostType] += this.value * -1;
-    }
+  public progressTurn() {
+    this.delay--;
+    if (this.delay <= 0) this.duration--;
+    /*  An even tick means it's your opponent's turn, odd means its yours.*/
+    /*  The default behavior is for your skills to activate on odd ticks*/
+    if (this.tick % 2 === PlayerPhase.MyTurn) {
+      this.activate = false;
+    } else this.activate = true;
+
+    if (this.duration < 0 && !this.infinite) this.terminate = true;
+    else if (this.targets.length === 0) this.terminate = true;
+    else this.terminate = false;
+
+    if (this.terminate) this.effectConclusion();
   }
 
   public getPublicData() {
     const publicData = { ...this };
     delete publicData.arenaReference;
-    delete publicData.targetedSkills;
     return publicData;
   }
 }
@@ -162,10 +168,9 @@ export class IncreaseCasterSkillDuration extends Effect {
     const publicData = { ...this };
     delete publicData.arenaReference;
     delete publicData.skillReference;
-    
-    return {...publicData};
+
+    return { ...publicData };
   }
-  
 }
 
 export class IncreaseTargetSkillDuration extends Effect {

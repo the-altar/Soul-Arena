@@ -22,7 +22,7 @@ export const usersOnline = async (req: Request, res: Response) => {
 };
 
 export const topLadder = async (req: Request, res: Response) => {
-  const sql = `select u.username, u.id, l.season_level, l.experience
+  const sql = `select u.username, u.avatar, u.id, l.season_level, l.experience
   from
     ladderboard l
   join users u on
@@ -39,7 +39,7 @@ export const topLadder = async (req: Request, res: Response) => {
 };
 
 export const topStreak = async (req: Request, res: Response) => {
-  const sql = `select
+  const sql = `select u.avatar,
     u.username ,
     u.id,
     l.max_streak

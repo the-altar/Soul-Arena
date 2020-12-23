@@ -3,33 +3,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IgnoreDecreaseDamageTaken = exports.AbsorbDamage = exports.DecreaseDamageTaken = exports.IncreaseDamageTaken = exports.DamageIncreasal = exports.DamageReduction = exports.Damage = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
-const logger_1 = require("../../../logger");
 class Damage extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
         this.damageType = data.damageType;
     }
     functionality(char, origin) {
-        const reduction = this.getDamageReductionFromCaster(this.caster, this, origin);
-        const increasalTaken = this.getIncreasedDamageTaken(char, this, origin);
-        const increasalDealt = this.getIncreasedDamageFromCaster(this.caster, this, origin);
-        let { decreased } = char.getBuffs().getDecreaseDamageTaken({
-            damageType: this.damageType,
-            skillType: origin.class,
-        });
-        if (char.getDebuffs().ignoreDecreaseDamageTaken)
-            decreased = 0;
-        const { conversionRate } = char.getBuffs().getAbsorbDamage({
-            skillType: origin.class,
-            damageType: this.damageType,
-        });
-        let damage = Number(this.altValue) || this.value;
-        damage = damage - (reduction + decreased - increasalTaken - increasalDealt);
-        damage = this.destroyDestructibleDefense(char, damage);
-        const absorbed = damage * (conversionRate / 100);
-        const hp = char.geHitPoints() - damage + Math.round(absorbed / 5) * 5;
-        logger_1.log.info(`Character's health has been set to ${hp}`);
-        char.setHitPoints(hp);
+        switch (this.triggerClause) {
+            case enums_1.triggerClauseType.None:
+                {
+                    this.apply(char, origin);
+                }
+                break;
+            case enums_1.triggerClauseType.IfAlliesUseASkill:
+                {
+                    const allies = char.getAllies();
+                    for (const cord of this.arenaReference.tempQueue) {
+                        if (allies.includes(cord.caster)) {
+                            this.apply(char, origin);
+                        }
+                    }
+                }
+                break;
+            default:
+                this.apply(char, origin);
+        }
     }
     getIncreasedDamageFromCaster(caster, effect, skill) {
         const effectCaster = this.arenaReference.findCharacterById(caster).char;
@@ -69,7 +67,36 @@ class Damage extends base_1.Effect {
     }
     generateToolTip() {
         const damageVal = Number(this.altValue) || this.value;
-        this.message = `this character will take ${damageVal} damage`;
+        switch (this.triggerClause) {
+            case enums_1.triggerClauseType.None: {
+                this.message = `This character will take ${damageVal} damage`;
+                break;
+            }
+            case enums_1.triggerClauseType.IfAlliesUseASkill: {
+                this.message = `This character will take ${damageVal} damage if their allies use a new skill`;
+            }
+        }
+    }
+    apply(char, origin) {
+        const reduction = this.getDamageReductionFromCaster(this.caster, this, origin);
+        const increasalTaken = this.getIncreasedDamageTaken(char, this, origin);
+        const increasalDealt = this.getIncreasedDamageFromCaster(this.caster, this, origin);
+        let { decreased } = char.getBuffs().getDecreaseDamageTaken({
+            damageType: this.damageType,
+            skillType: origin.class,
+        });
+        if (char.getDebuffs().ignoreDecreaseDamageTaken)
+            decreased = 0;
+        const { conversionRate } = char.getBuffs().getAbsorbDamage({
+            skillType: origin.class,
+            damageType: this.damageType,
+        });
+        let damage = Number(this.altValue) || this.value;
+        damage = damage - (reduction + decreased - increasalTaken - increasalDealt);
+        damage = this.destroyDestructibleDefense(char, damage);
+        const absorbed = damage * (conversionRate / 100);
+        const hp = char.geHitPoints() - damage + Math.round(absorbed / 5) * 5;
+        char.setHitPoints(hp);
     }
 }
 exports.Damage = Damage;

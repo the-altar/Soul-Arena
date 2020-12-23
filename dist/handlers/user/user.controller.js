@@ -29,7 +29,7 @@ function loggerMiddleware(req, res, next) {
         }
         catch (err) {
             res.status(401).end();
-            throw (err);
+            throw err;
         }
     });
 }
@@ -44,7 +44,7 @@ exports.mount = function (req, res) {
             username: u.username,
             authLevel: u.authLevel,
             id: u.id,
-            auth: u.auth
+            auth: u.auth,
         });
     });
 };
@@ -66,7 +66,7 @@ exports.userCharacters = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
     catch (err) {
         res.status(500).send("Something went wrong...");
-        throw (err);
+        throw err;
     }
 });
 exports.register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -94,19 +94,25 @@ exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const match = yield bcrypt_1.compare(req.body.password, user.passhash);
         if (match) {
             delete user.passhash;
-            const token = jsonwebtoken_1.sign({
+            const response = {
                 id: user.id,
                 authLevel: user.authLevel,
                 auth: true,
-                username: user.username
-            }, process.env.TOKEN_SECRET, { expiresIn: '365d' });
-            res.cookie('session_id', token, { httpOnly: true, maxAge: 365 * 24 * 60 * 60 * 1000 });
-            return res.json({ userData: user, success: true });
+                username: user.username,
+            };
+            const token = jsonwebtoken_1.sign(response, process.env.TOKEN_SECRET, {
+                expiresIn: "365d",
+            });
+            res.cookie("session_id", token, {
+                httpOnly: true,
+                maxAge: 365 * 24 * 60 * 60 * 1000,
+            });
+            return res.json({ userData: response, success: true });
         }
         return res.json({ success: false });
     }
     catch (err) {
-        throw (err);
+        throw err;
     }
 });
 exports.logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -130,7 +136,7 @@ exports.user = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(200).json(doc.rows[0]);
     }
     catch (err) {
-        throw (err);
+        throw err;
     }
 });
 exports.uploadAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -142,20 +148,23 @@ exports.uploadAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function*
         yield file.mv(p);
         yield db_1.pool.query("UPDATE users SET avatar = $1 where id = $2", [
             `${filename}.jpg`,
-            id
+            id,
         ]);
         return res.status(200).json({ success: true });
     }
     catch (err) {
         res.status(501).end();
-        throw (err);
+        throw err;
     }
 });
 exports.defaultAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const filename = req.params.filename + '.jpg';
+    const filename = req.params.filename + ".jpg";
     const id = Number(req.params.id);
     try {
-        yield db_1.pool.query("UPDATE users SET avatar = $1 where id = $2", [filename, id]);
+        yield db_1.pool.query("UPDATE users SET avatar = $1 where id = $2", [
+            filename,
+            id,
+        ]);
         return res.status(200).json({ success: true });
     }
     catch (err) {

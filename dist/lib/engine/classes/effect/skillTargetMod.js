@@ -28,7 +28,7 @@ class SkillTargetMod extends base_1.Effect {
         this.message = generateMessage(this.specificSkillIndex, this.newTarget, this.affectedSkill.name);
     }
     effectConclusion() {
-        this.affectedSkill.mods.clearTargetMod();
+        this.affectedSkill.mods.setTargetMod(null);
     }
     getPublicData() {
         const publicData = Object.assign({}, this);
@@ -43,22 +43,21 @@ class SkillCostChange extends base_1.Effect {
         super(data, caster);
         this.reiatsuCostType = data.reiatsuCostType;
         this.specificSkillTarget = data.specificSkillTarget;
-        this.targetedSkills = [];
+        this.targetedSkillName = "";
     }
     functionality(char, origin) {
         if (this.specificSkillTarget) {
             for (const s of char.skills) {
                 if (s.getId() === this.specificSkillTarget) {
-                    s.cost[this.reiatsuCostType] += this.value;
-                    this.targetedSkills.push(s);
+                    s.mods.costChange[this.reiatsuCostType] += this.value;
+                    this.targetedSkillName = s.name;
                     break;
                 }
             }
         }
         else {
             for (const s of char.skills) {
-                s.cost[this.reiatsuCostType] += this.value;
-                this.targetedSkills.push(s);
+                s.mods.costChange[this.reiatsuCostType] += this.value;
             }
         }
     }
@@ -76,21 +75,32 @@ class SkillCostChange extends base_1.Effect {
             this.message = `This character's skills will cost ${value} ${operation} ${enums_1.ReiatsuTypes[this.reiatsuCostType]} reiatsu`;
         }
         else {
-            this.message = `'${this.targetedSkills[0].name}' will cost ${value} ${operation} ${enums_1.ReiatsuTypes[this.reiatsuCostType]} reiatsu`;
+            this.message = `'${this.targetedSkillName}' will cost ${value} ${operation} ${enums_1.ReiatsuTypes[this.reiatsuCostType]} reiatsu`;
         }
     }
-    effectConclusion() {
-        for (const s of this.targetedSkills) {
-            if (this.value > 0)
-                s.cost[this.reiatsuCostType] -= this.value;
-            else
-                s.cost[this.reiatsuCostType] += this.value * -1;
+    progressTurn() {
+        this.delay--;
+        if (this.delay <= 0)
+            this.duration--;
+        /*  An even tick means it's your opponent's turn, odd means its yours.*/
+        /*  The default behavior is for your skills to activate on odd ticks*/
+        if (this.tick % 2 === enums_1.PlayerPhase.MyTurn) {
+            this.activate = false;
         }
+        else
+            this.activate = true;
+        if (this.duration < 0 && !this.infinite)
+            this.terminate = true;
+        else if (this.targets.length === 0)
+            this.terminate = true;
+        else
+            this.terminate = false;
+        if (this.terminate)
+            this.effectConclusion();
     }
     getPublicData() {
         const publicData = Object.assign({}, this);
         delete publicData.arenaReference;
-        delete publicData.targetedSkills;
         return publicData;
     }
 }

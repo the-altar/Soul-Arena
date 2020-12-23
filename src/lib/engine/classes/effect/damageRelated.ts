@@ -1,8 +1,13 @@
 import { Effect } from "./base";
-import { DamageType, Types, BuffTypes, SkillClassType } from "../../enums";
+import {
+  DamageType,
+  Types,
+  BuffTypes,
+  SkillClassType,
+  triggerClauseType,
+} from "../../enums";
 import { Character } from "../character";
 import { Skill } from "..";
-import { log } from "../../../logger";
 
 export class Damage extends Effect {
   private damageType: DamageType;
@@ -12,39 +17,25 @@ export class Damage extends Effect {
   }
 
   public functionality(char: Character, origin: Skill) {
-    const reduction = this.getDamageReductionFromCaster(
-      this.caster,
-      this,
-      origin
-    );
-    const increasalTaken = this.getIncreasedDamageTaken(char, this, origin);
-    const increasalDealt = this.getIncreasedDamageFromCaster(
-      this.caster,
-      this,
-      origin
-    );
-
-    let { decreased } = char.getBuffs().getDecreaseDamageTaken({
-      damageType: this.damageType,
-      skillType: origin.class,
-    });
-
-    if (char.getDebuffs().ignoreDecreaseDamageTaken) decreased = 0;
-
-    const { conversionRate } = char.getBuffs().getAbsorbDamage({
-      skillType: origin.class,
-      damageType: this.damageType,
-    });
-
-    let damage = Number(this.altValue) || this.value;
-    damage = damage - (reduction + decreased - increasalTaken - increasalDealt);
-
-    damage = this.destroyDestructibleDefense(char, damage);
-
-    const absorbed = damage * (conversionRate / 100);
-    const hp = char.geHitPoints() - damage + Math.round(absorbed / 5) * 5;
-    log.info(`Character's health has been set to ${hp}`);
-    char.setHitPoints(hp);
+    switch (this.triggerClause) {
+      case triggerClauseType.None:
+        {
+          this.apply(char, origin);
+        }
+        break;
+      case triggerClauseType.IfAlliesUseASkill:
+        {
+          const allies = char.getAllies();
+          for (const cord of this.arenaReference.tempQueue) {
+            if (allies.includes(cord.caster)) {
+              this.apply(char, origin);
+            }
+          }
+        }
+        break;
+      default:
+        this.apply(char, origin);
+    }
   }
 
   protected getIncreasedDamageFromCaster(
@@ -105,7 +96,50 @@ export class Damage extends Effect {
 
   public generateToolTip() {
     const damageVal = Number(this.altValue) || this.value;
-    this.message = `this character will take ${damageVal} damage`;
+    switch (this.triggerClause) {
+      case triggerClauseType.None: {
+        this.message = `This character will take ${damageVal} damage`;
+        break;
+      }
+      case triggerClauseType.IfAlliesUseASkill: {
+        this.message = `This character will take ${damageVal} damage if their allies use a new skill`
+      }
+    }
+  }
+
+  apply(char: Character, origin: Skill) {
+    const reduction = this.getDamageReductionFromCaster(
+      this.caster,
+      this,
+      origin
+    );
+    const increasalTaken = this.getIncreasedDamageTaken(char, this, origin);
+    const increasalDealt = this.getIncreasedDamageFromCaster(
+      this.caster,
+      this,
+      origin
+    );
+
+    let { decreased } = char.getBuffs().getDecreaseDamageTaken({
+      damageType: this.damageType,
+      skillType: origin.class,
+    });
+
+    if (char.getDebuffs().ignoreDecreaseDamageTaken) decreased = 0;
+
+    const { conversionRate } = char.getBuffs().getAbsorbDamage({
+      skillType: origin.class,
+      damageType: this.damageType,
+    });
+
+    let damage = Number(this.altValue) || this.value;
+    damage = damage - (reduction + decreased - increasalTaken - increasalDealt);
+
+    damage = this.destroyDestructibleDefense(char, damage);
+
+    const absorbed = damage * (conversionRate / 100);
+    const hp = char.geHitPoints() - damage + Math.round(absorbed / 5) * 5;
+    char.setHitPoints(hp);
   }
 }
 
