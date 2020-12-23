@@ -7,6 +7,7 @@ exports.App = void 0;
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const express_subdomain_1 = __importDefault(require("express-subdomain"));
 const express_fileupload_1 = __importDefault(require("express-fileupload"));
 const root_router_1 = require("./handlers/root/root.router");
 const character_router_1 = require("./handlers/character/character.router");
@@ -34,7 +35,7 @@ class App {
     }
     routes() {
         this.app.use("/user", user_1.userRouter);
-        this.app.use("/game", game_router_1.gameRouter);
+        this.app.use(express_subdomain_1.default("game", game_router_1.gameRouter));
         this.app.use("/character", character_router_1.characterRouter);
         this.app.use("/skill", skill_routes_1.skillRouter);
         this.app.use("/effect", effect_router_1.effectRouter);
