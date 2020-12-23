@@ -1,6 +1,7 @@
 import express from "express";
 import bodyparser from "body-parser";
 import cookieParser from "cookie-parser";
+import subdomain from "express-subdomain";
 import fileupload from "express-fileupload";
 
 import { Application } from "express";
@@ -34,8 +35,8 @@ export class App {
   }
 
   private routes(): void {
+    this.app.use(subdomain("game", gameRouter));
     this.app.use("/user", userRouter);
-    this.app.use("/game", gameRouter);
     this.app.use("/character", characterRouter);
     this.app.use("/skill", skillRouter);
     this.app.use("/effect", effectRouter);

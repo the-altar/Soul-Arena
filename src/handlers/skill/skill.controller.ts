@@ -22,6 +22,16 @@ export const get = async function (req: Request, res: Response) {
     }
 }
 
+export const destroy = async function(req:Request, res:Response) {
+    const skillId = req.params.id
+    try {
+        const res = await pool.query("DELETE from skill where id = $1 RETURNING data", [skillId])
+        res.rows[0].data
+    }catch(e){
+        console.log()
+    }
+}
+
 export const find = async function (req: Request, res: Response) {
     const id = req.params.id
     const value = [id]

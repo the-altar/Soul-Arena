@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getIds = exports.update = exports.find = exports.get = exports.create = void 0;
+exports.getIds = exports.update = exports.find = exports.destroy = exports.get = exports.create = void 0;
 const db_1 = require("../../db");
 exports.create = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -31,6 +31,18 @@ exports.get = function (req, res) {
         }
         catch (err) {
             return res.status(500);
+        }
+    });
+};
+exports.destroy = function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const skillId = req.params.id;
+        try {
+            const res = yield db_1.pool.query("DELETE from skill where id = $1 RETURNING data", [skillId]);
+            res.rows[0].data;
+        }
+        catch (e) {
+            console.log();
         }
     });
 };
