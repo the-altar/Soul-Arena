@@ -75,6 +75,7 @@ export const login = async (req: Request, res: Response) => {
       res.cookie("session_id", token, {
         httpOnly: true,
         maxAge: 365 * 24 * 60 * 60 * 1000,
+        domain: process.env.DOMAIN,
       });
       return res.json({ userData: response, success: true });
     }
@@ -85,7 +86,10 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-  res.clearCookie("session_id");
+  res.cookie("session_id", {}, {
+    maxAge:0,
+    domain: process.env.DOMAIN,
+  });
   return res.status(200).end();
 };
 

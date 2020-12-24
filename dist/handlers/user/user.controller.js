@@ -85,6 +85,7 @@ exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             res.cookie("session_id", token, {
                 httpOnly: true,
                 maxAge: 365 * 24 * 60 * 60 * 1000,
+                domain: process.env.DOMAIN,
             });
             return res.json({ userData: response, success: true });
         }
@@ -95,7 +96,10 @@ exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    res.clearCookie("session_id");
+    res.cookie("session_id", {}, {
+        maxAge: 0,
+        domain: process.env.DOMAIN,
+    });
     return res.status(200).end();
 });
 exports.user = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

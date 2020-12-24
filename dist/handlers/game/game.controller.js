@@ -50,7 +50,8 @@ exports.user = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     `;
     try {
         const doc = yield db_1.pool.query(text, [id]);
-        res.status(200).json(doc.rows[0]);
+        const user = Object.assign(Object.assign({}, doc.rows[0]), { auth: true });
+        res.status(200).json(user);
     }
     catch (err) {
         throw err;

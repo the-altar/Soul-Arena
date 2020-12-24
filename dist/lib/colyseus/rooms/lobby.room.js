@@ -30,6 +30,7 @@ class Lobby extends colyseus_1.Room {
         return __awaiter(this, void 0, void 0, function* () {
             this.userList[client.sessionId] = options.id;
             this.idConnCount[options.id] = (this.idConnCount[options.id] || 0) + 1;
+            logger_1.log.info(`User connected - ID:${options.id}, CONNECTIONS: (${this.idConnCount[options.id]})`);
             if (this.idConnCount[options.id] > 1)
                 return;
             const conn = yield db_1.pool.connect();
@@ -57,6 +58,7 @@ class Lobby extends colyseus_1.Room {
         return __awaiter(this, void 0, void 0, function* () {
             const userId = this.userList[client.sessionId];
             this.idConnCount[userId]--;
+            logger_1.log.info(`User disconnected - ID:${userId}, CONNECTIONS: (${this.idConnCount[userId]})`);
             if (this.idConnCount[userId] > 0)
                 return;
             delete this.userList[client.sessionId];

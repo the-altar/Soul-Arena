@@ -42,7 +42,8 @@ export const user = async (req: Request, res: Response) => {
     `;
   try {
     const doc = await pool.query(text, [id]);
-    res.status(200).json(doc.rows[0]);
+    const user = { ...doc.rows[0], auth: true };
+    res.status(200).json(user);
   } catch (err) {
     throw err;
   }
