@@ -81,7 +81,7 @@ exports.purchase = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.upload = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     for (const file in req.files) {
         const f = req.files[file];
-        const p = path_1.join(process.cwd(), '/public/img/game/', f.name + ".jpg");
+        const p = path_1.join(process.cwd(), '/public/game/uploads', f.name + ".jpg");
         f.mv(p, (err) => {
             if (err) {
                 console.log(err);
@@ -95,7 +95,7 @@ exports.uploadFiles = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const response = [];
     for (const file in req.files) {
         const f = req.files[file];
-        const p = path_1.join(process.cwd(), '/public/img/game/', req.params.filename + ".jpg");
+        const p = path_1.join(process.cwd(), '/public/game/uploads', req.params.filename + ".jpg");
         f.mv(p, (err) => {
             if (err) {
                 return res.status(500).json({});

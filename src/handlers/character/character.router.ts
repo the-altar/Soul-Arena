@@ -7,9 +7,9 @@ router.get("/", getAll)
 router.get("/ids", getIds)
 router.get('/:id', find)
 router.post('/upload', upload)
-router.post("/file/:filename", uploadFiles)
 router.post('/new', create)
 router.post('/update', update)
 router.post('/purchase', [authenticate], purchase)
+router.post("/file/:filename", uploadFiles)
 
 export const characterRouter: Router = router 

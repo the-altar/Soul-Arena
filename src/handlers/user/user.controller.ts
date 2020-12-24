@@ -36,28 +36,6 @@ export const mount = async function (req: Request, res: Response) {
   });
 };
 
-export const userCharacters = async (req: Request, res: Response) => {
-  const text = `
-        select
-            jsonb_build_object('id', entity.id, 'isFree', entity.isfree) || entity.data || jsonb_build_object('skills', jsonb_agg(sk.data order by sk.priority)) as data
-        from
-            entity
-        join skill as sk on
-            sk.entity_id = entity.id
-        where entity.released = true    
-        group by
-            entity.id;        
-    `;
-
-  try {
-    const r = await pool.query(text);
-    return res.json(r.rows);
-  } catch (err) {
-    res.status(500).send("Something went wrong...");
-    throw err;
-  }
-};
-
 export const register = async (req: Request, res: Response) => {
   const text = `INSERT INTO users (username, passhash, email) values ($1, $2, $3);`;
   try {

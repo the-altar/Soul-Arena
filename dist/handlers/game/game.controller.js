@@ -9,27 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.missions = exports.deleteMissionTracks = exports.missionTracks = exports.trackMission = exports.user = exports.pokemonTypeEnums = exports.file = void 0;
-const enums_1 = require("../../lib/engine/enums");
+exports.character = exports.missions = exports.deleteMissionTracks = exports.missionTracks = exports.trackMission = exports.user = exports.file = void 0;
 const db_1 = require("../../db");
 exports.file = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    return res.sendFile("index.html", { root: "./public/game" });
-});
-exports.pokemonTypeEnums = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    return res.json({
-        pokemonTypings: enums_1.Types,
-        effectTypings: enums_1.effectType,
-        activationTypings: enums_1.activationType,
-        damageTypings: enums_1.DamageType,
-        costTypings: enums_1.CostTypes,
-        reiatsuTypings: enums_1.ReiatsuTypes,
-        characterTypings: enums_1.CharacterTypes,
-        controlTypings: enums_1.ControlType,
-        skillClassTypings: enums_1.SkillClassType,
-        targetModeTypings: enums_1.targetType,
-        effectTargetBehaviorTypings: enums_1.effectTargetBehavior,
-        triggerClauseTypings: enums_1.triggerClauseType,
-    });
+    return res.sendFile("index.html", { root: "./public/game/build" });
 });
 exports.user = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.res.locals.id;
@@ -145,6 +128,27 @@ exports.missions = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
     catch (err) {
         res.status(501);
+        throw err;
+    }
+});
+exports.character = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const text = `
+        select
+            jsonb_build_object('id', entity.id, 'isFree', entity.isfree) || entity.data || jsonb_build_object('skills', jsonb_agg(sk.data order by sk.priority)) as data
+        from
+            entity
+        join skill as sk on
+            sk.entity_id = entity.id
+        where entity.released = true    
+        group by
+            entity.id;        
+    `;
+    try {
+        const r = yield db_1.pool.query(text);
+        return res.json(r.rows);
+    }
+    catch (err) {
+        res.status(500).send("Something went wrong...");
         throw err;
     }
 });

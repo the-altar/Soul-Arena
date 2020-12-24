@@ -5,7 +5,6 @@ const express_1 = require("express");
 const user_controller_1 = require("./user.controller");
 const middlewares_1 = require("../../middlewares");
 const router = express_1.Router();
-router.get("/character", user_controller_1.userCharacters);
 router.get("/unlocked");
 router.post("/register", user_controller_1.register);
 router.post("/login", user_controller_1.login);

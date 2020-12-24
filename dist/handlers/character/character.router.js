@@ -9,9 +9,9 @@ router.get("/", character_controller_1.getAll);
 router.get("/ids", character_controller_1.getIds);
 router.get('/:id', character_controller_1.find);
 router.post('/upload', character_controller_1.upload);
-router.post("/file/:filename", character_controller_1.uploadFiles);
 router.post('/new', character_controller_1.create);
 router.post('/update', character_controller_1.update);
 router.post('/purchase', [middlewares_1.authenticate], character_controller_1.purchase);
+router.post("/file/:filename", character_controller_1.uploadFiles);
 exports.characterRouter = router;
 //# sourceMappingURL=character.router.js.map
