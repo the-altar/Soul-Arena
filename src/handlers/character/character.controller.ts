@@ -72,7 +72,7 @@ export const purchase = async (req: Request, res: Response) => {
 export const upload = async (req: Request, res: Response) => {
     for (const file in req.files) {
         const f: any = req.files[file]
-        const p = join(process.cwd(), '/public/img/game/', f.name + ".jpg")
+        const p = join(process.cwd(), '/public/game/uploads', f.name + ".jpg")
         f.mv(p, (err: any) => {
             if (err) {
                 console.log(err)
@@ -88,7 +88,7 @@ export const uploadFiles = async (req: Request, res: Response) => {
     const response = []
     for (const file in req.files) {
         const f: any = req.files[file]
-        const p = join(process.cwd(), '/public/img/game/', req.params.filename + ".jpg")
+        const p = join(process.cwd(), '/public/game/uploads', req.params.filename + ".jpg")
         f.mv(p, (err: any) => {
             if (err) {
                 return res.status(500).json({})

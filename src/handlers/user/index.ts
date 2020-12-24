@@ -1,10 +1,8 @@
 import { Router } from 'express'
-import { loggerMiddleware, userCharacters, register, login, logout, mount, user, uploadAvatar, defaultAvatar } from "./user.controller"
+import { loggerMiddleware, register, login, logout, mount, user, uploadAvatar, defaultAvatar } from "./user.controller"
 import { authenticate } from "../../middlewares"
 const router: Router = Router()
 
-
-router.get("/character", userCharacters)
 router.get("/unlocked",)
 router.post("/register", register)
 router.post("/login", login)

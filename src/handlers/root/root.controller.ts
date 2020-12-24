@@ -1,13 +1,10 @@
 import { Request, Response } from "express";
+import * as e from "../../lib/engine/enums";
 import { pool } from "../../db";
 import { log } from "../../lib/logger";
 
 export const baseController = async (req: Request, res: Response) => {
   return res.sendFile("index.html", { root: "./public/main" });
-};
-
-export const uploadController = async (req: Request, res: Response) => {
-  return res.json([{ url: "/absolute/path/to/filename.png" }]);
 };
 
 export const usersOnline = async (req: Request, res: Response) => {
@@ -56,4 +53,21 @@ export const topStreak = async (req: Request, res: Response) => {
     log.error(e);
     return res.status(500).json([]);
   }
+};
+
+export const enums = async (req: Request, res: Response) => {
+  return res.json({
+    pokemonTypings: e.Types,
+    effectTypings: e.effectType,
+    activationTypings: e.activationType,
+    damageTypings: e.DamageType,
+    costTypings: e.CostTypes,
+    reiatsuTypings: e.ReiatsuTypes,
+    characterTypings: e.CharacterTypes,
+    controlTypings: e.ControlType,
+    skillClassTypings: e.SkillClassType,
+    targetModeTypings: e.targetType,
+    effectTargetBehaviorTypings: e.effectTargetBehavior,
+    triggerClauseTypings: e.triggerClauseType,
+  });
 };

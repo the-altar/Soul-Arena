@@ -8,8 +8,7 @@ const router = express_1.Router();
 router.get("/online", root_controller_1.usersOnline);
 router.get("/ladder", root_controller_1.topLadder);
 router.get("/streak", root_controller_1.topStreak);
-router.put("/upload", root_controller_1.uploadController);
-router.post("/upload", root_controller_1.uploadController);
+router.get("/game-enums", root_controller_1.enums);
 // FRONT END
 router.get("/register", root_controller_1.baseController);
 router.get("/login", root_controller_1.baseController);

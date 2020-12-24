@@ -1,39 +1,8 @@
 import { Request, Response } from "express";
-import {
-  Types,
-  triggerClauseType,
-  effectType,
-  activationType,
-  DamageType,
-  CostTypes,
-  SkillClassType,
-  targetType,
-  effectTargetBehavior,
-  ReiatsuTypes,
-  CharacterTypes,
-  ControlType,
-} from "../../lib/engine/enums";
 import { pool } from "../../db";
 
 export const file = async (req: Request, res: Response) => {
-  return res.sendFile("index.html", { root: "./public/game" });
-};
-
-export const pokemonTypeEnums = async (req: Request, res: Response) => {
-  return res.json({
-    pokemonTypings: Types,
-    effectTypings: effectType,
-    activationTypings: activationType,
-    damageTypings: DamageType,
-    costTypings: CostTypes,
-    reiatsuTypings: ReiatsuTypes,
-    characterTypings: CharacterTypes,
-    controlTypings: ControlType,
-    skillClassTypings: SkillClassType,
-    targetModeTypings: targetType,
-    effectTargetBehaviorTypings: effectTargetBehavior,
-    triggerClauseTypings: triggerClauseType,
-  });
+  return res.sendFile("index.html", { root: "./public/game/build" });
 };
 
 export const user = async (req: Request, res: Response) => {
@@ -153,6 +122,28 @@ export const missions = async (req: Request, res: Response) => {
     return res.status(200).json(r.rows);
   } catch (err) {
     res.status(501);
+    throw err;
+  }
+};
+
+export const character = async (req: Request, res: Response) => {
+  const text = `
+        select
+            jsonb_build_object('id', entity.id, 'isFree', entity.isfree) || entity.data || jsonb_build_object('skills', jsonb_agg(sk.data order by sk.priority)) as data
+        from
+            entity
+        join skill as sk on
+            sk.entity_id = entity.id
+        where entity.released = true    
+        group by
+            entity.id;        
+    `;
+
+  try {
+    const r = await pool.query(text);
+    return res.json(r.rows);
+  } catch (err) {
+    res.status(500).send("Something went wrong...");
     throw err;
   }
 };

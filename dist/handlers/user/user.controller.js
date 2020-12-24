@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.defaultAvatar = exports.uploadAvatar = exports.user = exports.logout = exports.login = exports.register = exports.userCharacters = exports.mount = exports.loggerMiddleware = void 0;
+exports.defaultAvatar = exports.uploadAvatar = exports.user = exports.logout = exports.login = exports.register = exports.mount = exports.loggerMiddleware = void 0;
 const bcrypt_1 = require("bcrypt");
 const jsonwebtoken_1 = require("jsonwebtoken");
 const path_1 = require("path");
@@ -48,27 +48,6 @@ exports.mount = function (req, res) {
         });
     });
 };
-exports.userCharacters = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const text = `
-        select
-            jsonb_build_object('id', entity.id, 'isFree', entity.isfree) || entity.data || jsonb_build_object('skills', jsonb_agg(sk.data order by sk.priority)) as data
-        from
-            entity
-        join skill as sk on
-            sk.entity_id = entity.id
-        where entity.released = true    
-        group by
-            entity.id;        
-    `;
-    try {
-        const r = yield db_1.pool.query(text);
-        return res.json(r.rows);
-    }
-    catch (err) {
-        res.status(500).send("Something went wrong...");
-        throw err;
-    }
-});
 exports.register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const text = `INSERT INTO users (username, passhash, email) values ($1, $2, $3);`;
     try {
