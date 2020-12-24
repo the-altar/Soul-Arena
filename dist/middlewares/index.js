@@ -56,16 +56,15 @@ function authenticateAdmin(req, res, next) {
         try {
             const token = req.cookies.session_id;
             if (!token)
-                return res.status(401).end();
+                return res.status(301).redirect(process.env.ROOT_URL);
             const u = yield jsonwebtoken_1.verify(token, process.env.TOKEN_SECRET);
             if (u.authLevel < 100)
-                return res.status(401).end();
+                return res.status(301).redirect(process.env.ROOT_URL);
             else
                 next();
         }
         catch (err) {
-            res.status(401).end();
-            throw err;
+            return res.status(301).redirect(process.env.ROOT_URL);
         }
     });
 }

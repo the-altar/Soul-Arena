@@ -14,8 +14,10 @@ const router: Router = Router();
 router.get("/news", news);
 router.get("/:id/:siteArea", findThread);
 router.get("/:id/comments/:limit", getPosts);
-router.post("/", postThread);
-router.put("/", updateThread);
+
+//NEEDS AUTHENTICATION
+router.post("/", [authenticate], postThread);
+router.put("/", [authenticate], updateThread);
 router.post("/comment", [authenticate], postComment);
 router.delete("/comment/:id/:userId", [authenticate], deletePost);
 

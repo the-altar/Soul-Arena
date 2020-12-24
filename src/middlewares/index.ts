@@ -48,14 +48,14 @@ export async function authenticateAdmin(
 ) {
   try {
     const token = req.cookies.session_id;
-    if (!token) return res.status(401).end();
+    if (!token) return res.status(301).redirect(process.env.ROOT_URL);
 
     const u: any = await verify(token, process.env.TOKEN_SECRET as string);
-    if (u.authLevel < 100) return res.status(401).end();
+    if (u.authLevel < 100)
+      return res.status(301).redirect(process.env.ROOT_URL);
     else next();
   } catch (err) {
-    res.status(401).end();
-    throw err;
+    return res.status(301).redirect(process.env.ROOT_URL);
   }
 }
 

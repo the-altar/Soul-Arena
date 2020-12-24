@@ -3,7 +3,7 @@ import { loggerMiddleware, register, login, logout, mount, user, uploadAvatar, d
 import { authenticate } from "../../middlewares"
 const router: Router = Router()
 
-router.get("/unlocked",)
+//router.get("/unlocked",)
 router.post("/register", register)
 router.post("/login", login)
 router.post("/logout", logout)

@@ -8,8 +8,9 @@ const router = express_1.Router();
 router.get("/news", thread_controller_1.news);
 router.get("/:id/:siteArea", thread_controller_1.findThread);
 router.get("/:id/comments/:limit", thread_controller_1.getPosts);
-router.post("/", thread_controller_1.postThread);
-router.put("/", thread_controller_1.updateThread);
+//NEEDS AUTHENTICATION
+router.post("/", [middlewares_1.authenticate], thread_controller_1.postThread);
+router.put("/", [middlewares_1.authenticate], thread_controller_1.updateThread);
 router.post("/comment", [middlewares_1.authenticate], thread_controller_1.postComment);
 router.delete("/comment/:id/:userId", [middlewares_1.authenticate], thread_controller_1.deletePost);
 exports.threadRouter = router;
