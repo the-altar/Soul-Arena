@@ -50,7 +50,7 @@ class Character {
     }
     setHitPoints(hp) {
         if (!hp && hp !== 0) {
-            logger_1.log.info("problem setting health");
+            logger_1.log.info("[GAME] problem setting health");
             return;
         }
         this.hitPoints = hp;
@@ -109,7 +109,6 @@ class Character {
         }
     }
     getCopySkillByIndex(index) {
-        logger_1.log.info(`Skill selected: ${this.skills[index].name}`);
         const newObj = JSON.parse(JSON.stringify(this.skills[index].getCopyData()));
         return new skill_1.Skill(newObj, this.id, this.arenaReference);
     }

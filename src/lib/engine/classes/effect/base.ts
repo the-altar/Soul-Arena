@@ -100,8 +100,6 @@ export class Effect {
   }
 
   public extendDuration(val: number) {
-    log.info("Effect extended by " + val);
-    if (val) log.info("Effect extended by " + val);
     this.duration += val;
   }
 
@@ -261,7 +259,6 @@ export class Effect {
     this.activateTrigger(char, origin);
     if (!this.activate) return;
     this.functionality(char, origin);
-    log.info("APPLIED");
   }
 
   protected effectConclusion() {}
@@ -276,14 +273,8 @@ export class Effect {
   }
 
   public activateTrigger(char: Character, origin?: Skill) {
-    log.info(`activate trigger: ${origin.name}[${this.triggered}]`);
     if (this.triggered) return;
     this.triggered = true;
-    log.info(
-      `extension mods: ${
-        char.getDebuffs().increaseSkillDuration[origin.getId()]
-      }`
-    );
 
     this.duration =
       this.duration +
@@ -297,5 +288,5 @@ export class Effect {
     return { ...publicData };
   }
 
-  public apply(char:Character, origin:Skill) {}
+  public apply(char: Character, origin: Skill) {}
 }

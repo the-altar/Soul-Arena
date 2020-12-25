@@ -146,9 +146,6 @@ export class IncreaseCasterSkillDuration extends Effect {
     skill.mods.increaseDuration += this.value;
     this.skillReference = skill;
     this.targetedSkillName = skill.name;
-    log.info(
-      `Duration of ${skill.name} has been extended by ${skill.mods.increaseDuration}`
-    );
   }
 
   generateToolTip() {
@@ -160,7 +157,6 @@ export class IncreaseCasterSkillDuration extends Effect {
   }
 
   effectConclusion() {
-    log.info("EFFECT CONCLUSION");
     this.skillReference.mods.increaseDuration -= this.value;
   }
 

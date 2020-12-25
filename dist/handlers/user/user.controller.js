@@ -49,14 +49,28 @@ exports.mount = function (req, res) {
     });
 };
 exports.register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const text = `INSERT INTO users (username, passhash, email) values ($1, $2, $3);`;
+    const text = `INSERT INTO users (username, passhash, email) values ($1, $2, $3) RETURNING id;`;
+    const query2 = `INSERT INTO ladderboard (season, user_id, wins, losses, elo, streak, max_streak, experience, season_level, season_rank)
+  values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`;
+    const client = yield db_1.pool.connect();
     try {
         const hashed = yield bcrypt_1.hash(req.body.password, 10);
-        yield db_1.pool.query(text, [req.body.username, hashed, req.body.email]);
+        yield client.query("BEGIN");
+        const response = yield db_1.pool.query(text, [
+            req.body.username,
+            hashed,
+            req.body.email,
+        ]);
+        yield db_1.pool.query(query2, [0, response.rows[0].id, 0, 0, 0, 0, 0, 0, 0, 0]);
+        yield client.query("COMMIT");
         return res.json({ success: true });
     }
     catch (err) {
+        yield client.query("ROLLBACK");
         return res.json({ success: false, err: err });
+    }
+    finally {
+        client.release();
     }
 });
 exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

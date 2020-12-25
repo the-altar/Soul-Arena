@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Effect = void 0;
 const enums_1 = require("../../enums");
-const logger_1 = require("../../../logger");
 class Effect {
     constructor(data, caster) {
         this.value = data.value;
@@ -55,9 +54,6 @@ class Effect {
         this.targets = targets;
     }
     extendDuration(val) {
-        logger_1.log.info("Effect extended by " + val);
-        if (val)
-            logger_1.log.info("Effect extended by " + val);
         this.duration += val;
     }
     shouldApply() {
@@ -199,7 +195,6 @@ class Effect {
         if (!this.activate)
             return;
         this.functionality(char, origin);
-        logger_1.log.info("APPLIED");
     }
     effectConclusion() { }
     getTargets() {
@@ -211,11 +206,9 @@ class Effect {
         return true;
     }
     activateTrigger(char, origin) {
-        logger_1.log.info(`activate trigger: ${origin.name}[${this.triggered}]`);
         if (this.triggered)
             return;
         this.triggered = true;
-        logger_1.log.info(`extension mods: ${char.getDebuffs().increaseSkillDuration[origin.getId()]}`);
         this.duration =
             this.duration +
                 (char.getDebuffs().increaseSkillDuration[origin.getId()] || 0);

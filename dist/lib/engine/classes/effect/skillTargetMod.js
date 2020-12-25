@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IncreaseTargetSkillDuration = exports.IncreaseCasterSkillDuration = exports.SkillCostChange = exports.SkillTargetMod = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
-const logger_1 = require("../../../logger");
 class SkillTargetMod extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -121,7 +120,6 @@ class IncreaseCasterSkillDuration extends base_1.Effect {
         skill.mods.increaseDuration += this.value;
         this.skillReference = skill;
         this.targetedSkillName = skill.name;
-        logger_1.log.info(`Duration of ${skill.name} has been extended by ${skill.mods.increaseDuration}`);
     }
     generateToolTip() {
         if (this.targetedSkillName) {
@@ -129,7 +127,6 @@ class IncreaseCasterSkillDuration extends base_1.Effect {
         }
     }
     effectConclusion() {
-        logger_1.log.info("EFFECT CONCLUSION");
         this.skillReference.mods.increaseDuration -= this.value;
     }
     getPublicData() {

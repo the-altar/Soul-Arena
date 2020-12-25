@@ -9,6 +9,8 @@ export class Arena {
   private skillQueue: Array<Skill>;
   public tempQueue: Array<iSkillQueue>;
   public hasUsedSKill: { [key: number]: boolean };
+  public winner: Player;
+  public loser: Player;
 
   constructor() {
     this.players = [];
@@ -20,7 +22,8 @@ export class Arena {
   }
 
   public addPlayer(player: any, team: Array<iCharacter>): void {
-    this.players.push(new Player(player));
+    const playerInstance = new Player(player);
+    this.players.push(playerInstance);
 
     if (this.players.length === 1) {
       const i = Math.floor(Math.random() * (3 + 1));
@@ -32,6 +35,7 @@ export class Arena {
     for (let c of team) {
       this.characters.push(new Character(c, player.id, this));
       const index = this.characters.length - 1;
+      playerInstance.myCharsRealId.push(this.characters[index].literalId);
 
       if (index < 3) {
         this.characters[index].setEnemies([3, 4, 5]);
@@ -114,8 +118,6 @@ export class Arena {
     return {
       gameData: this.getClientData(),
       isOver: false,
-      winner: player1,
-      loser: player2,
     };
   }
 
@@ -353,7 +355,6 @@ export class Arena {
   }
 
   private getClientData() {
-
     const publicSkillQueue = [];
     for (const skill of this.skillQueue) {
       publicSkillQueue.push(skill.getPublicData());
@@ -392,19 +393,16 @@ export class Arena {
   }
 
   public surrender(surrenderer: number) {
-    let winner, loser;
     const player1 = this.players[this.turnCount % 2];
     const player2 = this.players[((this.turnCount % 2) + 1) % 2];
 
     if (player2.getId() === surrenderer) {
-      winner = player1;
-      loser = player2;
+      this.winner = player1;
+      this.loser = player2;
     } else {
-      winner = player2;
-      loser = player1;
+      this.winner = player2;
+      this.loser = player1;
     }
-
-    return { winner, loser };
   }
 
   public getActiveSkills(): Array<Skill> {
@@ -412,11 +410,12 @@ export class Arena {
   }
 
   public gameOver(winner: Player, loser: Player) {
+    this.winner = winner;
+    this.loser = loser;
+
     return {
       gameData: {},
       isOver: true,
-      winner,
-      loser,
     };
   }
 
@@ -432,11 +431,11 @@ export class Arena {
     };
   }
 
-  public publicCharactersData(){
-    const publicChar:Array<any> = []
-    for(const char of this.characters){
-      publicChar.push(char.getPublicData())
+  public publicCharactersData() {
+    const publicChar: Array<any> = [];
+    for (const char of this.characters) {
+      publicChar.push(char.getPublicData());
     }
-    return publicChar
+    return publicChar;
   }
 }

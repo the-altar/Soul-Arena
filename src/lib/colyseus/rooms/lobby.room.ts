@@ -23,7 +23,6 @@ export class Lobby extends Room {
   async onJoin(client: Client, options: any, auth: any) {
     this.userList[client.sessionId] = options.id;
     this.idConnCount[options.id] = (this.idConnCount[options.id] || 0) + 1;
-    log.info(`User connected - ID:${options.id}, CONNECTIONS: (${this.idConnCount[options.id]})`);
     if (this.idConnCount[options.id] > 1) return;
 
     const conn = await pool.connect();
@@ -48,10 +47,8 @@ export class Lobby extends Room {
   async onLeave(client: Client, consented: boolean) {
     const userId = this.userList[client.sessionId];
     this.idConnCount[userId]--;
-    log.info(`User disconnected - ID:${userId}, CONNECTIONS: (${this.idConnCount[userId]})`);
-
     if (this.idConnCount[userId] > 0) return;
-
+    
     delete this.userList[client.sessionId];
     delete this.idConnCount[userId];
 

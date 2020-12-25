@@ -262,7 +262,6 @@ export class Skill {
       effect.execute(this);
       effect.generateToolTip();
     }
-    log.info(`Effects of '${this.name}' [EXECUTED]`);
   }
 
   public getCost(): Array<number> {

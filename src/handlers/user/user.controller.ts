@@ -37,13 +37,29 @@ export const mount = async function (req: Request, res: Response) {
 };
 
 export const register = async (req: Request, res: Response) => {
-  const text = `INSERT INTO users (username, passhash, email) values ($1, $2, $3);`;
+  const text = `INSERT INTO users (username, passhash, email) values ($1, $2, $3) RETURNING id;`;
+  const query2 = `INSERT INTO ladderboard (season, user_id, wins, losses, elo, streak, max_streak, experience, season_level, season_rank)
+  values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`;
+
+  const client = await pool.connect();
   try {
     const hashed = await hash(req.body.password, 10);
-    await pool.query(text, [req.body.username, hashed, req.body.email]);
+
+    await client.query("BEGIN");
+    const response = await pool.query(text, [
+      req.body.username,
+      hashed,
+      req.body.email,
+    ]);
+    await pool.query(query2, [0, response.rows[0].id, 0, 0, 0, 0, 0, 0, 0, 0]);
+    await client.query("COMMIT");
+
     return res.json({ success: true });
   } catch (err) {
+    await client.query("ROLLBACK");
     return res.json({ success: false, err: err });
+  } finally {
+    client.release();
   }
 };
 
@@ -86,10 +102,14 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-  res.cookie("session_id", {}, {
-    maxAge:0,
-    domain: process.env.DOMAIN,
-  });
+  res.cookie(
+    "session_id",
+    {},
+    {
+      maxAge: 0,
+      domain: process.env.DOMAIN,
+    }
+  );
   return res.status(200).end();
 };
 

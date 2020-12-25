@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Counter = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
-const logger_1 = require("../../../logger");
 class Counter extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -22,7 +21,6 @@ class Counter extends base_1.Effect {
         if (isTriggered.activated) {
             const casterIndex = this.arenaReference.findCharacterById(this.caster).index;
             const casterChar = this.arenaReference.findCharacterById(this.caster).char;
-            logger_1.log.info(`Caster is ${casterChar.name}`);
             const targetsIndex = isTriggered.indexes;
             this.applyLinkedEffects(origin, casterIndex, targetsIndex);
         }
@@ -91,7 +89,6 @@ class Counter extends base_1.Effect {
         return hasCountered;
     }
     applyLinkedEffects(origin, caster, targets) {
-        logger_1.log.info(`Looking for effects to apply on ${origin.name}`);
         for (const trigger of this.triggerOnCounter) {
             for (const effect of origin.inactiveEffects) {
                 if (effect.id !== trigger.id)
@@ -99,7 +96,6 @@ class Counter extends base_1.Effect {
                 if (trigger.self) {
                     effect.triggerRate = 100;
                     effect.setTargets([caster]);
-                    logger_1.log.info("COUNTER applied effect on character " + caster);
                     origin.effects.push(effect);
                 }
             }

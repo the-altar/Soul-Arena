@@ -16,12 +16,14 @@ import { log } from "../../../logger";
 
 export class Character {
   public name: string;
+  /** The actual ID of the character on the database*/
   public literalId: number;
   private facepic: string;
   private description: string;
   public banner: string;
   private allies: Array<number>;
   private enemies: Array<number>;
+  /** This ID is unique to the game instance */
   private id: number;
   private hitPoints: number;
   private isTarget: boolean;
@@ -83,7 +85,7 @@ export class Character {
 
   public setHitPoints(hp: number): void {
     if (!hp && hp !== 0) {
-      log.info("problem setting health");
+      log.info("[GAME] problem setting health");
       return;
     }
 
@@ -154,7 +156,6 @@ export class Character {
   }
 
   public getCopySkillByIndex(index: number): Skill {
-    log.info(`Skill selected: ${this.skills[index].name}`);
     const newObj = JSON.parse(JSON.stringify(this.skills[index].getCopyData()));
     return new Skill(newObj, this.id, this.arenaReference);
   }

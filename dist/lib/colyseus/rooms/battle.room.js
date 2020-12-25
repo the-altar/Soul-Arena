@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12,6 +31,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Battle = void 0;
 const colyseus_1 = require("colyseus");
 const engine_1 = require("../../engine");
+const results = __importStar(require("../../helpers/battleResults"));
 const db_1 = require("../../../db");
 const logger_1 = require("../../logger");
 class Battle extends colyseus_1.Room {
@@ -20,24 +40,18 @@ class Battle extends colyseus_1.Room {
         this.arena = new engine_1.Arena();
         this.constructed = 0;
         this.evaluateGroupInterval = 60000;
+        this.playerState = {};
     }
     // When room is initialized
     onCreate(options) {
         this.onMessage("end-game-turn", (client, payload) => __awaiter(this, void 0, void 0, function* () {
             this.delay.reset();
             this.arena.processTurn(payload);
-            const { isOver, gameData, winner, loser } = this.arena.startGame(true);
-            if (!isOver)
-                this.broadcast("start-new-turn", gameData);
-            else {
-                yield this.updateMissionGoals(winner, loser);
-                const payload1 = endMatch(winner, loser, true);
-                const payload2 = endMatch(loser, winner, false);
-                this.broadcast("end-game", {
-                    winner: { playerData: Object.assign({}, winner), results: Object.assign({}, payload1) },
-                    loser: { playerData: Object.assign({}, loser), results: Object.assign({}, payload2) },
-                });
-                this.disconnect();
+            try {
+                yield this.lifeCycle();
+            }
+            catch (e) {
+                logger_1.log.error(e);
             }
         }));
         this.onMessage("add-skill-to-queue", (client, cordinates) => {
@@ -52,15 +66,7 @@ class Battle extends colyseus_1.Room {
             client.send("exchanged-energy", this.arena.exchangeEnergyPool(payload));
         });
         this.onMessage("surrender", (client, id) => __awaiter(this, void 0, void 0, function* () {
-            const { winner, loser } = this.arena.surrender(id);
-            yield this.updateMissionGoals(winner, loser);
-            const payload1 = endMatch(winner, loser, true);
-            const payload2 = endMatch(loser, winner, false);
-            this.broadcast("end-game", {
-                winner: { playerData: Object.assign({}, winner), results: Object.assign({}, payload1) },
-                loser: { playerData: Object.assign({}, loser), results: Object.assign({}, payload2) },
-            });
-            this.disconnect();
+            yield this.surrender(id);
         }));
     }
     // Authorize client based on provided options before WebSocket handshake is complete
@@ -73,36 +79,92 @@ class Battle extends colyseus_1.Room {
     onJoin(client, options, auth) {
         this.arena.addPlayer(options.player, options.team);
         this.constructed++;
-        logger_1.log.info("Somebody connected");
+        this.playerState[client.sessionId] = options.player.id;
         if (this.constructed === 2) {
             this.gameClock();
         }
     }
     // When a client leaves the room
-    onLeave(client, consented) { }
+    onLeave(client, consented) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (consented) {
+                logger_1.log.info("[GAME] user left");
+                return;
+            }
+            try {
+                // Notify ROOM that someone already left
+                // allow disconnected client to reconnect into this room until 20 seconds
+                logger_1.log.info("[GAME] user went missing");
+                yield this.allowReconnection(client, 20);
+                logger_1.log.info("[GAME] user reconnected");
+                // client returned! let's re-activate it.
+            }
+            catch (e) {
+                // 20 seconds expired. let's remove the client.
+                const id = this.playerState[client.sessionId];
+                yield this.surrender(id);
+                logger_1.log.info("[GAME] surrendered");
+            }
+        });
+    }
     // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
     onDispose() {
-        return __awaiter(this, void 0, void 0, function* () { });
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.updateGameRecords(this.arena.winner, this.arena.loser);
+                yield this.updateMissionGoals(this.arena.winner, this.arena.loser);
+                yield results.updateGameResults(Object.assign(Object.assign({}, this.arena.loser.season), { coins: this.arena.loser.coins, season: 1, id: this.arena.loser.id }));
+                yield results.updateGameResults(Object.assign(Object.assign({}, this.arena.winner.season), { coins: this.arena.winner.coins, season: 1, id: this.arena.winner.id }));
+            }
+            catch (e) {
+                logger_1.log.error(e);
+            }
+            finally {
+                logger_1.log.info("[GAME] room has been disposed of");
+            }
+        });
     }
     gameClock() {
-        logger_1.log.info("A new game has begun");
+        logger_1.log.info("[GAME] A new game has begun");
         const { gameData } = this.arena.startGame();
         this.broadcast("game-started", gameData);
         this.delay = this.clock.setInterval(() => __awaiter(this, void 0, void 0, function* () {
-            const { isOver, gameData, winner, loser } = this.arena.startGame();
+            try {
+                yield this.lifeCycle();
+            }
+            catch (e) {
+                logger_1.log.error(e);
+            }
+        }), this.evaluateGroupInterval);
+    }
+    lifeCycle() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { isOver, gameData } = this.arena.startGame();
             if (!isOver)
                 this.broadcast("start-new-turn", gameData);
             else {
-                yield this.updateMissionGoals(winner, loser);
-                const payload1 = endMatch(winner, loser, true);
-                const payload2 = endMatch(loser, winner, false);
+                const payload1 = results.matchCalculations(this.arena.winner, this.arena.loser, true);
+                const payload2 = results.matchCalculations(this.arena.loser, this.arena.winner, false);
                 this.broadcast("end-game", {
-                    winner: { playerData: Object.assign({}, winner), results: Object.assign({}, payload1) },
-                    loser: { playerData: Object.assign({}, loser), results: Object.assign({}, payload2) },
+                    winner: { playerData: this.arena.winner, results: payload1 },
+                    loser: { playerData: this.arena.loser, results: payload2 },
                 });
-                this.disconnect();
             }
-        }), this.evaluateGroupInterval);
+        });
+    }
+    surrender(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.arena.surrender(id);
+            const payload1 = results.matchCalculations(this.arena.winner, this.arena.loser, true);
+            const payload2 = results.matchCalculations(this.arena.loser, this.arena.winner, false);
+            this.broadcast("end-game", {
+                winner: {
+                    playerData: Object.assign({}, this.arena.winner),
+                    results: Object.assign({}, payload1),
+                },
+                loser: { playerData: Object.assign({}, this.arena.loser), results: Object.assign({}, payload2) },
+            });
+        });
     }
     updateMissionGoals(winner, loser) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -118,13 +180,18 @@ class Battle extends colyseus_1.Room {
             m2.id = tm.mission_id
         where
             tm.user_id = $1 or tm.user_id = $2;`;
-            const res = yield db_1.pool.query(sql, [winner.id, loser.id]);
-            for (const data of res.rows) {
-                if (data.user_id === winner.id) {
-                    this.progressMission(winner, data);
+            try {
+                const res = yield db_1.pool.query(sql, [winner.id, loser.id]);
+                for (const data of res.rows) {
+                    if (data.user_id === winner.id) {
+                        yield this.progressMission(winner, data);
+                    }
+                    else
+                        yield this.breakMissionStreaks(loser, data);
                 }
-                else
-                    this.breakMissionStreaks(loser, data);
+            }
+            catch (e) {
+                return Promise.reject(e);
             }
         });
     }
@@ -167,7 +234,7 @@ class Battle extends colyseus_1.Room {
                 }
                 catch (e) {
                     yield client.query("ROLLBACK");
-                    throw e;
+                    return Promise.reject(e);
                 }
                 finally {
                     client.release();
@@ -183,8 +250,32 @@ class Battle extends colyseus_1.Room {
                     ]);
                 }
                 catch (err) {
-                    throw err;
+                    return Promise.reject(err);
                 }
+            }
+        });
+    }
+    updateGameRecords(winner, loser) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const query1 = `INSERT INTO game_stats DEFAULT VALUES;`;
+            const query2 = `INSERT INTO game_result (winner_id, loser_id) VALUES($1, $2);`;
+            const query3 = `UPDATE entity SET games_won= games_won + 1 WHERE id=ANY($1)`;
+            const query4 = `UPDATE entity SET games_lost= games_lost + 1 WHERE id=ANY($1)`;
+            const client = yield db_1.pool.connect();
+            try {
+                yield client.query("BEGIN");
+                yield client.query(query1);
+                yield client.query(query2, [winner.id, loser.id]);
+                yield client.query(query3, [winner.myCharsRealId]);
+                yield client.query(query4, [loser.myCharsRealId]);
+                yield client.query("COMMIT");
+            }
+            catch (e) {
+                yield client.query("ROLLBACK");
+                logger_1.log.error(e);
+            }
+            finally {
+                client.release();
             }
         });
     }
@@ -219,175 +310,10 @@ class Battle extends colyseus_1.Room {
                 ]);
             }
             catch (err) {
-                throw err;
+                return Promise.reject(err);
             }
         });
     }
 }
 exports.Battle = Battle;
-function probability(r1, r2) {
-    return (1.0 * 1.0) / (1 + 1.0 * Math.pow(10, (1.0 * (r1 - r2)) / 400));
-}
-function calculateElo(p1, p2, isWinner) {
-    const Pb = probability(p1.season.elo, p2.season.elo);
-    let eloGained = 0;
-    if (isWinner)
-        eloGained = p1.season.elo + 50 * (1 - Pb);
-    else
-        eloGained = p1.season.elo + 50 * (0 - Pb);
-    p1.season.elo = Math.floor(eloGained);
-}
-function calculateExpGain(player, p2, isWinner) {
-    const levelStatus = [0];
-    let exp;
-    let levelDifference = Math.abs(p2.season.seasonLevel - player.season.seasonLevel);
-    if (!isWinner && player.season.seasonLevel < p2.season.seasonLevel)
-        levelDifference *= -1;
-    else if (isWinner && player.season.seasonLevel > p2.season.seasonLevel)
-        levelDifference = 0;
-    exp = Math.min(Math.max(50 * levelDifference, 150), 600);
-    if (isWinner) {
-        player.season.exp += exp;
-        levelUp(player, levelStatus);
-    }
-    else {
-        player.season.exp = Math.max(0, player.season.exp - exp);
-        levelDown(player, levelStatus);
-    }
-    return {
-        levelStatus: levelStatus[0],
-        exp,
-    };
-}
-function levelUp(p, hasLeveledUp) {
-    const n = p.season.seasonLevel;
-    const reqExp = ((n * (n + 1)) / 2) * 150;
-    if (p.season.exp < reqExp)
-        return;
-    else {
-        p.season.seasonLevel++;
-        validateRanking(p);
-        hasLeveledUp[0] = 1;
-        levelUp(p, hasLeveledUp);
-    }
-}
-function levelDown(p, hasLeveledDown) {
-    const n = p.season.seasonLevel - 1;
-    const reqExp = ((n * (n + 1)) / 2) * 150;
-    if (p.season.exp < reqExp) {
-        p.season.seasonLevel--;
-        validateRanking(p);
-        hasLeveledDown[0] = 2;
-        levelDown(p, hasLeveledDown);
-    }
-}
-function validateRanking(p) {
-    const lvl = p.season.seasonLevel;
-    if (lvl <= 5)
-        p.season.seasonRank = "Substitute Shinigami";
-    else if (lvl >= 6 && lvl <= 10)
-        p.season.seasonRank = "Shinigami";
-    else if (lvl >= 11 && lvl <= 15)
-        p.season.seasonRank = "3rd Seat";
-    else if (lvl >= 16 && lvl <= 20)
-        p.season.seasonRank = "Lieutenant";
-    else if (lvl >= 21 && lvl <= 25)
-        p.season.seasonRank = "Arrancar";
-    else if (lvl >= 26 && lvl <= 30)
-        p.season.seasonRank = "Captain";
-    else if (lvl >= 31 && lvl <= 35)
-        p.season.seasonRank = "Vasto Lorde";
-    else if (lvl >= 36 && lvl <= 40)
-        p.season.seasonRank = "Captain Commander";
-    else
-        p.season.seasonRank = "Royal Guard";
-}
-function calculateMaxStreak(player) {
-    if (player.season.streak > player.season.maxStreak)
-        player.season.maxStreak = player.season.streak;
-}
-function winRate(player, isWinner) {
-    if (isWinner) {
-        player.season.wins++;
-        if (player.season.streak < 0)
-            player.season.streak = 1;
-        else
-            player.season.streak++;
-    }
-    else {
-        if (player.season.streak > 0)
-            player.season.streak = 0;
-        player.season.streak--;
-        player.season.losses++;
-    }
-}
-function endMatch(p1, p2, isWinner) {
-    winRate(p1, isWinner);
-    calculateMaxStreak(p1);
-    calculateElo(p1, p2, isWinner);
-    const coins = calculateCoins(p1, isWinner);
-    const results = calculateExpGain(p1, p2, isWinner);
-    updateGameResults({
-        wins: p1.season.wins || 0,
-        losses: p1.season.losses || 0,
-        streak: p1.season.streak || 0,
-        elo: p1.season.elo || 0,
-        id: p1.getId(),
-        exp: p1.season.exp || 0,
-        maxStreak: p1.season.maxStreak || 0,
-        seasonLevel: p1.season.seasonLevel || 0,
-        seasonRank: p1.season.seasonRank || "Substitute Shinigami",
-        season: 1,
-        coins: p1.coins,
-    });
-    return Object.assign({ playerId: p1.getId(), coins }, results);
-}
-function updateGameResults(payload) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (payload.id < 0)
-            return;
-        const text = `
-    INSERT INTO ladderboard (season, user_id, wins, losses, elo, streak, max_streak, experience, season_level, season_rank)
-    values ($9,$10,$1,$2,$3,$4,$5,$6,$7,$8)
-    on conflict (season, user_id) do update 
-    set 
-        wins = $1, 
-        losses = $2,	
-        elo = $3,
-        streak = $4, 
-        max_streak = $5, 
-        experience = $6,
-        season_level = $7,
-        season_rank = $8;`;
-        const userText = `update users set coins=$1 where id=$2`;
-        const { wins, losses, streak, elo, id, exp, maxStreak, seasonLevel, seasonRank, coins, } = payload;
-        const values = [
-            wins,
-            losses,
-            elo,
-            streak,
-            maxStreak,
-            exp,
-            seasonLevel,
-            seasonRank,
-            0,
-            id,
-        ];
-        try {
-            yield db_1.pool.query(text, values);
-            yield db_1.pool.query(userText, [coins, id]);
-        }
-        catch (err) {
-            throw err;
-        }
-    });
-}
-function calculateCoins(p, isWinner) {
-    if (!isWinner)
-        return 0;
-    let coinsEarned = p.season.streak * 50;
-    coinsEarned = Math.min(Math.max(Math.floor(coinsEarned), 50), 600);
-    p.coins += coinsEarned;
-    return coinsEarned;
-}
 //# sourceMappingURL=battle.room.js.map

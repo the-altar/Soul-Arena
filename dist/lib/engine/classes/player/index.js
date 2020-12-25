@@ -12,6 +12,7 @@ class Player {
         this.myChars = [];
         this.coins = player.coins;
         this.season = player.season;
+        this.myCharsRealId = [];
     }
     setMyCharsIndex(myChars) {
         this.myChars = myChars;

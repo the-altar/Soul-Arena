@@ -13,10 +13,13 @@ export class Player {
         maxStreak: number,
         seasonRank: string,
         seasonLevel:number,
+
+        
     } 
     public energyPool: Array<number>
     private payupCart: Array<number>
     private myChars: Array<number>
+    public myCharsRealId:Array<number>
     
     constructor(player:any) {
         this.username = player.username
@@ -28,6 +31,7 @@ export class Player {
         this.myChars = []
         this.coins = player.coins
         this.season = player.season
+        this.myCharsRealId = []
     }
     public setMyCharsIndex(myChars: Array<number>) {
         this.myChars = myChars

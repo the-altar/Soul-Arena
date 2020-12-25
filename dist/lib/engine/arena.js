@@ -12,7 +12,8 @@ class Arena {
         this.hasUsedSKill = {};
     }
     addPlayer(player, team) {
-        this.players.push(new classes_1.Player(player));
+        const playerInstance = new classes_1.Player(player);
+        this.players.push(playerInstance);
         if (this.players.length === 1) {
             const i = Math.floor(Math.random() * (3 + 1));
             this.players[0].increaseEnergyPool(i);
@@ -23,6 +24,7 @@ class Arena {
         for (let c of team) {
             this.characters.push(new classes_1.Character(c, player.id, this));
             const index = this.characters.length - 1;
+            playerInstance.myCharsRealId.push(this.characters[index].literalId);
             if (index < 3) {
                 this.characters[index].setEnemies([3, 4, 5]);
                 switch (index) {
@@ -99,8 +101,6 @@ class Arena {
         return {
             gameData: this.getClientData(),
             isOver: false,
-            winner: player1,
-            loser: player2,
         };
     }
     executeNewSkills() {
@@ -338,28 +338,26 @@ class Arena {
         return this.players.length;
     }
     surrender(surrenderer) {
-        let winner, loser;
         const player1 = this.players[this.turnCount % 2];
         const player2 = this.players[((this.turnCount % 2) + 1) % 2];
         if (player2.getId() === surrenderer) {
-            winner = player1;
-            loser = player2;
+            this.winner = player1;
+            this.loser = player2;
         }
         else {
-            winner = player2;
-            loser = player1;
+            this.winner = player2;
+            this.loser = player1;
         }
-        return { winner, loser };
     }
     getActiveSkills() {
         return this.skillQueue;
     }
     gameOver(winner, loser) {
+        this.winner = winner;
+        this.loser = loser;
         return {
             gameData: {},
             isOver: true,
-            winner,
-            loser,
         };
     }
     exchangeEnergyPool(replace) {

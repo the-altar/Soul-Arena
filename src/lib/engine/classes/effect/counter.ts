@@ -35,7 +35,6 @@ export class Counter extends Effect {
     if (isTriggered.activated) {
       const casterIndex = this.arenaReference.findCharacterById(this.caster).index;
       const casterChar = this.arenaReference.findCharacterById(this.caster).char
-      log.info(`Caster is ${casterChar.name}`)
       const targetsIndex = isTriggered.indexes;
       this.applyLinkedEffects(origin, casterIndex, targetsIndex);
     }
@@ -115,7 +114,6 @@ export class Counter extends Effect {
   }
 
   applyLinkedEffects(origin: Skill, caster: number, targets: Array<number>) {
-    log.info(`Looking for effects to apply on ${origin.name}`);
     for (const trigger of this.triggerOnCounter) {
       for (const effect of origin.inactiveEffects) {
         if (effect.id !== trigger.id) continue;
@@ -123,7 +121,6 @@ export class Counter extends Effect {
         if (trigger.self) {
           effect.triggerRate = 100;
           effect.setTargets([caster]);
-          log.info("COUNTER applied effect on character " + caster);
           origin.effects.push(effect);
         }
       }

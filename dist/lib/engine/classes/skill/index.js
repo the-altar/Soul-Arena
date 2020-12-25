@@ -5,7 +5,6 @@ const enums_1 = require("../../enums");
 const effect_1 = require("../effect");
 const targetValidationFactory_1 = require("./targetValidationFactory");
 const mods_1 = require("./mods");
-const logger_1 = require("../../../logger");
 class Skill {
     constructor(data, caster, world) {
         this.caster = data.caster;
@@ -194,7 +193,6 @@ class Skill {
             effect.execute(this);
             effect.generateToolTip();
         }
-        logger_1.log.info(`Effects of '${this.name}' [EXECUTED]`);
     }
     getCost() {
         return this.turnCost;
