@@ -52,7 +52,7 @@ exports.topLadder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     ladderboard l
   join users u on
     u.id = l.user_id
-  order by l.season_level desc limit 10;`;
+  order by l.season_level desc limit 5;`;
     try {
         const data = yield db_1.pool.query(sql);
         return res.status(200).json(data.rows);
@@ -71,7 +71,7 @@ exports.topStreak = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     ladderboard l
   join users u on
     u.id = l.user_id
-  order by l.max_streak desc;`;
+  order by l.max_streak desc limit 5;`;
     try {
         const data = yield db_1.pool.query(sql);
         return res.status(200).json(data.rows);

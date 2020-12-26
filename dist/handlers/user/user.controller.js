@@ -85,25 +85,25 @@ exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (data.rowCount === 0)
             return res.json({ success: false });
         const match = yield bcrypt_1.compare(req.body.password, user.passhash);
-        if (match) {
-            delete user.passhash;
-            const response = {
-                id: user.id,
-                authLevel: user.authLevel,
-                auth: true,
-                username: user.username,
-            };
-            const token = jsonwebtoken_1.sign(response, process.env.TOKEN_SECRET, {
-                expiresIn: "365d",
-            });
-            res.cookie("session_id", token, {
-                httpOnly: true,
-                maxAge: 365 * 24 * 60 * 60 * 1000,
-                domain: process.env.DOMAIN,
-            });
-            return res.json({ userData: response, success: true });
-        }
-        return res.json({ success: false });
+        console.log(match);
+        if (!match)
+            return res.json({ success: false });
+        delete user.passhash;
+        const response = {
+            id: user.id,
+            authLevel: user.authLevel,
+            auth: true,
+            username: user.username,
+        };
+        const token = jsonwebtoken_1.sign(response, process.env.TOKEN_SECRET, {
+            expiresIn: "365d",
+        });
+        res.cookie("session_id", token, {
+            httpOnly: true,
+            maxAge: 365 * 24 * 60 * 60 * 1000,
+            domain: process.env.DOMAIN,
+        });
+        return res.json({ userData: response, success: true });
     }
     catch (err) {
         throw err;

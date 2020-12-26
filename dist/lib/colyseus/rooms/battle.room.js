@@ -44,6 +44,7 @@ class Battle extends colyseus_1.Room {
     }
     // When room is initialized
     onCreate(options) {
+        this.setPatchRate(null);
         this.onMessage("end-game-turn", (client, payload) => __awaiter(this, void 0, void 0, function* () {
             this.delay.reset();
             this.arena.processTurn(payload);

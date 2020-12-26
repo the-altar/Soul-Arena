@@ -16,6 +16,7 @@ const logger_1 = require("../../logger");
 class Lobby extends colyseus_1.Room {
     // When room is initialized
     onCreate(options) {
+        this.setPatchRate(null);
         this.userList = {};
         this.idConnCount = {};
     }
@@ -57,9 +58,9 @@ class Lobby extends colyseus_1.Room {
         return __awaiter(this, void 0, void 0, function* () {
             const userId = this.userList[client.sessionId];
             this.idConnCount[userId]--;
+            delete this.userList[client.sessionId];
             if (this.idConnCount[userId] > 0)
                 return;
-            delete this.userList[client.sessionId];
             delete this.idConnCount[userId];
             const conn = yield db_1.pool.connect();
             try {
@@ -80,7 +81,9 @@ class Lobby extends colyseus_1.Room {
         });
     }
     // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
-    onDispose() { }
+    onDispose() {
+        logger_1.log.info("LOBBY HAS BEEN DISPOSED OF");
+    }
 }
 exports.Lobby = Lobby;
 //# sourceMappingURL=lobby.room.js.map

@@ -75,27 +75,27 @@ export const login = async (req: Request, res: Response) => {
     if (data.rowCount === 0) return res.json({ success: false });
 
     const match = await compare(req.body.password, user.passhash);
+    console.log(match)
+    if (!match) return res.json({ success: false });
 
-    if (match) {
-      delete user.passhash;
-      const response = {
-        id: user.id,
-        authLevel: user.authLevel,
-        auth: true,
-        username: user.username,
-      };
-      const token = sign(response, process.env.TOKEN_SECRET, {
-        expiresIn: "365d",
-      });
+    delete user.passhash;
+    const response = {
+      id: user.id,
+      authLevel: user.authLevel,
+      auth: true,
+      username: user.username,
+    };
+    const token = sign(response, process.env.TOKEN_SECRET, {
+      expiresIn: "365d",
+    });
 
-      res.cookie("session_id", token, {
-        httpOnly: true,
-        maxAge: 365 * 24 * 60 * 60 * 1000,
-        domain: process.env.DOMAIN,
-      });
-      return res.json({ userData: response, success: true });
-    }
-    return res.json({ success: false });
+    res.cookie("session_id", token, {
+      httpOnly: true,
+      maxAge: 365 * 24 * 60 * 60 * 1000,
+      domain: process.env.DOMAIN,
+    });
+
+    return res.json({ userData: response, success: true });
   } catch (err) {
     throw err;
   }

@@ -49,7 +49,12 @@ export class App {
           "game",
           express
             .Router()
-            .use(express.static("public/game/build", { maxAge: "7d" }))
+            .use(
+              express.static("public/game/build", {
+                maxAge: "7d",
+                index: false,
+              })
+            )
             .use(express.static("public/game", { maxAge: "7d" }))
             .use("/", gameRouter)
         )

@@ -19,13 +19,13 @@ function authenticate(req, res, next) {
                 return res.status(401);
             const u = yield jsonwebtoken_1.verify(token, process.env.TOKEN_SECRET);
             if (!u.auth)
-                return res.status(401);
+                return res.status(401).json({});
             req.res.locals.token = u;
             req.res.locals.id = u.id;
             next();
         }
         catch (err) {
-            res.status(401);
+            res.status(401).json({});
             throw err;
         }
     });
@@ -36,17 +36,16 @@ function authUserGameSession(req, res, next) {
         try {
             const token = req.cookies.session_id;
             if (!token)
-                return res.status(200).json(generateGuest());
+                return res.status(301).redirect("/login");
             const u = yield jsonwebtoken_1.verify(token, process.env.TOKEN_SECRET);
             if (!u.auth)
-                return res.status(200).json(generateGuest());
+                return res.status(301).redirect("/login");
             req.res.locals.token = u;
             req.res.locals.id = u.id;
             next();
         }
         catch (err) {
-            res.status(200).json(generateGuest());
-            throw err;
+            return res.status(301).redirect("/login");
         }
     });
 }

@@ -9,6 +9,7 @@ export class Lobby extends Room {
 
   // When room is initialized
   onCreate(options: any) {
+    this.setPatchRate(null);
     this.userList = {};
     this.idConnCount = {};
   }
@@ -47,9 +48,9 @@ export class Lobby extends Room {
   async onLeave(client: Client, consented: boolean) {
     const userId = this.userList[client.sessionId];
     this.idConnCount[userId]--;
-    if (this.idConnCount[userId] > 0) return;
-    
     delete this.userList[client.sessionId];
+
+    if (this.idConnCount[userId] > 0) return;
     delete this.idConnCount[userId];
 
     const conn = await pool.connect();
@@ -69,5 +70,7 @@ export class Lobby extends Room {
   }
 
   // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
-  onDispose() {}
+  onDispose() {
+    log.info("LOBBY HAS BEEN DISPOSED OF");
+  }
 }

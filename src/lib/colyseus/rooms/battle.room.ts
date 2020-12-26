@@ -25,6 +25,7 @@ export class Battle extends Room {
   private playerState: { [x: string]: number } = {};
   // When room is initialized
   onCreate(options: any) {
+    this.setPatchRate(null);
     this.onMessage("end-game-turn", async (client: Client, payload: any) => {
       this.delay.reset();
       this.arena.processTurn(payload);

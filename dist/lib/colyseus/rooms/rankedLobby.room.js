@@ -25,7 +25,9 @@ class ClientManager {
     addClient(id, payload, connection) {
         this.clientList[id] = {
             player: payload.player,
-            team: payload.team.map((e) => { return Object.assign({}, e.data); }),
+            team: payload.team.map((e) => {
+                return Object.assign({}, e.data);
+            }),
             connection: connection,
         };
         this.onlineList[payload.player.id] = true;
@@ -54,9 +56,11 @@ class ClientManager {
         return Object.keys(this.clientList).length;
     }
     getRankedMap() {
-        const mappedHash = Object.keys(this.clientList).sort((a, b) => {
+        const mappedHash = Object.keys(this.clientList)
+            .sort((a, b) => {
             return this.clientList[a].player.elo - this.clientList[b].player.elo;
-        }).map((sortedKey) => {
+        })
+            .map((sortedKey) => {
             return this.clientList[sortedKey];
         });
         return mappedHash;
@@ -70,21 +74,25 @@ class RankedLobby extends colyseus_1.Room {
     }
     // When room is initialized
     onCreate(options) {
+        this.setPatchRate(null);
         this.setSimulationInterval(() => __awaiter(this, void 0, void 0, function* () {
             try {
                 const queue = this.manager.getRankedMap();
                 for (let i = 1; i < queue.length; i = i + 2) {
-                    const room = yield colyseus_1.matchMaker.createRoom('battle', {});
+                    const room = yield colyseus_1.matchMaker.createRoom("battle", {});
                     for (let j = i - 1; j <= i; j++) {
                         const p = queue[j];
-                        const seat = yield colyseus_1.matchMaker.reserveSeatFor(room, { player: p.player, team: p.team });
-                        p.connection.send('seat', seat);
+                        const seat = yield colyseus_1.matchMaker.reserveSeatFor(room, {
+                            player: p.player,
+                            team: p.team,
+                        });
+                        p.connection.send("seat", seat);
                         this.manager.removeClientBySessionId(queue[j].connection.sessionId);
                     }
                 }
             }
             catch (err) {
-                throw (err);
+                throw err;
             }
         }), this.evaluateGroupInterval);
     }
@@ -122,7 +130,7 @@ class RankedLobby extends colyseus_1.Room {
                 this.manager.addClient(client.sessionId, options, client);
             }
             catch (err) {
-                throw (err);
+                throw err;
             }
         });
     }
@@ -131,8 +139,7 @@ class RankedLobby extends colyseus_1.Room {
         this.manager.removeClientBySessionId(client.sessionId);
     }
     onDispose() {
-        return __awaiter(this, void 0, void 0, function* () {
-        });
+        return __awaiter(this, void 0, void 0, function* () { });
     }
 }
 exports.RankedLobby = RankedLobby;

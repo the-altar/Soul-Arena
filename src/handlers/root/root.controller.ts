@@ -24,7 +24,7 @@ export const topLadder = async (req: Request, res: Response) => {
     ladderboard l
   join users u on
     u.id = l.user_id
-  order by l.season_level desc limit 10;`;
+  order by l.season_level desc limit 5;`;
 
   try {
     const data = await pool.query(sql);
@@ -44,7 +44,7 @@ export const topStreak = async (req: Request, res: Response) => {
     ladderboard l
   join users u on
     u.id = l.user_id
-  order by l.max_streak desc;`;
+  order by l.max_streak desc limit 5;`;
 
   try {
     const data = await pool.query(sql);

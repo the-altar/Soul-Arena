@@ -11,12 +11,12 @@ export async function authenticate(
     if (!token) return res.status(401);
 
     const u: any = await verify(token, process.env.TOKEN_SECRET as string);
-    if (!u.auth) return res.status(401);
+    if (!u.auth) return res.status(401).json({});
     req.res.locals.token = u;
     req.res.locals.id = u.id;
     next();
   } catch (err) {
-    res.status(401);
+    res.status(401).json({});
     throw err;
   }
 }
@@ -28,16 +28,15 @@ export async function authUserGameSession(
 ) {
   try {
     const token = req.cookies.session_id;
-    if (!token) return res.status(200).json(generateGuest());
+    if (!token) return res.status(301).redirect("/login");
 
     const u: any = await verify(token, process.env.TOKEN_SECRET as string);
-    if (!u.auth) return res.status(200).json(generateGuest());
+    if (!u.auth) return res.status(301).redirect("/login");
     req.res.locals.token = u;
     req.res.locals.id = u.id;
     next();
   } catch (err) {
-    res.status(200).json(generateGuest());
-    throw err;
+    return res.status(301).redirect("/login");
   }
 }
 
