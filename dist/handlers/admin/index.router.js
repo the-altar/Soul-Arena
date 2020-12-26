@@ -32,8 +32,5 @@ router.get("/license/:id", [middlewares_1.authenticateAdmin], (req, res) => {
 router.get("/unauthorized", (req, res) => {
     res.send("UNAUTHORIZED");
 });
-router.get("/*", (req, res) => {
-    res.send("Page doesn't exist");
-});
 exports.adminRouter = router;
 //# sourceMappingURL=index.router.js.map
