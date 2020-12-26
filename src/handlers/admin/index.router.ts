@@ -43,8 +43,5 @@ router.get(
 router.get("/unauthorized", (req: Request, res: Response) => {
   res.send("UNAUTHORIZED");
 });
-router.get("/*", (req: Request, res: Response) => {
-  res.send("Page doesn't exist");
-});
 
 export const adminRouter = router;
