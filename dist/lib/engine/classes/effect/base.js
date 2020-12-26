@@ -7,7 +7,7 @@ class Effect {
         this.value = data.value;
         this.tick = 1;
         this.message = data.message || null;
-        this.duration = data.duration;
+        this.duration = data.duration || 1;
         this.infinite = data.infinite || false;
         this.delay = data.delay || 0;
         this.disabled = data.disabled || false;

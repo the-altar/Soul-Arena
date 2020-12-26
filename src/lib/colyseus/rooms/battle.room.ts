@@ -1,10 +1,10 @@
 import http from "http";
 import { Room, Client, Delayed } from "colyseus";
+import { Schema, type, ArraySchema } from "@colyseus/schema";
 import { Arena, iCharacter, Player } from "../../engine";
 import * as results from "../../helpers/battleResults";
 import { pool } from "../../../db";
 import { log } from "../../logger";
-import { levelFromName } from "bunyan";
 
 interface iSkillCordinates {
   target?: number;
@@ -17,23 +17,25 @@ interface iRegister {
   team: Array<iCharacter>;
 }
 
+class MatchState extends Schema {
+  @type("string")
+  turnData:string;
+}
+
 export class Battle extends Room {
   private arena: Arena = new Arena();
   private constructed: number = 0;
   private evaluateGroupInterval = 60000;
   private delay: Delayed;
   private playerState: { [x: string]: number } = {};
+
   // When room is initialized
   onCreate(options: any) {
-    this.setPatchRate(null);
+    this.setState(new MatchState());
     this.onMessage("end-game-turn", async (client: Client, payload: any) => {
       this.delay.reset();
       this.arena.processTurn(payload);
-      try {
-        await this.lifeCycle();
-      } catch (e) {
-        log.error(e);
-      }
+      this.lifeCycle();
     });
 
     this.onMessage(
@@ -80,68 +82,58 @@ export class Battle extends Room {
   // When a client leaves the room
   async onLeave(client: Client, consented: boolean) {
     if (consented) {
-      log.info("[GAME] user left");
       return;
     }
     try {
       // Notify ROOM that someone already left
       // allow disconnected client to reconnect into this room until 20 seconds
-
-      log.info("[GAME] user went missing");
       await this.allowReconnection(client, 20);
-      log.info("[GAME] user reconnected");
       // client returned! let's re-activate it.
     } catch (e) {
       // 20 seconds expired. let's remove the client.
       const id = this.playerState[client.sessionId];
       await this.surrender(id);
-      log.info("[GAME] surrendered");
     }
   }
 
   // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
   async onDispose() {
-    try {
-      await this.updateGameRecords(this.arena.winner, this.arena.loser);
-      await this.updateMissionGoals(this.arena.winner, this.arena.loser);
-      await results.updateGameResults({
-        ...this.arena.loser.season,
-        coins: this.arena.loser.coins,
-        season: 1,
-        id: this.arena.loser.id,
-      });
-      await results.updateGameResults({
-        ...this.arena.winner.season,
-        coins: this.arena.winner.coins,
-        season: 1,
-        id: this.arena.winner.id,
-      });
-    } catch (e) {
-      log.error(e);
-    } finally {
-      log.info("[GAME] room has been disposed of");
-    }
-  }
-
-  gameClock() {
-    log.info("[GAME] A new game has begun");
-    const { gameData } = this.arena.startGame();
-    this.broadcast("game-started", gameData);
-
-    this.delay = this.clock.setInterval(async () => {
+    if (this.arena.winner && this.arena.loser)
       try {
-        await this.lifeCycle();
+        await this.updateGameRecords(this.arena.winner, this.arena.loser);
+        await this.updateMissionGoals(this.arena.winner, this.arena.loser);
+        await results.updateGameResults({
+          ...this.arena.loser.season,
+          coins: this.arena.loser.coins,
+          season: 1,
+          id: this.arena.loser.id,
+        });
+        await results.updateGameResults({
+          ...this.arena.winner.season,
+          coins: this.arena.winner.coins,
+          season: 1,
+          id: this.arena.winner.id,
+        });
       } catch (e) {
         log.error(e);
       }
+  }
+
+  gameClock() {
+    this.arena.startGame();
+    this.state.turnData = JSON.stringify(this.arena.getClientData())
+    this.broadcast("game-started", this.arena.getClientData());
+
+    this.delay = this.clock.setInterval(() => {
+      this.lifeCycle();
+      this.state.turnData = JSON.stringify(this.arena.getClientData())
     }, this.evaluateGroupInterval);
   }
 
-  async lifeCycle() {
-    const { isOver, gameData } = this.arena.startGame();
-
-    if (!isOver) this.broadcast("start-new-turn", gameData);
-    else {
+  lifeCycle() {
+    const isOver = this.arena.startGame();
+    this.state.turnData = JSON.stringify(this.arena.getClientData())
+    if (isOver) {
       const payload1 = results.matchCalculations(
         this.arena.winner,
         this.arena.loser,

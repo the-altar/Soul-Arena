@@ -75,15 +75,12 @@ class Arena {
         player.consumeEnergy(energySpent);
         player.resetPayupCart();
     }
-    startGame(complete) {
+    startGame() {
         this.turnCount++;
         const player1 = this.players[this.turnCount % 2];
         const player2 = this.players[((this.turnCount % 2) + 1) % 2];
         player1.setTurn(true);
         player2.setTurn(false);
-        //console.log("Executing skill Queue")
-        if (!complete)
-            this.emptyTempQueue();
         this.clearCharactersNotifications();
         this.executeSkills();
         this.executeNewSkills();
@@ -98,10 +95,7 @@ class Arena {
         if (bCount2 === 3)
             return this.gameOver(player2, player1);
         this.validateSkillQueue();
-        return {
-            gameData: this.getClientData(),
-            isOver: false,
-        };
+        return false;
     }
     executeNewSkills() {
         const list = this.tempQueue;
@@ -251,14 +245,6 @@ class Arena {
             this.characters[i].clearSkillMods();
         }
     }
-    emptyTempQueue() {
-        if (this.tempQueue.length > 0) {
-            while (this.tempQueue.length > 0) {
-                const s = this.tempQueue.pop();
-                this.removeSkillFromTempQueue(s);
-            }
-        }
-    }
     endPlayerPhase(player) {
         let bodyCount = 0;
         //console.log("-> clearing debuff, lowering cooldowns and increase energy pool")
@@ -355,10 +341,7 @@ class Arena {
     gameOver(winner, loser) {
         this.winner = winner;
         this.loser = loser;
-        return {
-            gameData: {},
-            isOver: true,
-        };
+        return true;
     }
     exchangeEnergyPool(replace) {
         const player = this.players[this.turnCount % 2];

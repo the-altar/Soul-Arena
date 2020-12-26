@@ -70,7 +70,5 @@ export class Lobby extends Room {
   }
 
   // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
-  onDispose() {
-    log.info("LOBBY HAS BEEN DISPOSED OF");
-  }
+  onDispose() {}
 }

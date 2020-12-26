@@ -81,9 +81,7 @@ class Lobby extends colyseus_1.Room {
         });
     }
     // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
-    onDispose() {
-        logger_1.log.info("LOBBY HAS BEEN DISPOSED OF");
-    }
+    onDispose() { }
 }
 exports.Lobby = Lobby;
 //# sourceMappingURL=lobby.room.js.map

@@ -11,6 +11,12 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -30,10 +36,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Battle = void 0;
 const colyseus_1 = require("colyseus");
+const schema_1 = require("@colyseus/schema");
 const engine_1 = require("../../engine");
 const results = __importStar(require("../../helpers/battleResults"));
 const db_1 = require("../../../db");
 const logger_1 = require("../../logger");
+class MatchState extends schema_1.Schema {
+}
+__decorate([
+    schema_1.type("string")
+], MatchState.prototype, "turnData", void 0);
 class Battle extends colyseus_1.Room {
     constructor() {
         super(...arguments);
@@ -44,16 +56,11 @@ class Battle extends colyseus_1.Room {
     }
     // When room is initialized
     onCreate(options) {
-        this.setPatchRate(null);
+        this.setState(new MatchState());
         this.onMessage("end-game-turn", (client, payload) => __awaiter(this, void 0, void 0, function* () {
             this.delay.reset();
             this.arena.processTurn(payload);
-            try {
-                yield this.lifeCycle();
-            }
-            catch (e) {
-                logger_1.log.error(e);
-            }
+            this.lifeCycle();
         }));
         this.onMessage("add-skill-to-queue", (client, cordinates) => {
             const payload = this.arena.addSkillToTempQueue(cordinates);
@@ -89,69 +96,56 @@ class Battle extends colyseus_1.Room {
     onLeave(client, consented) {
         return __awaiter(this, void 0, void 0, function* () {
             if (consented) {
-                logger_1.log.info("[GAME] user left");
                 return;
             }
             try {
                 // Notify ROOM that someone already left
                 // allow disconnected client to reconnect into this room until 20 seconds
-                logger_1.log.info("[GAME] user went missing");
                 yield this.allowReconnection(client, 20);
-                logger_1.log.info("[GAME] user reconnected");
                 // client returned! let's re-activate it.
             }
             catch (e) {
                 // 20 seconds expired. let's remove the client.
                 const id = this.playerState[client.sessionId];
                 yield this.surrender(id);
-                logger_1.log.info("[GAME] surrendered");
             }
         });
     }
     // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
     onDispose() {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield this.updateGameRecords(this.arena.winner, this.arena.loser);
-                yield this.updateMissionGoals(this.arena.winner, this.arena.loser);
-                yield results.updateGameResults(Object.assign(Object.assign({}, this.arena.loser.season), { coins: this.arena.loser.coins, season: 1, id: this.arena.loser.id }));
-                yield results.updateGameResults(Object.assign(Object.assign({}, this.arena.winner.season), { coins: this.arena.winner.coins, season: 1, id: this.arena.winner.id }));
-            }
-            catch (e) {
-                logger_1.log.error(e);
-            }
-            finally {
-                logger_1.log.info("[GAME] room has been disposed of");
-            }
+            if (this.arena.winner && this.arena.loser)
+                try {
+                    yield this.updateGameRecords(this.arena.winner, this.arena.loser);
+                    yield this.updateMissionGoals(this.arena.winner, this.arena.loser);
+                    yield results.updateGameResults(Object.assign(Object.assign({}, this.arena.loser.season), { coins: this.arena.loser.coins, season: 1, id: this.arena.loser.id }));
+                    yield results.updateGameResults(Object.assign(Object.assign({}, this.arena.winner.season), { coins: this.arena.winner.coins, season: 1, id: this.arena.winner.id }));
+                }
+                catch (e) {
+                    logger_1.log.error(e);
+                }
         });
     }
     gameClock() {
-        logger_1.log.info("[GAME] A new game has begun");
-        const { gameData } = this.arena.startGame();
-        this.broadcast("game-started", gameData);
-        this.delay = this.clock.setInterval(() => __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield this.lifeCycle();
-            }
-            catch (e) {
-                logger_1.log.error(e);
-            }
-        }), this.evaluateGroupInterval);
+        this.arena.startGame();
+        this.state.turnData = JSON.stringify(this.arena.getClientData());
+        this.broadcast("game-started", this.arena.getClientData());
+        this.delay = this.clock.setInterval(() => {
+            this.lifeCycle();
+            this.state.turnData = JSON.stringify(this.arena.getClientData());
+        }, this.evaluateGroupInterval);
     }
     lifeCycle() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { isOver, gameData } = this.arena.startGame();
-            if (!isOver)
-                this.broadcast("start-new-turn", gameData);
-            else {
-                const payload1 = results.matchCalculations(this.arena.winner, this.arena.loser, true);
-                const payload2 = results.matchCalculations(this.arena.loser, this.arena.winner, false);
-                this.broadcast("end-game", {
-                    winner: { playerData: this.arena.winner, results: payload1 },
-                    loser: { playerData: this.arena.loser, results: payload2 },
-                });
-            }
-        });
+        const isOver = this.arena.startGame();
+        this.state.turnData = JSON.stringify(this.arena.getClientData());
+        if (isOver) {
+            const payload1 = results.matchCalculations(this.arena.winner, this.arena.loser, true);
+            const payload2 = results.matchCalculations(this.arena.loser, this.arena.winner, false);
+            this.broadcast("end-game", {
+                winner: { playerData: this.arena.winner, results: payload1 },
+                loser: { playerData: this.arena.loser, results: payload2 },
+            });
+        }
     }
     surrender(id) {
         return __awaiter(this, void 0, void 0, function* () {
