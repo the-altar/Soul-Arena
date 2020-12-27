@@ -81,7 +81,6 @@ export class Arena {
 
   public processTurn(energySpent: Array<number>) {
     const player = this.players[this.turnCount % 2];
-    this.clearSkillMods(player);
     if (!energySpent) return;
 
     player.consumeEnergy(energySpent);
@@ -95,7 +94,6 @@ export class Arena {
 
     player1.setTurn(true);
     player2.setTurn(false);
-
 
     this.clearCharactersNotifications();
 

@@ -35,7 +35,7 @@ export class Skill {
   private targetChoices: { [x: string]: Array<number> };
   private id: number;
   public caster: number;
-  public turnCost: Array<number>;
+  private turnCost: Array<number>;
   private arenaReference: Arena;
 
   constructor(data: any, caster: number, world: Arena) {
@@ -59,7 +59,7 @@ export class Skill {
     this.id = data.id;
     this.harmful = data.harmful || false;
     this.arenaReference = world;
-    this.turnCost = [data.turnCost || data.cost];
+    this.turnCost = this.cost.slice();
     data.effects = data.effects.sort((a: any, b: any) => {
       return (b.priority || 0) - (a.priority || 0);
     });
@@ -375,8 +375,9 @@ export class Skill {
   }
 
   public setTurnCost() {
-    for (const i in this.cost) {
-      this.turnCost[i] = Math.max(this.cost[i] + this.mods.costChange[i], 0);
+    const t = this.mods.costReplacement || this.cost;
+    for (const i in t) {
+      this.turnCost[i] = Math.max(t[i] + this.mods.costChange[i], 0);
     }
   }
 }

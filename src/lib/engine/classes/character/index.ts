@@ -103,6 +103,7 @@ export class Character {
   public lowerCooldowns(char: Character) {
     for (const skill of this.skills) {
       skill.lowerCooldown(0);
+      skill.clearMods();
     }
   }
 
@@ -325,7 +326,7 @@ export class Character {
     delete publicData.skills;
     delete publicData.buffs;
     delete publicData.debuffs;
-    
+
     const skillCopy = [];
     for (const skill of this.skills) {
       skillCopy.push(skill.getPublicData());

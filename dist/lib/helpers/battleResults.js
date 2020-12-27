@@ -26,16 +26,13 @@ function calculateExpGain(player, p2, isWinner) {
     const levelStatus = [0];
     let exp;
     let levelDifference = Math.abs(p2.season.seasonLevel - player.season.seasonLevel);
-    if (!isWinner && player.season.seasonLevel < p2.season.seasonLevel)
-        levelDifference *= -1;
-    else if (isWinner && player.season.seasonLevel > p2.season.seasonLevel)
-        levelDifference = 0;
-    exp = Math.min(Math.max(50 * levelDifference, 150), 600);
     if (isWinner) {
+        exp = Math.min(Math.max(50 * levelDifference, 150), 600);
         player.season.exp += exp;
         levelUp(player, levelStatus);
     }
     else {
+        exp = Math.min(Math.max(50 * levelDifference, 50), 300);
         player.season.exp = Math.max(0, player.season.exp - exp);
         levelDown(player, levelStatus);
     }
@@ -118,6 +115,7 @@ function matchCalculations(p1, p2, isWinner) {
     calculateElo(p1, p2, isWinner);
     const coins = calculateCoins(p1, isWinner);
     const results = calculateExpGain(p1, p2, isWinner);
+    console.log(results);
     return Object.assign({ playerId: p1.getId(), coins }, results);
 }
 exports.matchCalculations = matchCalculations;

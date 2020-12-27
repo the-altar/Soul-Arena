@@ -27,7 +27,7 @@ class Skill {
         this.id = data.id;
         this.harmful = data.harmful || false;
         this.arenaReference = world;
-        this.turnCost = [data.turnCost || data.cost];
+        this.turnCost = this.cost.slice();
         data.effects = data.effects.sort((a, b) => {
             return (b.priority || 0) - (a.priority || 0);
         });
@@ -281,8 +281,12 @@ class Skill {
         return Object.assign(Object.assign({}, publicSkill), { effects: copyEffects, inactiveEffects: copyInactiveEffects });
     }
     setTurnCost() {
-        for (const i in this.cost) {
-            this.turnCost[i] = Math.max(this.cost[i] + this.mods.costChange[i], 0);
+        if (this.mods.costReplacement) {
+            console.log(this.mods.costReplacement, this.cost);
+        }
+        const t = this.mods.costReplacement || this.cost;
+        for (const i in t) {
+            this.turnCost[i] = Math.max(t[i] + this.mods.costChange[i], 0);
         }
     }
 }

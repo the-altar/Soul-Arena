@@ -13,7 +13,6 @@ router.get("roster/:id", [authenticateAdmin], (req: Request, res: Response) => {
   return res.sendFile("index.html", { root: "./public/admin" });
 });
 router.get("/skills", [authenticateAdmin], (req: Request, res: Response) => {
-  console.log("Asking for roster");
   return res.sendFile("index.html", { root: "./public/admin" });
 });
 router.get(

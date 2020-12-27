@@ -101,7 +101,7 @@ export function matchCalculations(p1: Player, p2: Player, isWinner: boolean) {
   calculateElo(p1, p2, isWinner);
   const coins = calculateCoins(p1, isWinner);
   const results = calculateExpGain(p1, p2, isWinner);
-
+  console.log(results)
   return {
     playerId: p1.getId(),
     coins,

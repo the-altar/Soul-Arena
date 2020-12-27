@@ -67,6 +67,7 @@ class Character {
     lowerCooldowns(char) {
         for (const skill of this.skills) {
             skill.lowerCooldown(0);
+            skill.clearMods();
         }
     }
     generateEnergy() {

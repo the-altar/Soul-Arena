@@ -10,7 +10,7 @@ export class SkillMods {
   constructor(data: any) {
     this.targetMod = data.targetMod || null;
     this.increaseDuration = data.increaseDuration || 0;
-    this.costReplacement = null;
+    this.costReplacement = data.costReplacement || null;
     this.costChange = data.costChange || {
       [ReiatsuTypes.Hakuda]: 0,
       [ReiatsuTypes.Kidou]: 0,
