@@ -25,16 +25,12 @@ export function calculateExpGain(
     p2.season.seasonLevel - player.season.seasonLevel
   );
 
-  if (!isWinner && player.season.seasonLevel < p2.season.seasonLevel)
-    levelDifference *= -1;
-  else if (isWinner && player.season.seasonLevel > p2.season.seasonLevel)
-    levelDifference = 0;
-  exp = Math.min(Math.max(50 * levelDifference, 150), 600);
-
   if (isWinner) {
+    exp = Math.min(Math.max(50 * levelDifference, 150), 600);
     player.season.exp += exp;
     levelUp(player, levelStatus);
   } else {
+    exp = Math.min(Math.max(50 * levelDifference, 50), 300);
     player.season.exp = Math.max(0, player.season.exp - exp);
     levelDown(player, levelStatus);
   }
