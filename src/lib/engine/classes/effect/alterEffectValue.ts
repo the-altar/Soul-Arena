@@ -85,6 +85,7 @@ export class EnableEffects extends Effect {
   private parentSkillId: number;
   private targetedSkill: Skill;
   private hasBeenApplied: boolean;
+  private skillName: string;
 
   constructor(data: any, caster: number) {
     super(data, caster);
@@ -93,6 +94,16 @@ export class EnableEffects extends Effect {
   }
 
   functionality(char: Character, origin: Skill) {
+    if (char.getDebuffs().ignoreBenefitialEffects) {
+      if (!this.hasBeenApplied) {
+        this.skillName = char.findSkillById(this.parentSkillId).name;
+        return;
+      }
+      this.effectConclusion();
+      this.hasBeenApplied = false;
+      return;
+    }
+
     if (this.hasBeenApplied) return;
 
     const targetedSkill = char.findSkillById(this.parentSkillId);
@@ -102,16 +113,17 @@ export class EnableEffects extends Effect {
         targetedSkill.effects.push(e);
       }
     }
+    this.skillName = targetedSkill.name;
     this.targetedSkill = targetedSkill;
     this.hasBeenApplied = true;
   }
 
   generateToolTip() {
-    this.message =
-      this.message || `'${this.targetedSkill.name}' has been improved`;
+    this.message = this.message || `'${this.skillName}' has been improved`;
   }
 
   effectConclusion() {
+    if (!this.targetedSkill) return;
     for (let i = this.targetedSkill.effects.length - 1; i >= 0; i--) {
       const e = this.targetedSkill.effects[i];
       if (this.effectsId.includes(e.id)) {

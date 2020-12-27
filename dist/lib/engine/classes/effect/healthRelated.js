@@ -9,7 +9,8 @@ class Healing extends base_1.Effect {
         super(data, caster);
     }
     functionality(char, origin) {
-        this.triggered = true;
+        if (char.getDebuffs().ignoreBenefitialEffects)
+            return;
         const hp = char.geHitPoints() + this.value;
         char.setHitPoints(hp);
     }
@@ -37,7 +38,8 @@ class HealthDrain extends damageRelated_1.Damage {
         super(data, caster);
     }
     functionality(character, origin) {
-        this.triggered = true;
+        if (character.getBuffs().ignoreHarmfulEffects.status)
+            return;
         const reduction = this.getDamageReductionFromCaster(this.caster, this, origin);
         let damage = this.value - reduction;
         if (damage < 0)

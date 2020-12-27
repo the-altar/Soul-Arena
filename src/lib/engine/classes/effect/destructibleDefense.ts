@@ -8,6 +8,7 @@ import {
 import { Character } from "../character";
 import { Skill } from "../skill";
 
+/**Destructible defense must be destroyed before dealing damage. A bit more complex */
 export class DestructibleDefense extends Effect {
   private noRepeat:boolean
   public uniqueId: number;
@@ -29,8 +30,6 @@ export class DestructibleDefense extends Effect {
     this.generateToolTip();
 
     if (this.delay <= 0) this.duration--;
-    /*  An even tick means it's your opponent's turn, odd means its yours.*/
-    /*  The default behavior is for your skills to activate on odd ticks*/
     if (this.tick % 2 === PlayerPhase.MyTurn || this.compulsory) {
       this.activate = false;
     } else this.activate = true;

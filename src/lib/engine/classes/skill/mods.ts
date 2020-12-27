@@ -2,6 +2,7 @@ import { effectType, targetType, ReiatsuTypes } from "../../enums";
 export class SkillMods {
   private targetMod: targetType;
   public increaseDuration: number;
+  public costReplacement: Array<ReiatsuTypes>;
   public costChange: {
     [x: number]: number;
   };
@@ -9,6 +10,7 @@ export class SkillMods {
   constructor(data: any) {
     this.targetMod = data.targetMod || null;
     this.increaseDuration = data.increaseDuration || 0;
+    this.costReplacement = null;
     this.costChange = data.costChange || {
       [ReiatsuTypes.Hakuda]: 0,
       [ReiatsuTypes.Kidou]: 0,
@@ -35,5 +37,6 @@ export class SkillMods {
       [ReiatsuTypes.Reiryoku]: 0,
       [ReiatsuTypes.Zanpakutou]: 0,
     };
+    this.costReplacement = null;
   }
 }

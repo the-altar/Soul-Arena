@@ -6,6 +6,7 @@ class SkillMods {
     constructor(data) {
         this.targetMod = data.targetMod || null;
         this.increaseDuration = data.increaseDuration || 0;
+        this.costReplacement = null;
         this.costChange = data.costChange || {
             [enums_1.ReiatsuTypes.Hakuda]: 0,
             [enums_1.ReiatsuTypes.Kidou]: 0,
@@ -29,6 +30,7 @@ class SkillMods {
             [enums_1.ReiatsuTypes.Reiryoku]: 0,
             [enums_1.ReiatsuTypes.Zanpakutou]: 0,
         };
+        this.costReplacement = null;
     }
 }
 exports.SkillMods = SkillMods;

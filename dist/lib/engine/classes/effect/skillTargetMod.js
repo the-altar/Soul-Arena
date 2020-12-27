@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IncreaseTargetSkillDuration = exports.IncreaseCasterSkillDuration = exports.SkillCostChange = exports.SkillTargetMod = void 0;
+exports.IncreaseTargetSkillDuration = exports.IncreaseCasterSkillDuration = exports.ReplaceSkillCost = exports.SkillCostChange = exports.SkillTargetMod = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
 class SkillTargetMod extends base_1.Effect {
@@ -77,26 +77,6 @@ class SkillCostChange extends base_1.Effect {
             this.message = `'${this.targetedSkillName}' will cost ${value} ${operation} ${enums_1.ReiatsuTypes[this.reiatsuCostType]} reiatsu`;
         }
     }
-    progressTurn() {
-        this.delay--;
-        if (this.delay <= 0)
-            this.duration--;
-        /*  An even tick means it's your opponent's turn, odd means its yours.*/
-        /*  The default behavior is for your skills to activate on odd ticks*/
-        if (this.tick % 2 === enums_1.PlayerPhase.MyTurn) {
-            this.activate = false;
-        }
-        else
-            this.activate = true;
-        if (this.duration < 0 && !this.infinite)
-            this.terminate = true;
-        else if (this.targets.length === 0)
-            this.terminate = true;
-        else
-            this.terminate = false;
-        if (this.terminate)
-            this.effectConclusion();
-    }
     getPublicData() {
         const publicData = Object.assign({}, this);
         delete publicData.arenaReference;
@@ -104,6 +84,34 @@ class SkillCostChange extends base_1.Effect {
     }
 }
 exports.SkillCostChange = SkillCostChange;
+class ReplaceSkillCost extends base_1.Effect {
+    constructor(data, caster) {
+        super(data, caster);
+        this.reiatsuReplacement = data.reiatsuReplacement;
+        this.specificSkillTarget = data.specificSkillTarget;
+        this.targetedSkillName = "";
+    }
+    functionality(char, origin) {
+        if (this.specificSkillTarget) {
+            for (const s of char.skills) {
+                if (s.getId() === this.specificSkillTarget) {
+                    s.mods.costReplacement = this.reiatsuReplacement;
+                    this.targetedSkillName = s.name;
+                    break;
+                }
+            }
+        }
+        else {
+            for (const s of char.skills) {
+                s.mods.costReplacement = this.reiatsuReplacement;
+            }
+        }
+    }
+    generateToolTip() {
+        this.message = "Costs have been replaced";
+    }
+}
+exports.ReplaceSkillCost = ReplaceSkillCost;
 class IncreaseCasterSkillDuration extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -111,6 +119,16 @@ class IncreaseCasterSkillDuration extends base_1.Effect {
         this.noRepeat = false;
     }
     functionality(char, origin) {
+        if (char.getDebuffs().ignoreBenefitialEffects) {
+            this.noRepeat = false;
+            if (!this.targetedSkillName) {
+                this.targetedSkillName = char.findSkillById(this.targetSkillId).name;
+            }
+            else {
+                this.effectConclusion();
+            }
+            return;
+        }
         if (this.noRepeat)
             return;
         this.noRepeat = true;
@@ -143,6 +161,17 @@ class IncreaseTargetSkillDuration extends base_1.Effect {
         this.targetSkillId = data.targetSkillId;
     }
     functionality(char, origin) {
+        if (char.getBuffs().ignoreHarmfulEffects.status) {
+            this.noRepeat = false;
+            if (!this.targetedSkillName) {
+                this.targetedSkillName = this.arenaReference
+                    .findCharacterById(this.caster)
+                    .char.findSkillById(this.targetSkillId).name;
+            }
+            this.charReference = char;
+            this.effectConclusion();
+            return;
+        }
         if (this.noRepeat)
             return;
         this.noRepeat = true;

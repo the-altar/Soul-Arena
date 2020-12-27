@@ -34,6 +34,10 @@ export class Buffs {
   damageIncreasal: { byDamage: any; bySkillClass: any; bySkillId: any };
   absorbDamage: { [x: string]: { [x: string]: number } };
   destructibleDefense: { [x: string]: Effect };
+  ignoreHarmfulEffects: {
+    status: boolean;
+    includeDamage: boolean;
+  };
 
   constructor() {
     this.invulnerability = {
@@ -47,6 +51,10 @@ export class Buffs {
     this.damageIncreasal = { byDamage: {}, bySkillClass: {}, bySkillId: {} };
     this.absorbDamage = {};
     this.destructibleDefense = {};
+    this.ignoreHarmfulEffects = {
+      status: false,
+      includeDamage: false,
+    };
   }
 
   public isInvulnerable(skill: Skill, effect?: Effect): boolean {
@@ -157,7 +165,7 @@ export class Buffs {
 
   public validateDD() {
     for (const k in this.destructibleDefense) {
-      if (this.destructibleDefense[k].value <= 0){
+      if (this.destructibleDefense[k].value <= 0) {
         delete this.destructibleDefense[k];
       }
     }
@@ -188,5 +196,11 @@ export class Buffs {
   }
   public getDestructibleDefense() {
     return this.destructibleDefense;
+  }
+  public clearIgnoreHarmfulEffects() {
+    this.ignoreHarmfulEffects = {
+      status: false,
+      includeDamage: false,
+    };
   }
 }

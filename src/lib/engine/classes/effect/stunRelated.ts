@@ -14,6 +14,7 @@ export class Stun extends Effect {
   }
 
   public functionality(char: Character, origin: Skill) {
+    if (char.getBuffs().ignoreHarmfulEffects.status) return;
     char.disableSkills();
     char.getDebuffs().stun[this.stunClass] = true;
   }

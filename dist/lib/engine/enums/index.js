@@ -57,6 +57,8 @@ var effectType;
     effectType[effectType["DisableEffects"] = 26] = "DisableEffects";
     effectType[effectType["IncreaseCasterSkillDuration"] = 27] = "IncreaseCasterSkillDuration";
     effectType[effectType["IncreaseTargetSkillDuration"] = 28] = "IncreaseTargetSkillDuration";
+    effectType[effectType["IgnoreEffects"] = 29] = "IgnoreEffects";
+    effectType[effectType["ReplaceSkillCost"] = 30] = "ReplaceSkillCost";
 })(effectType = exports.effectType || (exports.effectType = {}));
 var activationType;
 (function (activationType) {

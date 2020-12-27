@@ -53,6 +53,8 @@ export enum effectType {
   DisableEffects,
   IncreaseCasterSkillDuration,
   IncreaseTargetSkillDuration,
+  IgnoreEffects,
+  ReplaceSkillCost
 }
 
 export enum activationType {

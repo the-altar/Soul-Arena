@@ -18,7 +18,7 @@ export class EnergyGain extends Effect {
   }
 
   public functionality(char: Character, origin: Skill) {
-    this.triggered = true;
+    if(char.getDebuffs().ignoreBenefitialEffects) return
     const p = this.arenaReference.findPlayerByCharacterIndex(this.caster);
     let index: number;
     if (this.energyType === CostTypes.Random)
@@ -52,6 +52,7 @@ export class EnergyRemoval extends Effect {
   }
 
   public functionality(char: Character, origin: Skill) {
+    if(char.getBuffs().ignoreHarmfulEffects.status) return
     const p = this.arenaReference.findPlayerByChar(char);
 
     if (this.triggerClause === triggerClauseType.IfTargeted) {

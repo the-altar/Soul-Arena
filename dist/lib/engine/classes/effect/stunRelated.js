@@ -9,6 +9,8 @@ class Stun extends base_1.Effect {
         this.stunClass = data.stunClass;
     }
     functionality(char, origin) {
+        if (char.getBuffs().ignoreHarmfulEffects.status)
+            return;
         char.disableSkills();
         char.getDebuffs().stun[this.stunClass] = true;
     }

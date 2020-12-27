@@ -39,6 +39,7 @@ export class EffectRemoval extends Effect {
   }
 
   removeHarmfulEffects(char: Character) {
+    if (char.getDebuffs().ignoreBenefitialEffects) return;
     const skills = this.arenaReference.getActiveSkills();
     for (const skill of skills) {
       let wasRemoved = false;
@@ -51,6 +52,7 @@ export class EffectRemoval extends Effect {
   }
 
   removeFriendlyEffects(char: Character) {
+    if (char.getBuffs().ignoreHarmfulEffects.status) return;
     const skills = this.arenaReference.getActiveSkills();
     for (const skill of skills) {
       let wasRemoved = false;
@@ -86,4 +88,43 @@ function reduceTargets(arr: Skill | Effect, char: Character, world: Arena) {
   }
 
   return false;
+}
+
+export class IgnoreEffects extends Effect {
+  private harmful: boolean;
+  private friendly: boolean;
+  private includeDamage: boolean;
+
+  constructor(data: any, caster: number) {
+    super(data, caster);
+    this.harmful = data.harmful || false;
+    this.friendly = data.friendly || false;
+    this.includeDamage = data.includeDamage || false;
+  }
+
+  public functionality(char: Character, origin: Skill) {
+    if (this.harmful) {
+      if (char.getDebuffs().ignoreBenefitialEffects) return;
+      char.getBuffs().ignoreHarmfulEffects = {
+        status: true,
+        includeDamage: this.includeDamage,
+      };
+    }
+    if (this.friendly) {
+      if (char.getBuffs().ignoreHarmfulEffects.status) return;
+      char.getDebuffs().ignoreBenefitialEffects = true;
+    }
+  }
+
+  generateToolTip() {
+    let extra;
+    this.includeDamage ? (extra = "") : (extra = " except damage");
+    if (this.harmful && this.friendly) {
+      this.message = `This character will ignore all effects` + extra;
+    } else if (this.harmful) {
+      this.message = `This character will ignore all harmful effects` + extra;
+    } else if (this.friendly) {
+      this.message = `This character will ignore all friendly effects`;
+    }
+  }
 }

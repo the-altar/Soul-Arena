@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EffectRemoval = void 0;
+exports.IgnoreEffects = exports.EffectRemoval = void 0;
 const base_1 = require("./base");
 const z_helpers_1 = require("./z.helpers");
 class EffectRemoval extends base_1.Effect {
@@ -33,6 +33,8 @@ class EffectRemoval extends base_1.Effect {
         }
     }
     removeHarmfulEffects(char) {
+        if (char.getDebuffs().ignoreBenefitialEffects)
+            return;
         const skills = this.arenaReference.getActiveSkills();
         for (const skill of skills) {
             let wasRemoved = false;
@@ -46,6 +48,8 @@ class EffectRemoval extends base_1.Effect {
         }
     }
     removeFriendlyEffects(char) {
+        if (char.getBuffs().ignoreHarmfulEffects.status)
+            return;
         const skills = this.arenaReference.getActiveSkills();
         for (const skill of skills) {
             let wasRemoved = false;
@@ -82,4 +86,41 @@ function reduceTargets(arr, char, world) {
     }
     return false;
 }
+class IgnoreEffects extends base_1.Effect {
+    constructor(data, caster) {
+        super(data, caster);
+        this.harmful = data.harmful || false;
+        this.friendly = data.friendly || false;
+        this.includeDamage = data.includeDamage || false;
+    }
+    functionality(char, origin) {
+        if (this.harmful) {
+            if (char.getDebuffs().ignoreBenefitialEffects)
+                return;
+            char.getBuffs().ignoreHarmfulEffects = {
+                status: true,
+                includeDamage: this.includeDamage,
+            };
+        }
+        if (this.friendly) {
+            if (char.getBuffs().ignoreHarmfulEffects.status)
+                return;
+            char.getDebuffs().ignoreBenefitialEffects = true;
+        }
+    }
+    generateToolTip() {
+        let extra;
+        this.includeDamage ? (extra = "") : (extra = " except damage");
+        if (this.harmful && this.friendly) {
+            this.message = `This character will ignore all effects` + extra;
+        }
+        else if (this.harmful) {
+            this.message = `This character will ignore all harmful effects` + extra;
+        }
+        else if (this.friendly) {
+            this.message = `This character will ignore all friendly effects`;
+        }
+    }
+}
+exports.IgnoreEffects = IgnoreEffects;
 //# sourceMappingURL=effectRemoval.js.map

@@ -9,7 +9,8 @@ class EnergyGain extends base_1.Effect {
         this.energyType = data.energyType;
     }
     functionality(char, origin) {
-        this.triggered = true;
+        if (char.getDebuffs().ignoreBenefitialEffects)
+            return;
         const p = this.arenaReference.findPlayerByCharacterIndex(this.caster);
         let index;
         if (this.energyType === enums_1.CostTypes.Random)
@@ -43,6 +44,8 @@ class EnergyRemoval extends base_1.Effect {
         this.energyType = data.energyType;
     }
     functionality(char, origin) {
+        if (char.getBuffs().ignoreHarmfulEffects.status)
+            return;
         const p = this.arenaReference.findPlayerByChar(char);
         if (this.triggerClause === enums_1.triggerClauseType.IfTargeted) {
             for (const cordinate of this.arenaReference.tempQueue) {

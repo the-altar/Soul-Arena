@@ -23,9 +23,10 @@ import {
   SkillTargetMod,
   IncreaseCasterSkillDuration,
   IncreaseTargetSkillDuration,
+  ReplaceSkillCost,
 } from "./skillTargetMod";
 import { Counter } from "./counter";
-import { EffectRemoval } from "./effectRemoval";
+import { EffectRemoval, IgnoreEffects } from "./effectRemoval";
 import {
   AlterEffectValue,
   DisableEffects,
@@ -117,6 +118,12 @@ export const effectFactory = function (effect: any, caster: number): Effect {
     }
     case effectType.IncreaseTargetSkillDuration: {
       return new IncreaseTargetSkillDuration(effect, caster);
+    }
+    case effectType.ReplaceSkillCost: {
+      return new ReplaceSkillCost(effect, caster);
+    }
+    case effectType.IgnoreEffects: {
+      return new IgnoreEffects(effect, caster);
     }
     default: {
       return new Effect(effect, caster);

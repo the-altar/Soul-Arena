@@ -68,7 +68,7 @@ export class SkillCostChange extends Effect {
       for (const s of char.skills) {
         if (s.getId() === this.specificSkillTarget) {
           s.mods.costChange[this.reiatsuCostType] += this.value;
-          this.targetedSkillName = s.name
+          this.targetedSkillName = s.name;
           break;
         }
       }
@@ -103,26 +103,43 @@ export class SkillCostChange extends Effect {
     }
   }
 
-  public progressTurn() {
-    this.delay--;
-    if (this.delay <= 0) this.duration--;
-    /*  An even tick means it's your opponent's turn, odd means its yours.*/
-    /*  The default behavior is for your skills to activate on odd ticks*/
-    if (this.tick % 2 === PlayerPhase.MyTurn) {
-      this.activate = false;
-    } else this.activate = true;
-
-    if (this.duration < 0 && !this.infinite) this.terminate = true;
-    else if (this.targets.length === 0) this.terminate = true;
-    else this.terminate = false;
-
-    if (this.terminate) this.effectConclusion();
-  }
-
   public getPublicData() {
     const publicData = { ...this };
     delete publicData.arenaReference;
     return publicData;
+  }
+}
+
+export class ReplaceSkillCost extends Effect {
+  private reiatsuReplacement: Array<ReiatsuTypes>;
+  private specificSkillTarget: number;
+  private targetedSkillName: string;
+
+  constructor(data: any, caster: any) {
+    super(data, caster);
+    this.reiatsuReplacement = data.reiatsuReplacement;
+    this.specificSkillTarget = data.specificSkillTarget;
+    this.targetedSkillName = "";
+  }
+
+  public functionality(char: Character, origin: Skill) {
+    if (this.specificSkillTarget) {
+      for (const s of char.skills) {
+        if (s.getId() === this.specificSkillTarget) {
+          s.mods.costReplacement = this.reiatsuReplacement;
+          this.targetedSkillName = s.name;
+          break;
+        }
+      }
+    } else {
+      for (const s of char.skills) {
+        s.mods.costReplacement = this.reiatsuReplacement;
+      }
+    }
+  }
+
+  generateToolTip() {
+    this.message = "Costs have been replaced";
   }
 }
 
@@ -139,6 +156,16 @@ export class IncreaseCasterSkillDuration extends Effect {
   }
 
   functionality(char: Character, origin: Skill) {
+    if (char.getDebuffs().ignoreBenefitialEffects) {
+      this.noRepeat = false;
+      if (!this.targetedSkillName) {
+        this.targetedSkillName = char.findSkillById(this.targetSkillId).name;
+      } else {
+        this.effectConclusion();
+      }
+      return;
+    }
+
     if (this.noRepeat) return;
     this.noRepeat = true;
     const skill = char.getRealSkillById(this.targetSkillId);
@@ -181,6 +208,18 @@ export class IncreaseTargetSkillDuration extends Effect {
   }
 
   functionality(char: Character, origin: Skill) {
+    if (char.getBuffs().ignoreHarmfulEffects.status) {
+      this.noRepeat = false;
+      if (!this.targetedSkillName) {
+        this.targetedSkillName = this.arenaReference
+          .findCharacterById(this.caster)
+          .char.findSkillById(this.targetSkillId).name;
+      }
+      this.charReference = char;
+      this.effectConclusion();
+      return;
+    }
+
     if (this.noRepeat) return;
     this.noRepeat = true;
     const val = char.getDebuffs().increaseSkillDuration[this.targetSkillId];

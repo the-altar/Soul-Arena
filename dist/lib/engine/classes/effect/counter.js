@@ -14,13 +14,21 @@ class Counter extends base_1.Effect {
     }
     functionality(target, origin) {
         let isTriggered;
-        if (this.isDefensive)
+        if (this.isDefensive) {
+            if (target.getDebuffs().ignoreBenefitialEffects)
+                return;
             isTriggered = this.DefensiveCounter(target, origin);
-        else
+        }
+        else {
+            if (target.getBuffs().ignoreHarmfulEffects.status)
+                return;
             isTriggered = this.OffensiveCounter(target, origin);
+        }
         if (isTriggered.activated) {
-            const casterIndex = this.arenaReference.findCharacterById(this.caster).index;
-            const casterChar = this.arenaReference.findCharacterById(this.caster).char;
+            const casterIndex = this.arenaReference.findCharacterById(this.caster)
+                .index;
+            const casterChar = this.arenaReference.findCharacterById(this.caster)
+                .char;
             const targetsIndex = isTriggered.indexes;
             this.applyLinkedEffects(origin, casterIndex, targetsIndex);
         }
@@ -31,7 +39,9 @@ class Counter extends base_1.Effect {
         let hasCountered = { activated: false, indexes };
         for (let i = temp.length - 1; i >= 0; i--) {
             const cordinates = temp[i];
-            const caster = this.arenaReference.getCharactersByIndex([cordinates.caster])[0];
+            const caster = this.arenaReference.getCharactersByIndex([
+                cordinates.caster,
+            ])[0];
             const skill = caster.getRealSkillByIndex(cordinates.skill);
             if (this.value === 0)
                 return hasCountered;
@@ -62,7 +72,9 @@ class Counter extends base_1.Effect {
             if (this.value === 0)
                 return hasCountered;
             const cordinates = temp[i];
-            const char = this.arenaReference.getCharactersByIndex([cordinates.caster])[0];
+            const char = this.arenaReference.getCharactersByIndex([
+                cordinates.caster,
+            ])[0];
             const skill = char.getRealSkillByIndex(cordinates.skill);
             if (skill.uncounterable)
                 continue;

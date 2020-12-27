@@ -11,7 +11,7 @@ export class Healing extends Effect {
   }
 
   public functionality(char: Character, origin: Skill) {
-    this.triggered = true;
+    if (char.getDebuffs().ignoreBenefitialEffects) return;
     const hp = char.geHitPoints() + this.value;
     char.setHitPoints(hp);
   }
@@ -39,11 +39,11 @@ export class HealthDrain extends Damage {
   }
 
   public functionality(character: Character, origin: Skill) {
-    this.triggered = true;
+    if (character.getBuffs().ignoreHarmfulEffects.status) return;
     const reduction = this.getDamageReductionFromCaster(
       this.caster,
       this,
-      origin,
+      origin
     );
     let damage = this.value - reduction;
     if (damage < 0) damage = 0;

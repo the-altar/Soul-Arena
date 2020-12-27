@@ -18,6 +18,7 @@ class Debuffs {
         this.ignoreDecreaseDamageTaken = false;
         this.increaseSkillDuration = {};
         this.stun = {};
+        this.ignoreBenefitialEffects = false;
     }
     setCooldownIncreasal(params) {
         const { specific, value } = params;
@@ -59,6 +60,7 @@ class Debuffs {
         this.stun = {};
         this.ignoreDecreaseDamageTaken = false;
         this.ignoreInvulnerability = false;
+        this.ignoreBenefitialEffects = false;
     }
 }
 exports.Debuffs = Debuffs;

@@ -108,6 +108,12 @@ exports.effectFactory = function (effect, caster) {
         case enums_1.effectType.IncreaseTargetSkillDuration: {
             return new skillTargetMod_1.IncreaseTargetSkillDuration(effect, caster);
         }
+        case enums_1.effectType.ReplaceSkillCost: {
+            return new skillTargetMod_1.ReplaceSkillCost(effect, caster);
+        }
+        case enums_1.effectType.IgnoreEffects: {
+            return new effectRemoval_1.IgnoreEffects(effect, caster);
+        }
         default: {
             return new base_1.Effect(effect, caster);
         }

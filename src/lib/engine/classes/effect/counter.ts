@@ -18,7 +18,7 @@ export class Counter extends Effect {
 
   constructor(data: any, caster: number) {
     super(data, caster);
-    this.tick = 0
+    this.tick = 0;
     this.isDefensive = data.isDefensive || false;
     this.counterType = data.counterType || false;
     this.counterEffectType = data.counterEffectType || false;
@@ -28,13 +28,19 @@ export class Counter extends Effect {
   public functionality(target: Character, origin: Skill) {
     let isTriggered: { activated: boolean; indexes: Array<number> };
 
-    if (this.isDefensive)
+    if (this.isDefensive) {
+      if (target.getDebuffs().ignoreBenefitialEffects) return;
       isTriggered = this.DefensiveCounter(target, origin);
-    else isTriggered = this.OffensiveCounter(target, origin);
+    } else {
+      if (target.getBuffs().ignoreHarmfulEffects.status) return;
+      isTriggered = this.OffensiveCounter(target, origin);
+    }
 
     if (isTriggered.activated) {
-      const casterIndex = this.arenaReference.findCharacterById(this.caster).index;
-      const casterChar = this.arenaReference.findCharacterById(this.caster).char
+      const casterIndex = this.arenaReference.findCharacterById(this.caster)
+        .index;
+      const casterChar = this.arenaReference.findCharacterById(this.caster)
+        .char;
       const targetsIndex = isTriggered.indexes;
       this.applyLinkedEffects(origin, casterIndex, targetsIndex);
     }
@@ -48,7 +54,9 @@ export class Counter extends Effect {
 
     for (let i = temp.length - 1; i >= 0; i--) {
       const cordinates = temp[i];
-      const caster = this.arenaReference.getCharactersByIndex([cordinates.caster])[0];
+      const caster = this.arenaReference.getCharactersByIndex([
+        cordinates.caster,
+      ])[0];
       const skill = caster.getRealSkillByIndex(cordinates.skill);
       if (this.value === 0) return hasCountered;
       if (skill.uncounterable) continue;
@@ -83,7 +91,9 @@ export class Counter extends Effect {
     for (let i = temp.length - 1; i >= 0; i--) {
       if (this.value === 0) return hasCountered;
       const cordinates = temp[i];
-      const char = this.arenaReference.getCharactersByIndex([cordinates.caster])[0];
+      const char = this.arenaReference.getCharactersByIndex([
+        cordinates.caster,
+      ])[0];
       const skill = char.getRealSkillByIndex(cordinates.skill);
       if (skill.uncounterable) continue;
 
@@ -145,18 +155,14 @@ export class Counter extends Effect {
   }
 
   generateToolTip() {
-    if(this.value === 1 && this.DefensiveCounter) {
-      this.message = `The first new skill used on this character will be countered`
-    }
-    else if(this.value === 1 && this.OffensiveCounter){
-      this.message = `The first new skill used by this character will be countered`
-    }
-    else if (this.OffensiveCounter) {
-      this.message = "New skills used on this character will be countered"
-    }
-    else if (this.DefensiveCounter) {
-      this.message = "New skills used by this character will be countered"
+    if (this.value === 1 && this.DefensiveCounter) {
+      this.message = `The first new skill used on this character will be countered`;
+    } else if (this.value === 1 && this.OffensiveCounter) {
+      this.message = `The first new skill used by this character will be countered`;
+    } else if (this.OffensiveCounter) {
+      this.message = "New skills used on this character will be countered";
+    } else if (this.DefensiveCounter) {
+      this.message = "New skills used by this character will be countered";
     }
   }
-  
 }

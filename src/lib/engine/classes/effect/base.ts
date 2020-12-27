@@ -3,13 +3,12 @@ import {
   effectType,
   effectTargetBehavior,
   activationType,
-  Types,
   PlayerPhase,
   triggerClauseType,
 } from "../../enums";
 import { Arena } from "../../arena";
 import { Skill } from "../skill";
-import { log } from "../../../logger";
+import { isHarmful, isFriendly } from "./z.helpers";
 
 export class Effect {
   protected arenaReference: Arena;

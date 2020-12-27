@@ -9,11 +9,12 @@ class CooldownIncreasal extends base_1.Effect {
         this.specific = data.specific;
     }
     functionality(char, origin) {
-        this.triggered = true;
+        if (char.getBuffs().ignoreHarmfulEffects.status)
+            return;
         char.setDebuff({
             debuffType: enums_1.DebuffTypes.CooldownIncreasal,
             value: this.value,
-            specific: this.specific
+            specific: this.specific,
         });
     }
     generateToolTip() {
@@ -36,7 +37,8 @@ class CooldownReduction extends base_1.Effect {
         this.triggered = true;
         const cd = char.getBuffs().cooldownReduction;
         if (this.ofSkillId) {
-            cd.ofSkillId[this.ofSkillId] = (cd.ofSkillId[this.ofSkillId] || 0) + this.value;
+            cd.ofSkillId[this.ofSkillId] =
+                (cd.ofSkillId[this.ofSkillId] || 0) + this.value;
             this.skillName = char.findSkillById(this.ofSkillId).name;
         }
         else if (this.ofAllSkills)

@@ -15,6 +15,10 @@ class Buffs {
         this.damageIncreasal = { byDamage: {}, bySkillClass: {}, bySkillId: {} };
         this.absorbDamage = {};
         this.destructibleDefense = {};
+        this.ignoreHarmfulEffects = {
+            status: false,
+            includeDamage: false,
+        };
     }
     isInvulnerable(skill, effect) {
         if (this.invulnerability.toSkillClass.has(enums_1.SkillClassType.Any))
@@ -129,6 +133,12 @@ class Buffs {
     }
     getDestructibleDefense() {
         return this.destructibleDefense;
+    }
+    clearIgnoreHarmfulEffects() {
+        this.ignoreHarmfulEffects = {
+            status: false,
+            includeDamage: false,
+        };
     }
 }
 exports.Buffs = Buffs;

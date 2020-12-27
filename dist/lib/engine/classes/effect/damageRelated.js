@@ -3,12 +3,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IgnoreDecreaseDamageTaken = exports.AbsorbDamage = exports.DecreaseDamageTaken = exports.IncreaseDamageTaken = exports.DamageIncreasal = exports.DamageReduction = exports.Damage = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
+/**Deals damage */
 class Damage extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
         this.damageType = data.damageType;
     }
     functionality(char, origin) {
+        if (char.getBuffs().ignoreHarmfulEffects.status &&
+            char.getBuffs().ignoreHarmfulEffects.includeDamage)
+            return;
         switch (this.triggerClause) {
             case enums_1.triggerClauseType.None:
                 {
@@ -52,6 +56,8 @@ class Damage extends base_1.Effect {
         return c + d + e;
     }
     destroyDestructibleDefense(char, damage) {
+        if (char.getDebuffs().ignoreBenefitialEffects)
+            return damage;
         const dd_effect_list = char.getBuffs().destructibleDefense;
         if (damage <= 0)
             return;
@@ -100,6 +106,7 @@ class Damage extends base_1.Effect {
     }
 }
 exports.Damage = Damage;
+/* [Debuff] Decrease the amount of damage dealt by a character*/
 class DamageReduction extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -108,7 +115,17 @@ class DamageReduction extends base_1.Effect {
         this.specificSkill = data.specificSkill || false;
     }
     functionality(char, origin) {
+        let blocked = false;
+        blocked = char.getBuffs().ignoreHarmfulEffects.status;
         const buff = char.getDebuffs().damageReduction;
+        if (blocked) {
+            if (this.specificSkill) {
+                this.specificSkillName = this.arenaReference
+                    .findCharacterById(this.caster)
+                    .char.findSkillById(this.specificSkill).name;
+            }
+            return;
+        }
         if (this.skillType) {
             buff.bySkillClass[this.skillType] =
                 (buff.bySkillClass[this.skillType] || 0) + this.value;
@@ -138,6 +155,7 @@ class DamageReduction extends base_1.Effect {
     }
 }
 exports.DamageReduction = DamageReduction;
+/*[Buff] Increase the amount of damage dealt by a character */
 class DamageIncreasal extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -146,7 +164,15 @@ class DamageIncreasal extends base_1.Effect {
         this.specificSkill = data.specificSkill || false;
     }
     functionality(char, origin) {
+        let blocked = char.getDebuffs().ignoreBenefitialEffects;
         const buff = char.getBuffs().damageIncreasal;
+        if (blocked) {
+            if (this.specificSkill)
+                this.specificSkillName = this.arenaReference
+                    .findCharacterById(this.caster)
+                    .char.findSkillById(this.specificSkill).name;
+            return;
+        }
         if (this.skillType) {
             buff.bySkillClass[this.skillType] =
                 (buff.bySkillClass[this.skillType] || 0) + this.value;
@@ -176,6 +202,7 @@ class DamageIncreasal extends base_1.Effect {
     }
 }
 exports.DamageIncreasal = DamageIncreasal;
+/*[Debuff] Increase amount of damage a character takes when targeted */
 class IncreaseDamageTaken extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -184,6 +211,14 @@ class IncreaseDamageTaken extends base_1.Effect {
         this.specificSkill = data.specificSkill || false;
     }
     functionality(char, origin) {
+        let blocked = char.getBuffs().ignoreHarmfulEffects.status;
+        if (blocked) {
+            if (this.specificSkill)
+                this.specificSkillName = this.specificSkillName = this.arenaReference
+                    .findCharacterById(this.caster)
+                    .char.findSkillById(this.specificSkill).name;
+            return;
+        }
         const debuff = char.getDebuffs().increaseDamageTaken;
         if (this.skillType) {
             debuff.bySkillClass[this.skillType] =
@@ -192,9 +227,6 @@ class IncreaseDamageTaken extends base_1.Effect {
         else if (this.specificSkill) {
             debuff.bySkillId[this.specificSkill] =
                 (debuff.bySkillId[this.specificSkill] || 0) + this.value;
-            this.specificSkillName = this.arenaReference
-                .findCharacterById(this.caster)
-                .char.findSkillById(this.specificSkill).name;
         }
         else if (this.damageType) {
             debuff.byDamage[this.damageType] =
@@ -214,6 +246,7 @@ class IncreaseDamageTaken extends base_1.Effect {
     }
 }
 exports.IncreaseDamageTaken = IncreaseDamageTaken;
+/*[Buff] Decrease amount of damage dealt to a character when targeted */
 class DecreaseDamageTaken extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -221,6 +254,10 @@ class DecreaseDamageTaken extends base_1.Effect {
         this.damageType = data.damageType;
     }
     functionality(char, origin) {
+        if (char.getDebuffs().ignoreBenefitialEffects)
+            return;
+        if (char.getDebuffs().ignoreDecreaseDamageTaken)
+            return;
         char.setBuff({
             damageType: this.damageType,
             value: this.value,
@@ -233,6 +270,7 @@ class DecreaseDamageTaken extends base_1.Effect {
     }
 }
 exports.DecreaseDamageTaken = DecreaseDamageTaken;
+/**[Buff] Convert damage into health at certain ratio */
 class AbsorbDamage extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -240,6 +278,8 @@ class AbsorbDamage extends base_1.Effect {
         this.damageType = data.damageType;
     }
     functionality(char, origin) {
+        if (char.getDebuffs().ignoreBenefitialEffects)
+            return;
         char.setBuff({
             damageType: this.damageType,
             value: this.value,
@@ -255,11 +295,14 @@ class AbsorbDamage extends base_1.Effect {
     }
 }
 exports.AbsorbDamage = AbsorbDamage;
+/**[Debuff] Makes character unable to reduce damage taken */
 class IgnoreDecreaseDamageTaken extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
     }
     functionality(char, origin) {
+        if (char.getDebuffs().ignoreBenefitialEffects)
+            return;
         char.getDebuffs().ignoreDecreaseDamageTaken = true;
     }
     generateToolTip() {

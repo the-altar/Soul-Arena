@@ -16,6 +16,7 @@ export class Debuffs {
   ignoreDecreaseDamageTaken: boolean;
   increaseSkillDuration: { [x: string]: number };
   stun: { [x: string]: boolean };
+  ignoreBenefitialEffects: boolean;
 
   constructor() {
     this.increaseDamageTaken = {
@@ -31,8 +32,9 @@ export class Debuffs {
     this.cooldownIncreasal = { any: 0 };
     this.ignoreInvulnerability = false;
     this.ignoreDecreaseDamageTaken = false;
-    this.increaseSkillDuration = {}
+    this.increaseSkillDuration = {};
     this.stun = {};
+    this.ignoreBenefitialEffects = false;
   }
 
   public setCooldownIncreasal(params: iDebuffParams) {
@@ -76,5 +78,6 @@ export class Debuffs {
     this.stun = {};
     this.ignoreDecreaseDamageTaken = false;
     this.ignoreInvulnerability = false;
+    this.ignoreBenefitialEffects = false;
   }
 }
