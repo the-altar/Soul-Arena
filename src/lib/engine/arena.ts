@@ -104,10 +104,10 @@ export class Arena {
     this.tickSkillsInQueue();
     this.hasUsedSKill = {};
 
-    //console.log("End player phase for: " + player2.getId())
-    const bCount1 = this.endPlayerPhase(player2);
     //console.log("Start player phase for: " + player1.getId())
     const bCount2 = this.startPlayerPhase(player1);
+    //console.log("End player phase for: " + player2.getId())
+    const bCount1 = this.endPlayerPhase(player2);
 
     if (bCount1 === 3) return this.gameOver(player1, player2);
     if (bCount2 === 3) return this.gameOver(player2, player1);

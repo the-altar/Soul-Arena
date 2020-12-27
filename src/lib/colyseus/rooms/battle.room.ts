@@ -19,7 +19,7 @@ interface iRegister {
 
 class MatchState extends Schema {
   @type("string")
-  turnData:string;
+  turnData: string;
 }
 
 export class Battle extends Room {
@@ -121,18 +121,18 @@ export class Battle extends Room {
 
   gameClock() {
     this.arena.startGame();
-    this.state.turnData = JSON.stringify(this.arena.getClientData())
+    this.state.turnData = JSON.stringify(this.arena.getClientData());
     this.broadcast("game-started", this.arena.getClientData());
 
     this.delay = this.clock.setInterval(() => {
       this.lifeCycle();
-      this.state.turnData = JSON.stringify(this.arena.getClientData())
+      this.state.turnData = JSON.stringify(this.arena.getClientData());
     }, this.evaluateGroupInterval);
   }
 
   lifeCycle() {
     const isOver = this.arena.startGame();
-    this.state.turnData = JSON.stringify(this.arena.getClientData())
+    this.state.turnData = JSON.stringify(this.arena.getClientData());
     if (isOver) {
       const payload1 = results.matchCalculations(
         this.arena.winner,
