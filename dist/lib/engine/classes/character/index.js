@@ -157,7 +157,11 @@ class Character {
     addEffectStack(effect) {
         this.effectStack.add(effect.gameId);
         const count = this.effectStack.count(effect.gameId);
-        logger_1.log.info(`Stack count of [${enums_1.effectType[effect.getType()]}]${effect.gameId}: ${count}, limit is: ${effect.stackLimit}`);
+        /*log.info(
+          `Stack count of [${effectType[effect.getType()]}]${
+            effect.gameId
+          }: ${count}, limit is: ${effect.stackLimit}`
+        );*/
         if (effect.stackLimit && count > effect.stackLimit) {
             this.effectStack.decrease(effect.id);
             return false;

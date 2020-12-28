@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Arena = void 0;
 const classes_1 = require("./classes");
-const logger_1 = require("../logger");
 class Arena {
     constructor() {
         this.players = [];
@@ -272,7 +271,7 @@ class Arena {
             if (!c.isKnockedOut()) {
                 c.clearBuffs();
                 c.effectStack.clearStack();
-                logger_1.log.info(`[${c.name}] Effect stack and buffs have been cleared`);
+                //log.info(`[${c.name}] Effect stack and buffs have been cleared`);
             }
             else
                 bodyCount++;
