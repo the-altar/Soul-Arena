@@ -42,6 +42,9 @@ export class Effect {
   public infinite: boolean;
   public activate: boolean;
   public id: number;
+  public gameId: number;
+  public stackLimit: number;
+
   constructor(data: any, caster: number) {
     this.value = data.value;
     this.tick = 1;
@@ -65,6 +68,9 @@ export class Effect {
     this.altValue = data.altValue || null;
     this.linked = data.linked || null;
     this.id = data.id;
+    this.stackLimit = data.stackLimit || 0;
+    this.gameId =
+      data.gameId || Math.floor(Math.random() * (0 - 99999) + 99999);
     this.message = data.message;
     this.mods = data.mods || {
       increment: {
@@ -128,7 +134,6 @@ export class Effect {
 
     if (this.duration <= 0 && !this.infinite) this.terminate = true;
     else if (this.targets.length === 0) this.terminate = true;
-    else this.terminate = false;
 
     if (this.terminate) this.effectConclusion();
   }
@@ -251,8 +256,10 @@ export class Effect {
     targetList: Array<number>,
     charIndex: number
   ) {
+    if ((!this.triggered || this.activate) && !char.addEffectStack(this)) {
+      return;
+    }
     targetList.push(charIndex);
-
     if (char.isInvulnerable(origin)) return;
     if (char.isKnockedOut()) return;
     this.activateTrigger(char, origin);

@@ -26,6 +26,9 @@ class Effect {
         this.altValue = data.altValue || null;
         this.linked = data.linked || null;
         this.id = data.id;
+        this.stackLimit = data.stackLimit || 0;
+        this.gameId =
+            data.gameId || Math.floor(Math.random() * (0 - 99999) + 99999);
         this.message = data.message;
         this.mods = data.mods || {
             increment: {
@@ -83,8 +86,6 @@ class Effect {
             this.terminate = true;
         else if (this.targets.length === 0)
             this.terminate = true;
-        else
-            this.terminate = false;
         if (this.terminate)
             this.effectConclusion();
     }
@@ -186,6 +187,9 @@ class Effect {
     }
     generateToolTip(triggered) { }
     activateOnTarget(char, origin, targetList, charIndex) {
+        if ((!this.triggered || this.activate) && !char.addEffectStack(this)) {
+            return;
+        }
         targetList.push(charIndex);
         if (char.isInvulnerable(origin))
             return;

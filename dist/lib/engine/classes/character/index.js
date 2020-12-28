@@ -6,6 +6,7 @@ const skill_1 = require("../skill");
 const buffs_1 = require("./buffs");
 const notifications_1 = require("./notifications");
 const debuffs_1 = require("./debuffs");
+const effetStack_1 = require("./effetStack");
 const logger_1 = require("../../../logger");
 class Character {
     constructor(data, playerId, world) {
@@ -29,6 +30,7 @@ class Character {
         this.enemies = [];
         this.knockedOut = false;
         this.arenaReference = world;
+        this.effectStack = new effetStack_1.EffectStack();
         for (const skill of data.skills) {
             this.skills.push(new skill_1.Skill(skill, this.id, this.arenaReference));
         }
@@ -151,6 +153,16 @@ class Character {
     }
     isKnockedOut() {
         return this.knockedOut;
+    }
+    addEffectStack(effect) {
+        this.effectStack.add(effect.gameId);
+        const count = this.effectStack.count(effect.gameId);
+        logger_1.log.info(`Stack count of [${enums_1.effectType[effect.getType()]}]${effect.gameId}: ${count}, limit is: ${effect.stackLimit}`);
+        if (effect.stackLimit && count > effect.stackLimit) {
+            this.effectStack.decrease(effect.id);
+            return false;
+        }
+        return true;
     }
     disableSkills() {
         this.skills.forEach((s) => {

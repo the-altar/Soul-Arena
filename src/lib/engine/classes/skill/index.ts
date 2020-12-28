@@ -60,9 +60,7 @@ export class Skill {
     this.harmful = data.harmful || false;
     this.arenaReference = world;
     this.turnCost = this.cost.slice();
-    data.effects = data.effects.sort((a: any, b: any) => {
-      return (b.priority || 0) - (a.priority || 0);
-    });
+
     for (const e of data.effects) {
       const built = effectFactory(e, caster);
       built.setArenaReference(this.arenaReference);
@@ -71,7 +69,8 @@ export class Skill {
         this.inactiveEffects.push(built);
       }
     }
-
+    // This here for when the skill gets copied and all inactive effects have already been parsed
+    // and need to be rebuilt (the first loop won't include them)
     if (data.inactiveEffects) {
       for (const e of data.inactiveEffects) {
         const built = effectFactory(e, caster);
@@ -249,7 +248,7 @@ export class Skill {
       effect.tick++;
       effect.shouldApply();
       effect.execute(this);
-      effect.generateToolTip();
+      if (!effect.terminate) effect.generateToolTip();
     }
   }
 

@@ -27,7 +27,7 @@ exports.create = function (req, res) {
 exports.get = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const values = [req.body];
-        const TEXT = "select * from effect where skill_id = any ($1);";
+        const TEXT = "select * from effect where skill_id = any ($1) order by priority DESC;";
         try {
             const data = yield db_1.pool.query(TEXT, values);
             return res.json(data.rows);
@@ -42,7 +42,7 @@ exports.find = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const id = req.params.id;
         const value = [id];
-        const text = "SELECT * FROM effect WHERE id = $1 order by priority DESC";
+        const text = "SELECT * FROM effect WHERE id = $1;";
         try {
             const data = yield db_1.pool.query(text, value);
             return res.json(data.rows[0]);
@@ -76,7 +76,7 @@ exports.remove = function (req, res) {
         }
         catch (err) {
             res.status(404);
-            throw (err);
+            throw err;
         }
     });
 };

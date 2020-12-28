@@ -111,7 +111,7 @@ class RankedLobby extends colyseus_1.Room {
                 entity
             join (
                 select
-                    skill.priority, skill.id, skill.data || jsonb_build_object('id', skill.id) || jsonb_build_object('effects', jsonb_agg( effect.data || jsonb_build_object('id', effect.id) order by effect.priority)) as data, skill.entity_id
+                    skill.priority, skill.id, skill.data || jsonb_build_object('id', skill.id) || jsonb_build_object('effects', jsonb_agg( effect.data || jsonb_build_object('id', effect.id) order by effect.priority DESC)) as data, skill.entity_id
                 from
                     skill
                 join effect on

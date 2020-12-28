@@ -14,7 +14,6 @@ router.get("roster/:id", [middlewares_1.authenticateAdmin], (req, res) => {
     return res.sendFile("index.html", { root: "./public/admin" });
 });
 router.get("/skills", [middlewares_1.authenticateAdmin], (req, res) => {
-    console.log("Asking for roster");
     return res.sendFile("index.html", { root: "./public/admin" });
 });
 router.get("/skills/:id", [middlewares_1.authenticateAdmin], (req, res) => {

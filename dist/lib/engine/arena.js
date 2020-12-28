@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Arena = void 0;
 const classes_1 = require("./classes");
+const logger_1 = require("../logger");
 class Arena {
     constructor() {
         this.players = [];
@@ -76,23 +77,23 @@ class Arena {
     }
     startGame() {
         this.turnCount++;
-        const player1 = this.players[this.turnCount % 2];
-        const player2 = this.players[((this.turnCount % 2) + 1) % 2];
-        player1.setTurn(true);
-        player2.setTurn(false);
+        const nextPlayer = this.players[this.turnCount % 2];
+        const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
+        nextPlayer.setTurn(true);
+        currentPlayer.setTurn(false);
         this.clearCharactersNotifications();
         this.executeSkills();
         this.executeNewSkills();
         this.tickSkillsInQueue();
         this.hasUsedSKill = {};
         //console.log("Start player phase for: " + player1.getId())
-        const bCount2 = this.startPlayerPhase(player1);
+        const bCount2 = this.startPlayerPhase(nextPlayer);
         //console.log("End player phase for: " + player2.getId())
-        const bCount1 = this.endPlayerPhase(player2);
+        const bCount1 = this.endPlayerPhase(currentPlayer);
         if (bCount1 === 3)
-            return this.gameOver(player1, player2);
+            return this.gameOver(nextPlayer, currentPlayer);
         if (bCount2 === 3)
-            return this.gameOver(player2, player1);
+            return this.gameOver(nextPlayer, nextPlayer);
         this.validateSkillQueue();
         return false;
     }
@@ -270,6 +271,8 @@ class Arena {
             const c = this.characters[i];
             if (!c.isKnockedOut()) {
                 c.clearBuffs();
+                c.effectStack.clearStack();
+                logger_1.log.info(`[${c.name}] Effect stack and buffs have been cleared`);
             }
             else
                 bodyCount++;

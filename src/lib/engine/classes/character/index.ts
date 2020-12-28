@@ -12,7 +12,9 @@ import { Arena } from "../../arena";
 import { Buffs, iBuffParams } from "./buffs";
 import { Notification } from "./notifications";
 import { Debuffs, iDebuffParams } from "./debuffs";
+import { EffectStack } from "./effetStack";
 import { log } from "../../../logger";
+import { Effect } from "../effect";
 
 export class Character {
   public name: string;
@@ -36,6 +38,7 @@ export class Character {
   private belongs: { [key: number]: boolean };
   public skills: Array<Skill>;
   private arenaReference: Arena;
+  public effectStack: EffectStack;
 
   constructor(data: iCharacter, playerId: number, world: Arena) {
     this.buffs = new Buffs();
@@ -58,6 +61,8 @@ export class Character {
     this.enemies = [];
     this.knockedOut = false;
     this.arenaReference = world;
+    this.effectStack = new EffectStack();
+
     for (const skill of data.skills) {
       this.skills.push(new Skill(skill, this.id, this.arenaReference));
     }
@@ -205,6 +210,22 @@ export class Character {
 
   public isKnockedOut(): boolean {
     return this.knockedOut;
+  }
+
+  public addEffectStack(effect: Effect) {
+    this.effectStack.add(effect.gameId);
+    const count = this.effectStack.count(effect.gameId);
+    /*log.info(
+      `Stack count of [${effectType[effect.getType()]}]${
+        effect.gameId
+      }: ${count}, limit is: ${effect.stackLimit}`
+    );*/
+
+    if (effect.stackLimit && count > effect.stackLimit) {
+      this.effectStack.decrease(effect.id);
+      return false;
+    }
+    return true;
   }
 
   public disableSkills() {

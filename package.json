@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf dist/ && tsc",
     "start": "node -r dotenv/config  dist/index.js",
-    "dev": "NODE_ENV=dev DEBUG=colyseus:*  node --trace-warnings -r dotenv/config  dist/index.js | ./node_modules/.bin/bunyan"
+    "dev": "NODE_ENV=dev node --trace-warnings -r dotenv/config  dist/index.js | ./node_modules/.bin/bunyan",
+    "debug": "NODE_ENV=dev DEBUG=colyseus:*  node --trace-warnings -r dotenv/config  dist/index.js | ./node_modules/.bin/bunyan"
+    
   },
   "keywords": [],
   "author": "",
