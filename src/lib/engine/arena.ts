@@ -108,7 +108,7 @@ export class Arena {
     const bCount1 = this.endPlayerPhase(currentPlayer);
 
     if (bCount1 === 3) return this.gameOver(nextPlayer, currentPlayer);
-    if (bCount2 === 3) return this.gameOver(nextPlayer, nextPlayer);
+    if (bCount2 === 3) return this.gameOver(currentPlayer, nextPlayer);
 
     this.validateSkillQueue();
     return false;
