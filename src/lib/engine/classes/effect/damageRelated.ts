@@ -279,7 +279,7 @@ export class IncreaseDamageTaken extends Effect {
 
     if (blocked) {
       if (this.specificSkill)
-        this.specificSkillName = this.specificSkillName = this.arenaReference
+        this.specificSkillName = this.arenaReference
           .findCharacterById(this.caster)
           .char.findSkillById(this.specificSkill).name;
       return;
@@ -293,6 +293,9 @@ export class IncreaseDamageTaken extends Effect {
     } else if (this.specificSkill) {
       debuff.bySkillId[this.specificSkill] =
         (debuff.bySkillId[this.specificSkill] || 0) + this.value;
+      this.specificSkillName = this.arenaReference
+        .findCharacterById(this.caster)
+        .char.findSkillById(this.specificSkill).name;
     } else if (this.damageType) {
       debuff.byDamage[this.damageType] =
         (debuff.byDamage[this.damageType] || 0) + this.value;

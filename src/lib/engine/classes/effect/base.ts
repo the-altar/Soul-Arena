@@ -124,8 +124,10 @@ export class Effect {
   }
 
   public progressTurn() {
-    this.delay--;
     if (this.delay <= 0) this.duration--;
+    else {
+      this.delay--;
+    }
     /*  An even tick means it's your opponent's turn, odd means its yours.*/
     /*  The default behavior is for your skills to activate on odd ticks*/
     if (this.tick % 2 === PlayerPhase.MyTurn) {
