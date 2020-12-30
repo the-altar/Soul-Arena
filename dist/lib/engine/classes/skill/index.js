@@ -176,6 +176,7 @@ class Skill {
         return this.targets;
     }
     executeEffects() {
+        //log.info("[GAME] Execute effects")
         for (const effect of this.effects) {
             effect.tick++;
             effect.shouldApply();
@@ -185,6 +186,7 @@ class Skill {
         }
     }
     executeInitEffects() {
+        //log.info("[GAME] Execute NEW effects")
         for (const effect of this.effects) {
             effect.tick++;
             effect.shouldApply();

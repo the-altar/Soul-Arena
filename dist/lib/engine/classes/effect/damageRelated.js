@@ -214,7 +214,7 @@ class IncreaseDamageTaken extends base_1.Effect {
         let blocked = char.getBuffs().ignoreHarmfulEffects.status;
         if (blocked) {
             if (this.specificSkill)
-                this.specificSkillName = this.specificSkillName = this.arenaReference
+                this.specificSkillName = this.arenaReference
                     .findCharacterById(this.caster)
                     .char.findSkillById(this.specificSkill).name;
             return;
@@ -227,6 +227,9 @@ class IncreaseDamageTaken extends base_1.Effect {
         else if (this.specificSkill) {
             debuff.bySkillId[this.specificSkill] =
                 (debuff.bySkillId[this.specificSkill] || 0) + this.value;
+            this.specificSkillName = this.arenaReference
+                .findCharacterById(this.caster)
+                .char.findSkillById(this.specificSkill).name;
         }
         else if (this.damageType) {
             debuff.byDamage[this.damageType] =

@@ -92,7 +92,7 @@ class Arena {
         if (bCount1 === 3)
             return this.gameOver(nextPlayer, currentPlayer);
         if (bCount2 === 3)
-            return this.gameOver(nextPlayer, nextPlayer);
+            return this.gameOver(currentPlayer, nextPlayer);
         this.validateSkillQueue();
         return false;
     }

@@ -244,6 +244,7 @@ export class Skill {
   }
 
   public executeEffects() {
+    //log.info("[GAME] Execute effects")
     for (const effect of this.effects) {
       effect.tick++;
       effect.shouldApply();
@@ -253,6 +254,7 @@ export class Skill {
   }
 
   public executeInitEffects() {
+    //log.info("[GAME] Execute NEW effects")
     for (const effect of this.effects) {
       effect.tick++;
       effect.shouldApply();

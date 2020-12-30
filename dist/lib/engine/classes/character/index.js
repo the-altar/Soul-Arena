@@ -198,6 +198,8 @@ class Character {
         }
     }
     isInvulnerable(skill) {
+        if (this.debuffs.ignoreInvulnerability)
+            return false;
         return this.buffs.isInvulnerable(skill);
     }
     clearBuffs() {
