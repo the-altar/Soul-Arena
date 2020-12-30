@@ -261,6 +261,7 @@ export class Character {
   }
 
   public isInvulnerable(skill: Skill): boolean {
+    if (this.debuffs.ignoreInvulnerability) return;
     return this.buffs.isInvulnerable(skill);
   }
 
