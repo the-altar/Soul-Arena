@@ -9,11 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.defaultAvatar = exports.uploadAvatar = exports.user = exports.logout = exports.login = exports.register = exports.mount = exports.loggerMiddleware = void 0;
+exports.matchHistory = exports.defaultAvatar = exports.uploadAvatar = exports.user = exports.logout = exports.login = exports.register = exports.mount = exports.loggerMiddleware = void 0;
 const bcrypt_1 = require("bcrypt");
 const jsonwebtoken_1 = require("jsonwebtoken");
 const path_1 = require("path");
 const db_1 = require("../../db");
+const logger_1 = require("../../lib/logger");
 function loggerMiddleware(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -37,7 +38,7 @@ exports.loggerMiddleware = loggerMiddleware;
 exports.mount = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.res.locals.guest) {
-            return res.json({ authLevel: -1, auth: false });
+            return res.json({ authLevel: -1, auth: false, id: -1 });
         }
         const u = req.res.locals.user;
         return res.json({
@@ -118,7 +119,8 @@ exports.logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.user = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const username = req.body.username || req.params.username;
-    const text = `select u.id, u.avatar, u.username, 
+    const text = `select u.id, u.avatar, u.username, u.joined_at, 
+	  case when u2.user_id is not null then true else false end online,
     jsonb_build_object('elo', lb.elo, 'wins', lb.wins, 'losses', lb.losses, 'streak', lb.streak, 'maxStreak', lb.max_streak, 'exp', lb.experience, 'seasonRank', lb.season_rank, 'seasonLevel', lb.season_level) as season, 
     jsonb_build_object('authLevel', ur.auth_level, 'rankName', ur."name") as rank 
     from users as u 
@@ -126,6 +128,8 @@ exports.user = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         on u.id = lb.user_id 
     left join user_rank as ur 
         on u.user_rank_id = ur.id
+    left join usersonline u2 
+    	on u2.user_id = u.id 
     where u.username = $1;
     `;
     try {
@@ -166,6 +170,26 @@ exports.defaultAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
     catch (err) {
         return res.status(500).json({ success: false });
+    }
+});
+exports.matchHistory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `
+  select gr.created_at, winner_id, jsonb_agg(jsonb_build_object('username', u2.username, 'id', u2.id)) as players from game_result gr 
+  left join users u2 
+    on u2.id = gr.winner_id or u2.id = gr.loser_id 
+  left join ladderboard l2 
+    on l2.user_id = $1
+  where gr.winner_id = $1 or gr.loser_id = $1 and gr.created_at >= NOW() - INTERVAL '24 HOURS'
+  group by gr.winner_id, gr.loser_id, gr.created_at
+  order by gr.created_at DESC;
+  `;
+    try {
+        const data = yield db_1.pool.query(query, [req.params.id]);
+        return res.status(200).json(data.rows);
+    }
+    catch (e) {
+        logger_1.log.error(e);
+        return res.status(500).json({});
     }
 });
 //# sourceMappingURL=user.controller.js.map

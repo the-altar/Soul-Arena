@@ -12,6 +12,7 @@ router.post("/logout", user_controller_1.logout);
 router.post("/:username", user_controller_1.user);
 router.post("/avatar/:id", [middlewares_1.authenticate], user_controller_1.uploadAvatar);
 router.post("/avatar/:id/:filename", [middlewares_1.authenticate], user_controller_1.defaultAvatar);
+router.get("/match-history/:id", user_controller_1.matchHistory);
 router.get("/", [user_controller_1.loggerMiddleware], user_controller_1.mount);
 exports.userRouter = router;
 //# sourceMappingURL=index.js.map

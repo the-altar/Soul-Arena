@@ -3,6 +3,7 @@ import { hash, compare } from "bcrypt";
 import { sign, verify } from "jsonwebtoken";
 import { join } from "path";
 import { pool } from "../../db";
+import { log } from "../../lib/logger";
 
 export async function loggerMiddleware(
   req: Request,
@@ -25,7 +26,7 @@ export async function loggerMiddleware(
 
 export const mount = async function (req: Request, res: Response) {
   if (req.res.locals.guest) {
-    return res.json({ authLevel: -1, auth: false });
+    return res.json({ authLevel: -1, auth: false, id: -1 });
   }
   const u = req.res.locals.user;
   return res.json({
@@ -75,7 +76,7 @@ export const login = async (req: Request, res: Response) => {
     if (data.rowCount === 0) return res.json({ success: false });
 
     const match = await compare(req.body.password, user.passhash);
-    console.log(match)
+    console.log(match);
     if (!match) return res.json({ success: false });
 
     delete user.passhash;
@@ -116,7 +117,8 @@ export const logout = async (req: Request, res: Response) => {
 export const user = async (req: Request, res: Response) => {
   const username = req.body.username || req.params.username;
 
-  const text = `select u.id, u.avatar, u.username, 
+  const text = `select u.id, u.avatar, u.username, u.joined_at, 
+	  case when u2.user_id is not null then true else false end online,
     jsonb_build_object('elo', lb.elo, 'wins', lb.wins, 'losses', lb.losses, 'streak', lb.streak, 'maxStreak', lb.max_streak, 'exp', lb.experience, 'seasonRank', lb.season_rank, 'seasonLevel', lb.season_level) as season, 
     jsonb_build_object('authLevel', ur.auth_level, 'rankName', ur."name") as rank 
     from users as u 
@@ -124,8 +126,11 @@ export const user = async (req: Request, res: Response) => {
         on u.id = lb.user_id 
     left join user_rank as ur 
         on u.user_rank_id = ur.id
+    left join usersonline u2 
+    	on u2.user_id = u.id 
     where u.username = $1;
     `;
+
   try {
     const doc = await pool.query(text, [username]);
     res.status(200).json(doc.rows[0]);
@@ -164,5 +169,25 @@ export const defaultAvatar = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true });
   } catch (err) {
     return res.status(500).json({ success: false });
+  }
+};
+
+export const matchHistory = async (req: Request, res: Response) => {
+  const query = `
+  select gr.created_at, winner_id, jsonb_agg(jsonb_build_object('username', u2.username, 'id', u2.id)) as players from game_result gr 
+  left join users u2 
+    on u2.id = gr.winner_id or u2.id = gr.loser_id 
+  left join ladderboard l2 
+    on l2.user_id = $1
+  where gr.winner_id = $1 or gr.loser_id = $1 and gr.created_at >= NOW() - INTERVAL '24 HOURS'
+  group by gr.winner_id, gr.loser_id, gr.created_at
+  order by gr.created_at DESC;
+  `;
+  try {
+    const data = await pool.query(query, [req.params.id]);
+    return res.status(200).json(data.rows);
+  } catch (e) {
+    log.error(e);
+    return res.status(500).json({});
   }
 };
