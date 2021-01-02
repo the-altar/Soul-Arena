@@ -25,6 +25,6 @@ gameRouter.delete(
 
 gameRouter.get("/ingame", [authUserGameSession], file);
 gameRouter.get("/lobby", [authUserGameSession], file);
-gameRouter.get("/missions", [authUserGameSession], file);
+gameRouter.get("/assignments", [authUserGameSession], file);
 gameRouter.get("/login", file);
 gameRouter.get("/", [authUserGameSession], file);
