@@ -32,6 +32,7 @@ export class Skill {
   public uncounterable: boolean;
   private targetMode: targetType;
   public effects: Array<Effect>;
+  private casterReference:Character;
   private targetChoices: { [x: string]: Array<number> };
   private id: number;
   public caster: number;
