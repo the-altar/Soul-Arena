@@ -179,7 +179,7 @@ export const matchHistory = async (req: Request, res: Response) => {
     on u2.id = gr.winner_id or u2.id = gr.loser_id 
   left join ladderboard l2 
     on l2.user_id = $1
-  where gr.winner_id = $1 or gr.loser_id = $1 and gr.created_at >= NOW() - INTERVAL '24 HOURS'
+  where (gr.winner_id = $1 or gr.loser_id = $1) and gr.created_at >= (NOW() - INTERVAL '24 HOURS')
   group by gr.winner_id, gr.loser_id, gr.created_at
   order by gr.created_at DESC;
   `;
