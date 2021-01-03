@@ -40,6 +40,7 @@ export class EffectRemoval extends Effect {
 
   removeHarmfulEffects(char: Character) {
     if (char.getDebuffs().ignoreBenefitialEffects) return;
+    char.clearDebuffs();
     const skills = this.arenaReference.getActiveSkills();
     for (const skill of skills) {
       let wasRemoved = false;

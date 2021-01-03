@@ -301,7 +301,11 @@ export class Arena {
         c.getBuffs().validateDD();
         const energyIndex = c.generateEnergy();
         player.increaseEnergyPool(energyIndex);
-      } else bodyCount++;
+      } else {
+        c.clearDebuffs()
+        c.clearBuffs()
+        bodyCount++;
+      }
     }
     return bodyCount;
   }
@@ -318,13 +322,21 @@ export class Arena {
         c.clearBuffs();
         c.effectStack.clearStack();
         //log.info(`[${c.name}] Effect stack and buffs have been cleared`);
-      } else bodyCount++;
+      } else {
+        c.clearBuffs();
+        c.clearDebuffs();
+        bodyCount++;
+      }
     }
 
     for (const i of myChar) {
       const c = this.characters[i];
       if (!c.isKnockedOut())
         c.validadeSkillsCompletely(pool, this.characters, player.getId(), i);
+      else {
+        c.clearDebuffs();
+        c.clearBuffs();
+      }
     }
 
     return bodyCount;
