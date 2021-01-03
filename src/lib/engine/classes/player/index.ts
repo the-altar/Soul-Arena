@@ -13,8 +13,6 @@ export class Player {
         maxStreak: number,
         seasonRank: string,
         seasonLevel:number,
-
-        
     } 
     public energyPool: Array<number>
     private payupCart: Array<number>

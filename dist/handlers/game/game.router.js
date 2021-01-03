@@ -13,7 +13,7 @@ exports.gameRouter.get("/mission/:mission_id", [middlewares_1.authUserGameSessio
 exports.gameRouter.delete("/mission/:missionId", [middlewares_1.authUserGameSession], game_controller_1.deleteMissionTracks);
 exports.gameRouter.get("/ingame", [middlewares_1.authUserGameSession], game_controller_1.file);
 exports.gameRouter.get("/lobby", [middlewares_1.authUserGameSession], game_controller_1.file);
-exports.gameRouter.get("/missions", [middlewares_1.authUserGameSession], game_controller_1.file);
+exports.gameRouter.get("/assignments", [middlewares_1.authUserGameSession], game_controller_1.file);
 exports.gameRouter.get("/login", game_controller_1.file);
 exports.gameRouter.get("/", [middlewares_1.authUserGameSession], game_controller_1.file);
 //# sourceMappingURL=game.router.js.map

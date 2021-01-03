@@ -177,7 +177,7 @@ export class Arena {
     else indexes = [3, 4, 5];
     const ids = [];
     for (const index of indexes) {
-      ids.push(this.characters[index].literalId);
+      if (this.characters[index]) ids.push(this.characters[index].literalId);
     }
     return ids;
   }
@@ -295,7 +295,7 @@ export class Arena {
     for (const i of player.getMyCharsIndex()) {
       const c = this.characters[i];
 
-      if (!c.isKnockedOut()) {
+      if (c && !c.isKnockedOut()) {
         c.lowerCooldowns(c);
         c.clearDebuffs();
         c.getBuffs().validateDD();

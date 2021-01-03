@@ -143,8 +143,8 @@ exports.user = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.uploadAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = Number(req.params.id);
     const filename = id * 100;
-    const file = req.files.file;
     const p = path_1.join(process.cwd(), `/public/img/avatars/${filename}.jpg`);
+    const file = req.files.file;
     try {
         yield file.mv(p);
         yield db_1.pool.query("UPDATE users SET avatar = $1 where id = $2", [
@@ -154,8 +154,8 @@ exports.uploadAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function*
         return res.status(200).json({ success: true });
     }
     catch (err) {
-        res.status(501).end();
-        throw err;
+        logger_1.log.error(err);
+        return res.status(501).end();
     }
 });
 exports.defaultAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -179,7 +179,7 @@ exports.matchHistory = (req, res) => __awaiter(void 0, void 0, void 0, function*
     on u2.id = gr.winner_id or u2.id = gr.loser_id 
   left join ladderboard l2 
     on l2.user_id = $1
-  where gr.winner_id = $1 or gr.loser_id = $1 and gr.created_at >= NOW() - INTERVAL '24 HOURS'
+  where (gr.winner_id = $1 or gr.loser_id = $1) and gr.created_at >= (NOW() - INTERVAL '24 HOURS')
   group by gr.winner_id, gr.loser_id, gr.created_at
   order by gr.created_at DESC;
   `;

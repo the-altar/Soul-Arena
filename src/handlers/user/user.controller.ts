@@ -142,9 +142,9 @@ export const user = async (req: Request, res: Response) => {
 export const uploadAvatar = async (req: Request, res: Response) => {
   const id = Number(req.params.id);
   const filename = id * 100;
-  const file: any = req.files.file;
   const p = join(process.cwd(), `/public/img/avatars/${filename}.jpg`);
 
+  const file: any = req.files.file;
   try {
     await file.mv(p);
     await pool.query("UPDATE users SET avatar = $1 where id = $2", [
@@ -153,8 +153,8 @@ export const uploadAvatar = async (req: Request, res: Response) => {
     ]);
     return res.status(200).json({ success: true });
   } catch (err) {
-    res.status(501).end();
-    throw err;
+    log.error(err);
+    return res.status(501).end();
   }
 };
 

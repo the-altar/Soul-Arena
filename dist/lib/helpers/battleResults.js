@@ -32,7 +32,7 @@ function calculateExpGain(player, p2, isWinner) {
         levelUp(player, levelStatus);
     }
     else {
-        exp = Math.min(Math.max(50 * levelDifference, 50), 300);
+        exp = Math.min(Math.max(25 * levelDifference, 50), 300);
         player.season.exp = Math.max(0, player.season.exp - exp);
         levelDown(player, levelStatus);
     }
