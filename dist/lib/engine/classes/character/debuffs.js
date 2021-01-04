@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Debuffs = void 0;
+const enums_1 = require("../../enums");
 class Debuffs {
     constructor() {
         this.increaseDamageTaken = {
@@ -40,8 +41,8 @@ class Debuffs {
         }
         return r;
     }
-    isStunned(params) {
-        if (this.stun[params])
+    isStunned(skill) {
+        if (this.stun[skill.persistence] || this.stun[enums_1.SkillClassType.Any])
             return true;
         return false;
     }

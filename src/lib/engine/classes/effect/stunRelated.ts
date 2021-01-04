@@ -1,6 +1,5 @@
 import { Character } from "..";
 import { Effect } from "./base";
-import { Arena } from "../../arena";
 import { Skill } from "../skill";
 import { SkillClassType } from "../../enums";
 
@@ -11,6 +10,7 @@ export class Stun extends Effect {
   constructor(data: any, caster: number) {
     super(data, caster);
     this.stunClass = data.stunClass;
+    this.compulsory = true;
   }
 
   public functionality(char: Character, origin: Skill) {

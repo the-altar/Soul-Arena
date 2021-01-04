@@ -32,7 +32,7 @@ class Character {
         this.arenaReference = world;
         this.effectStack = new effetStack_1.EffectStack();
         for (const skill of data.skills) {
-            this.skills.push(new skill_1.Skill(skill, this.id, this.arenaReference));
+            this.skills.push(new skill_1.Skill(skill, this.id, this.arenaReference, this));
         }
     }
     setAllies(allies) {
@@ -113,7 +113,7 @@ class Character {
     }
     getCopySkillByIndex(index) {
         const newObj = JSON.parse(JSON.stringify(this.skills[index].getCopyData()));
-        return new skill_1.Skill(newObj, this.id, this.arenaReference);
+        return new skill_1.Skill(newObj, this.id, this.arenaReference, this);
     }
     getRealSkillByIndex(index) {
         return this.skills[index];
@@ -234,8 +234,7 @@ class Character {
     }
     isStunned(skill) {
         if (skill)
-            return this.debuffs.isStunned(skill.class);
-        return this.debuffs.isStunned(enums_1.SkillClassType.Any);
+            return this.debuffs.isStunned(skill);
     }
     getSkills() {
         return this.skills;

@@ -7,6 +7,7 @@ class Stun extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
         this.stunClass = data.stunClass;
+        this.compulsory = true;
     }
     functionality(char, origin) {
         if (char.getBuffs().ignoreHarmfulEffects.status)

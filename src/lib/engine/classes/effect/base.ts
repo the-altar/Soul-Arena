@@ -5,6 +5,7 @@ import {
   activationType,
   PlayerPhase,
   triggerClauseType,
+  ControlType,
 } from "../../enums";
 import { Arena } from "../../arena";
 import { Skill } from "../skill";
@@ -261,6 +262,12 @@ export class Effect {
     if ((!this.triggered || this.activate) && !char.addEffectStack(this)) {
       return;
     }
+
+    if (
+      origin.persistence === ControlType.Control &&
+      char.isInvulnerable(origin)
+    )
+      return;
     targetList.push(charIndex);
     if (char.isInvulnerable(origin)) return;
     if (char.isKnockedOut()) return;

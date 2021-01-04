@@ -64,7 +64,7 @@ export class Character {
     this.effectStack = new EffectStack();
 
     for (const skill of data.skills) {
-      this.skills.push(new Skill(skill, this.id, this.arenaReference));
+      this.skills.push(new Skill(skill, this.id, this.arenaReference, this));
     }
   }
 
@@ -163,7 +163,7 @@ export class Character {
 
   public getCopySkillByIndex(index: number): Skill {
     const newObj = JSON.parse(JSON.stringify(this.skills[index].getCopyData()));
-    return new Skill(newObj, this.id, this.arenaReference);
+    return new Skill(newObj, this.id, this.arenaReference, this);
   }
 
   public getRealSkillByIndex(index: number): Skill {
@@ -304,8 +304,7 @@ export class Character {
   }
 
   public isStunned(skill?: Skill): boolean {
-    if (skill) return this.debuffs.isStunned(skill.class);
-    return this.debuffs.isStunned(SkillClassType.Any);
+    if (skill) return this.debuffs.isStunned(skill);
   }
 
   public getSkills(): Array<Skill> {

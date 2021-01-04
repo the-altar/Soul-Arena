@@ -93,7 +93,6 @@ class Arena {
             return this.gameOver(nextPlayer, currentPlayer);
         if (bCount2 === 3)
             return this.gameOver(currentPlayer, nextPlayer);
-        this.validateSkillQueue();
         return false;
     }
     executeNewSkills() {
@@ -113,9 +112,16 @@ class Arena {
     tickSkillsInQueue() {
         for (let i = this.skillQueue.length - 1; i >= 0; i--) {
             const skill = this.skillQueue[i];
+            const cancelled = skill.isCancelled();
             const terminate = skill.tickEffectsDuration(this, skill);
-            if (terminate) {
+            if (terminate || cancelled) {
                 this.skillQueue.splice(i, 1);
+                continue;
+            }
+            const validated = skill.areTargetsValidated();
+            if (!validated || cancelled) {
+                this.skillQueue.splice(i, 1);
+                continue;
             }
         }
     }
@@ -217,14 +223,6 @@ class Arena {
                 };
         }
     }
-    validateSkillQueue() {
-        for (let i = this.skillQueue.length - 1; i >= 0; i--) {
-            const s = this.skillQueue[i];
-            if (!s.areTargetsValidated(this)) {
-                this.skillQueue.splice(i, 1);
-            }
-        }
-    }
     findPlayerByCharacterIndex(index) {
         const { char } = this.findCharacterById(index);
         for (const player of this.players) {
@@ -257,8 +255,11 @@ class Arena {
                 const energyIndex = c.generateEnergy();
                 player.increaseEnergyPool(energyIndex);
             }
-            else
+            else {
+                c.clearDebuffs();
+                c.clearBuffs();
                 bodyCount++;
+            }
         }
         return bodyCount;
     }
@@ -271,16 +272,15 @@ class Arena {
             const c = this.characters[i];
             if (!c.isKnockedOut()) {
                 c.clearBuffs();
+                c.validadeSkillsCompletely(pool, this.characters, player.getId(), i);
                 c.effectStack.clearStack();
                 //log.info(`[${c.name}] Effect stack and buffs have been cleared`);
             }
-            else
+            else {
+                c.clearBuffs();
+                c.clearDebuffs();
                 bodyCount++;
-        }
-        for (const i of myChar) {
-            const c = this.characters[i];
-            if (!c.isKnockedOut())
-                c.validadeSkillsCompletely(pool, this.characters, player.getId(), i);
+            }
         }
         return bodyCount;
     }

@@ -192,6 +192,9 @@ class Effect {
         if ((!this.triggered || this.activate) && !char.addEffectStack(this)) {
             return;
         }
+        if (origin.persistence === enums_1.ControlType.Control &&
+            char.isInvulnerable(origin))
+            return;
         targetList.push(charIndex);
         if (char.isInvulnerable(origin))
             return;

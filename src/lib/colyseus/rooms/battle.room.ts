@@ -1,6 +1,6 @@
 import http from "http";
 import { Room, Client, Delayed } from "colyseus";
-import { Schema, type, ArraySchema } from "@colyseus/schema";
+import { Schema, type } from "@colyseus/schema";
 import { Arena, iCharacter, Player } from "../../engine";
 import * as results from "../../helpers/battleResults";
 import { pool } from "../../../db";

@@ -1,4 +1,5 @@
 import { Types, DamageType, DebuffTypes, SkillClassType } from "../../enums";
+import { Skill } from "../../classes/skill";
 
 export interface iDebuffParams {
   damageType?: DamageType;
@@ -58,8 +59,9 @@ export class Debuffs {
     return r;
   }
 
-  public isStunned(params: any): boolean {
-    if (this.stun[params]) return true;
+  public isStunned(skill: Skill): boolean {
+    if (this.stun[skill.persistence] || this.stun[SkillClassType.Any])
+      return true;
     return false;
   }
 

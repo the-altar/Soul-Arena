@@ -32,14 +32,19 @@ export class Skill {
   public uncounterable: boolean;
   private targetMode: targetType;
   public effects: Array<Effect>;
-  private casterReference:Character;
+  private casterReference: Character;
   private targetChoices: { [x: string]: Array<number> };
   private id: number;
   public caster: number;
   private turnCost: Array<number>;
   private arenaReference: Arena;
 
-  constructor(data: any, caster: number, world: Arena) {
+  constructor(
+    data: any,
+    caster: number,
+    world: Arena,
+    casterReference: Character
+  ) {
     this.caster = data.caster;
     this.banner = data.banner;
     this.cooldown = 0 || data.startCooldown;
@@ -60,6 +65,7 @@ export class Skill {
     this.id = data.id;
     this.harmful = data.harmful || false;
     this.arenaReference = world;
+    this.casterReference = casterReference;
     this.turnCost = this.cost.slice();
 
     for (const e of data.effects) {
@@ -245,9 +251,19 @@ export class Skill {
   }
 
   public executeEffects() {
-    //log.info("[GAME] Execute effects")
+    //log.info(`[GAME] Execute effects of ${this.casterReference.name}`);
+
     for (const effect of this.effects) {
       effect.tick++;
+      effect.setTargets(this.targets);
+
+      if (this.casterReference.isStunned(this)) {
+        //log.info(`[STATUS] - STUNNED`);
+        if (this.persistence === ControlType.Action) continue;
+        else if (this.persistence === ControlType.Control)
+          effect.terminate = true;
+      }
+
       effect.shouldApply();
       effect.execute(this);
       if (!effect.terminate) effect.generateToolTip();
@@ -283,8 +299,13 @@ export class Skill {
   public tickEffectsDuration(world: Arena, origin: Skill) {
     for (let i = this.effects.length - 1; i >= 0; i--) {
       const effect = this.effects[i];
-      effect.progressTurn();
+      if (
+        this.casterReference.isStunned(this) &&
+        this.persistence === ControlType.Control
+      )
+        effect.terminate = true;
 
+      effect.progressTurn();
       if (effect.terminate) {
         const e = this.effects.splice(i, 1)[0];
 
@@ -307,16 +328,33 @@ export class Skill {
     return false;
   }
 
-  public areTargetsValidated(world: Arena) {
+  public areTargetsValidated() {
     for (let i = this.targets.length - 1; i >= 0; i--) {
-      const c = world.getCharactersByIndex([this.targets[i]])[0];
-      if (c.isKnockedOut()) {
+      const c = this.arenaReference.getCharactersByIndex([this.targets[i]])[0];
+      if (
+        c.isKnockedOut() ||
+        (c.isInvulnerable(this) && this.persistence === ControlType.Control)
+      ) {
         this.targets.splice(i, 1);
       }
     }
 
     if (this.targets.length === 0) return false;
     return true;
+  }
+
+  public isCancelled() {
+    log.info(
+      `[${
+        this.casterReference.name
+      }] - stunned: ${this.casterReference.isStunned(this)}`
+    );
+    if (
+      this.persistence === ControlType.Control &&
+      this.casterReference.isStunned(this)
+    )
+      return true;
+    return false;
   }
 
   public setTargetMod(target: targetType) {
@@ -342,6 +380,7 @@ export class Skill {
   public getPublicData() {
     const publicData = { ...this };
     delete publicData.arenaReference;
+    delete publicData.casterReference;
     delete publicData.effects;
     delete publicData.inactiveEffects;
     delete publicData.mods;
@@ -355,6 +394,7 @@ export class Skill {
 
   public getCopyData() {
     const publicSkill = { ...this };
+    delete publicSkill.casterReference;
     delete publicSkill.arenaReference;
     delete publicSkill.effects;
     delete publicSkill.inactiveEffects;

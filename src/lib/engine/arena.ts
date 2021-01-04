@@ -1,6 +1,7 @@
 import { Character, Player, Skill } from "./classes";
 import { iCharacter, iSkillQueue } from "./interfaces";
 import { log } from "../logger";
+import { throws } from "assert";
 
 export class Arena {
   private players: Array<Player>;
@@ -101,7 +102,6 @@ export class Arena {
     this.executeNewSkills();
     this.tickSkillsInQueue();
     this.hasUsedSKill = {};
-
     //console.log("Start player phase for: " + player1.getId())
     const bCount2 = this.startPlayerPhase(nextPlayer);
     //console.log("End player phase for: " + player2.getId())
@@ -110,7 +110,6 @@ export class Arena {
     if (bCount1 === 3) return this.gameOver(nextPlayer, currentPlayer);
     if (bCount2 === 3) return this.gameOver(currentPlayer, nextPlayer);
 
-    this.validateSkillQueue();
     return false;
   }
 
@@ -133,9 +132,16 @@ export class Arena {
   public tickSkillsInQueue() {
     for (let i = this.skillQueue.length - 1; i >= 0; i--) {
       const skill = this.skillQueue[i];
+      const cancelled = skill.isCancelled();
       const terminate = skill.tickEffectsDuration(this, skill);
-      if (terminate) {
+      if (terminate || cancelled) {
         this.skillQueue.splice(i, 1);
+        continue;
+      }
+      const validated = skill.areTargetsValidated();
+      if (!validated || cancelled) {
+        this.skillQueue.splice(i, 1);
+        continue;
       }
     }
   }
@@ -259,15 +265,6 @@ export class Arena {
     }
   }
 
-  public validateSkillQueue() {
-    for (let i = this.skillQueue.length - 1; i >= 0; i--) {
-      const s = this.skillQueue[i];
-      if (!s.areTargetsValidated(this)) {
-        this.skillQueue.splice(i, 1);
-      }
-    }
-  }
-
   public findPlayerByCharacterIndex(index: number) {
     const { char } = this.findCharacterById(index);
     for (const player of this.players) {
@@ -302,8 +299,8 @@ export class Arena {
         const energyIndex = c.generateEnergy();
         player.increaseEnergyPool(energyIndex);
       } else {
-        c.clearDebuffs()
-        c.clearBuffs()
+        c.clearDebuffs();
+        c.clearBuffs();
         bodyCount++;
       }
     }
@@ -320,6 +317,7 @@ export class Arena {
       const c = this.characters[i];
       if (!c.isKnockedOut()) {
         c.clearBuffs();
+        c.validadeSkillsCompletely(pool, this.characters, player.getId(), i);
         c.effectStack.clearStack();
         //log.info(`[${c.name}] Effect stack and buffs have been cleared`);
       } else {
@@ -328,17 +326,6 @@ export class Arena {
         bodyCount++;
       }
     }
-
-    for (const i of myChar) {
-      const c = this.characters[i];
-      if (!c.isKnockedOut())
-        c.validadeSkillsCompletely(pool, this.characters, player.getId(), i);
-      else {
-        c.clearDebuffs();
-        c.clearBuffs();
-      }
-    }
-
     return bodyCount;
   }
 

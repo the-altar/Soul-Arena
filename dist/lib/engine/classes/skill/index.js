@@ -5,8 +5,9 @@ const enums_1 = require("../../enums");
 const effect_1 = require("../effect");
 const targetValidationFactory_1 = require("./targetValidationFactory");
 const mods_1 = require("./mods");
+const logger_1 = require("../../../logger");
 class Skill {
-    constructor(data, caster, world) {
+    constructor(data, caster, world, casterReference) {
         this.caster = data.caster;
         this.banner = data.banner;
         this.cooldown = 0 || data.startCooldown;
@@ -27,6 +28,7 @@ class Skill {
         this.id = data.id;
         this.harmful = data.harmful || false;
         this.arenaReference = world;
+        this.casterReference = casterReference;
         this.turnCost = this.cost.slice();
         for (const e of data.effects) {
             const built = effect_1.effectFactory(e, caster);
@@ -176,9 +178,17 @@ class Skill {
         return this.targets;
     }
     executeEffects() {
-        //log.info("[GAME] Execute effects")
+        logger_1.log.info(`[GAME] Execute effects of ${this.casterReference.name}`);
         for (const effect of this.effects) {
             effect.tick++;
+            effect.setTargets(this.targets);
+            if (this.casterReference.isStunned(this)) {
+                logger_1.log.info(`[STATUS] - STUNNED`);
+                if (this.persistence === enums_1.ControlType.Action)
+                    continue;
+                else if (this.persistence === enums_1.ControlType.Control)
+                    effect.terminate = true;
+            }
             effect.shouldApply();
             effect.execute(this);
             if (!effect.terminate)
@@ -209,6 +219,9 @@ class Skill {
     tickEffectsDuration(world, origin) {
         for (let i = this.effects.length - 1; i >= 0; i--) {
             const effect = this.effects[i];
+            if (this.casterReference.isStunned(this) &&
+                this.persistence === enums_1.ControlType.Control)
+                effect.terminate = true;
             effect.progressTurn();
             if (effect.terminate) {
                 const e = this.effects.splice(i, 1)[0];
@@ -229,16 +242,24 @@ class Skill {
             return true;
         return false;
     }
-    areTargetsValidated(world) {
+    areTargetsValidated() {
         for (let i = this.targets.length - 1; i >= 0; i--) {
-            const c = world.getCharactersByIndex([this.targets[i]])[0];
-            if (c.isKnockedOut()) {
+            const c = this.arenaReference.getCharactersByIndex([this.targets[i]])[0];
+            if (c.isKnockedOut() ||
+                (c.isInvulnerable(this) && this.persistence === enums_1.ControlType.Control)) {
                 this.targets.splice(i, 1);
             }
         }
         if (this.targets.length === 0)
             return false;
         return true;
+    }
+    isCancelled() {
+        logger_1.log.info(`[${this.casterReference.name}] - stunned: ${this.casterReference.isStunned(this)}`);
+        if (this.persistence === enums_1.ControlType.Control &&
+            this.casterReference.isStunned(this))
+            return true;
+        return false;
     }
     setTargetMod(target) {
         this.mods.setTargetMod(target);
@@ -258,6 +279,7 @@ class Skill {
     getPublicData() {
         const publicData = Object.assign({}, this);
         delete publicData.arenaReference;
+        delete publicData.casterReference;
         delete publicData.effects;
         delete publicData.inactiveEffects;
         delete publicData.mods;
@@ -269,6 +291,7 @@ class Skill {
     }
     getCopyData() {
         const publicSkill = Object.assign({}, this);
+        delete publicSkill.casterReference;
         delete publicSkill.arenaReference;
         delete publicSkill.effects;
         delete publicSkill.inactiveEffects;
