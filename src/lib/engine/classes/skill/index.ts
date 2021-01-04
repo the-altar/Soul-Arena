@@ -300,8 +300,11 @@ export class Skill {
     for (let i = this.effects.length - 1; i >= 0; i--) {
       const effect = this.effects[i];
       if (
-        this.casterReference.isStunned(this) &&
-        this.persistence === ControlType.Control
+        (this.casterReference.isStunned(this) &&
+          this.persistence === ControlType.Control) ||
+        (this.casterReference.isKnockedOut() &&
+          (this.persistence === ControlType.Control ||
+            this.persistence === ControlType.Action))
       )
         effect.terminate = true;
 

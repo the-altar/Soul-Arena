@@ -178,12 +178,12 @@ class Skill {
         return this.targets;
     }
     executeEffects() {
-        logger_1.log.info(`[GAME] Execute effects of ${this.casterReference.name}`);
+        //log.info(`[GAME] Execute effects of ${this.casterReference.name}`);
         for (const effect of this.effects) {
             effect.tick++;
             effect.setTargets(this.targets);
             if (this.casterReference.isStunned(this)) {
-                logger_1.log.info(`[STATUS] - STUNNED`);
+                //log.info(`[STATUS] - STUNNED`);
                 if (this.persistence === enums_1.ControlType.Action)
                     continue;
                 else if (this.persistence === enums_1.ControlType.Control)
@@ -219,8 +219,11 @@ class Skill {
     tickEffectsDuration(world, origin) {
         for (let i = this.effects.length - 1; i >= 0; i--) {
             const effect = this.effects[i];
-            if (this.casterReference.isStunned(this) &&
-                this.persistence === enums_1.ControlType.Control)
+            if ((this.casterReference.isStunned(this) &&
+                this.persistence === enums_1.ControlType.Control) ||
+                (this.casterReference.isKnockedOut() &&
+                    (this.persistence === enums_1.ControlType.Control ||
+                        this.persistence === enums_1.ControlType.Action)))
                 effect.terminate = true;
             effect.progressTurn();
             if (effect.terminate) {
