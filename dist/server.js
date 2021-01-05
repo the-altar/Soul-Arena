@@ -16,8 +16,23 @@ exports.Coliseum = class {
         this.rooms();
     }
     rooms() {
-        this.server.define("rankedLobby", colyseus_2.RankedLobby);
-        this.server.define("battle", colyseus_2.Battle);
+        this.server.define("rankedLobby", colyseus_2.Queue, { targetRoom: "rankedBattle" });
+        this.server.define("quickLobby", colyseus_2.Queue, { targetRoom: "quickBattle" });
+        this.server.define("rankedBattle", colyseus_2.Battle, {
+            updateMissions: true,
+            allowMatchCalculations: true,
+            roomCode: 0,
+        });
+        this.server.define("quickBattle", colyseus_2.Battle, {
+            updateMissions: true,
+            allowMatchCalculations: false,
+            roomCode: 1,
+        });
+        this.server.define("privateBattle", colyseus_2.Battle, {
+            updateMissions: false,
+            allowMatchCalculations: false,
+            roomCode: 2,
+        });
         this.server.define("lobby", colyseus_2.Lobby);
     }
     run() {

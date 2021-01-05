@@ -56,6 +56,9 @@ class Battle extends colyseus_1.Room {
     }
     // When room is initialized
     onCreate(options) {
+        this.updateMissions = options.updateMissions;
+        this.allowMatchCalculations = options.allowMatchCalculations;
+        this.roomCode = options.roomCode;
         this.setState(new MatchState());
         this.onMessage("end-game-turn", (client, payload) => __awaiter(this, void 0, void 0, function* () {
             this.delay.reset();
@@ -117,7 +120,11 @@ class Battle extends colyseus_1.Room {
             if (this.arena.winner && this.arena.loser)
                 try {
                     yield this.updateGameRecords(this.arena.winner, this.arena.loser);
+                    if (!this.updateMissions)
+                        return;
                     yield this.updateMissionGoals(this.arena.winner, this.arena.loser);
+                    if (!this.allowMatchCalculations)
+                        return;
                     yield results.updateGameResults(Object.assign(Object.assign({}, this.arena.loser.season), { coins: this.arena.loser.coins, season: 1, id: this.arena.loser.id }));
                     yield results.updateGameResults(Object.assign(Object.assign({}, this.arena.winner.season), { coins: this.arena.winner.coins, season: 1, id: this.arena.winner.id }));
                 }
@@ -139,8 +146,13 @@ class Battle extends colyseus_1.Room {
         const isOver = this.arena.startGame();
         this.state.turnData = JSON.stringify(this.arena.getClientData());
         if (isOver) {
-            const payload1 = results.matchCalculations(this.arena.winner, this.arena.loser, true);
-            const payload2 = results.matchCalculations(this.arena.loser, this.arena.winner, false);
+            let payload1, payload2;
+            if (this.allowMatchCalculations) {
+                payload1 = results.matchCalculations(this.arena.winner, this.arena.loser, true);
+                payload2 = results.matchCalculations(this.arena.loser, this.arena.winner, false);
+            }
+            else
+                payload1 = payload2 = {};
             this.broadcast("end-game", {
                 winner: { playerData: this.arena.winner, results: payload1 },
                 loser: { playerData: this.arena.loser, results: payload2 },
@@ -150,8 +162,13 @@ class Battle extends colyseus_1.Room {
     surrender(id) {
         return __awaiter(this, void 0, void 0, function* () {
             this.arena.surrender(id);
-            const payload1 = results.matchCalculations(this.arena.winner, this.arena.loser, true);
-            const payload2 = results.matchCalculations(this.arena.loser, this.arena.winner, false);
+            let payload1, payload2;
+            if (this.allowMatchCalculations) {
+                payload1 = results.matchCalculations(this.arena.winner, this.arena.loser, true);
+                payload2 = results.matchCalculations(this.arena.loser, this.arena.winner, false);
+            }
+            else
+                payload1 = payload2 = {};
             this.broadcast("end-game", {
                 winner: {
                     playerData: Object.assign({}, this.arena.winner),
@@ -163,6 +180,8 @@ class Battle extends colyseus_1.Room {
     }
     updateMissionGoals(winner, loser) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!this.updateMissions)
+                return;
             const sql = `select
         tm.goals as "trackingGoals",
         tm.mission_id,
@@ -253,16 +272,18 @@ class Battle extends colyseus_1.Room {
     updateGameRecords(winner, loser) {
         return __awaiter(this, void 0, void 0, function* () {
             const query1 = `INSERT INTO game_stats DEFAULT VALUES;`;
-            const query2 = `INSERT INTO game_result (winner_id, loser_id) VALUES($1, $2);`;
+            const query2 = `INSERT INTO game_result (winner_id, loser_id, game_room) VALUES($1, $2, $3);`;
             const query3 = `UPDATE entity SET games_won= games_won + 1 WHERE id=ANY($1)`;
             const query4 = `UPDATE entity SET games_lost= games_lost + 1 WHERE id=ANY($1)`;
             const client = yield db_1.pool.connect();
             try {
                 yield client.query("BEGIN");
-                yield client.query(query1);
-                yield client.query(query2, [winner.id, loser.id]);
-                yield client.query(query3, [winner.myCharsRealId]);
-                yield client.query(query4, [loser.myCharsRealId]);
+                if (this.allowMatchCalculations) {
+                    yield client.query(query1);
+                    yield client.query(query3, [winner.myCharsRealId]);
+                    yield client.query(query4, [loser.myCharsRealId]);
+                }
+                yield client.query(query2, [winner.id, loser.id, this.roomCode]);
                 yield client.query("COMMIT");
             }
             catch (e) {

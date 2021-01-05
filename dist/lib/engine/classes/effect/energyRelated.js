@@ -28,12 +28,7 @@ class EnergyGain extends base_1.Effect {
             }
         }
         else {
-            if (this.delay > 0) {
-                this.message = `In ${this.delay} turns this character will gain ${this.value} extra PP`;
-            }
-            else {
-                this.message = `This character will gain ${this.value} extra PP`;
-            }
+            this.message = `This character will gain ${this.value} extra reiatsu`;
         }
     }
 }

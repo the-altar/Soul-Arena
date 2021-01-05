@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RankedLobby = void 0;
+exports.Queue = void 0;
 const colyseus_1 = require("colyseus");
 const db_1 = require("../../../db");
 class ClientManager {
@@ -66,7 +66,7 @@ class ClientManager {
         return mappedHash;
     }
 }
-class RankedLobby extends colyseus_1.Room {
+class Queue extends colyseus_1.Room {
     constructor() {
         super(...arguments);
         this.manager = new ClientManager();
@@ -74,12 +74,13 @@ class RankedLobby extends colyseus_1.Room {
     }
     // When room is initialized
     onCreate(options) {
+        this.targetRoom = options.targetRoom;
         this.setPatchRate(null);
         this.setSimulationInterval(() => __awaiter(this, void 0, void 0, function* () {
             try {
                 const queue = this.manager.getRankedMap();
                 for (let i = 1; i < queue.length; i = i + 2) {
-                    const room = yield colyseus_1.matchMaker.createRoom("battle", {});
+                    const room = yield colyseus_1.matchMaker.createRoom(this.targetRoom, {});
                     for (let j = i - 1; j <= i; j++) {
                         const p = queue[j];
                         const seat = yield colyseus_1.matchMaker.reserveSeatFor(room, {
@@ -142,5 +143,5 @@ class RankedLobby extends colyseus_1.Room {
         return __awaiter(this, void 0, void 0, function* () { });
     }
 }
-exports.RankedLobby = RankedLobby;
-//# sourceMappingURL=rankedLobby.room.js.map
+exports.Queue = Queue;
+//# sourceMappingURL=queue.room.js.map

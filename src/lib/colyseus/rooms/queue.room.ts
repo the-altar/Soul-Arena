@@ -72,18 +72,20 @@ class ClientManager {
   }
 }
 
-export class RankedLobby extends Room {
+export class Queue extends Room {
   private manager: ClientManager = new ClientManager();
   private evaluateGroupInterval: number = 5000;
+  private targetRoom: string;
   // When room is initialized
   onCreate(options: any) {
+    this.targetRoom = options.targetRoom;
     this.setPatchRate(null);
     this.setSimulationInterval(async () => {
       try {
         const queue = this.manager.getRankedMap();
 
         for (let i = 1; i < queue.length; i = i + 2) {
-          const room = await matchMaker.createRoom("battle", {});
+          const room = await matchMaker.createRoom(this.targetRoom, {});
 
           for (let j = i - 1; j <= i; j++) {
             const p = queue[j];

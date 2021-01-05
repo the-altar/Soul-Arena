@@ -6,7 +6,6 @@ import {
   triggerClauseType,
 } from "../../enums";
 import { Character } from "../character";
-import { Arena } from "../../arena";
 import { Skill } from "../skill";
 import { Player } from "../player";
 
@@ -18,7 +17,7 @@ export class EnergyGain extends Effect {
   }
 
   public functionality(char: Character, origin: Skill) {
-    if(char.getDebuffs().ignoreBenefitialEffects) return
+    if (char.getDebuffs().ignoreBenefitialEffects) return;
     const p = this.arenaReference.findPlayerByCharacterIndex(this.caster);
     let index: number;
     if (this.energyType === CostTypes.Random)
@@ -35,11 +34,7 @@ export class EnergyGain extends Effect {
         }
       }
     } else {
-      if (this.delay > 0) {
-        this.message = `In ${this.delay} turns this character will gain ${this.value} extra PP`;
-      } else {
-        this.message = `This character will gain ${this.value} extra PP`;
-      }
+      this.message = `This character will gain ${this.value} extra reiatsu`;
     }
   }
 }
@@ -52,7 +47,7 @@ export class EnergyRemoval extends Effect {
   }
 
   public functionality(char: Character, origin: Skill) {
-    if(char.getBuffs().ignoreHarmfulEffects.status) return
+    if (char.getBuffs().ignoreHarmfulEffects.status) return;
     const p = this.arenaReference.findPlayerByChar(char);
 
     if (this.triggerClause === triggerClauseType.IfTargeted) {

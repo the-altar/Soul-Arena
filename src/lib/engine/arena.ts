@@ -1,7 +1,6 @@
 import { Character, Player, Skill } from "./classes";
 import { iCharacter, iSkillQueue } from "./interfaces";
 import { log } from "../logger";
-import { throws } from "assert";
 
 export class Arena {
   private players: Array<Player>;
@@ -89,24 +88,31 @@ export class Arena {
   }
 
   public startGame() {
+    log.info("- [START] increase turn");
     this.turnCount++;
     const nextPlayer = this.players[this.turnCount % 2];
     const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
 
-    nextPlayer.setTurn(true);
     currentPlayer.setTurn(false);
+    nextPlayer.setTurn(true);
+    this.clearEffectsFromCharacters();
+    //console.log("End player phase for: " + player2.getId())
+    log.info(
+      `- [GAME] Ending ${currentPlayer.username}'s turn (decrease cooldowns, clear buffs and debuffs)`
+    );
 
     this.clearCharactersNotifications();
-
+    log.info("- [GAME] Executing old skills");
     this.executeSkills();
+    log.info("- [GAME] Executing new skills");
     this.executeNewSkills();
+    log.info("- [GAME] Tick skills in queue");
     this.tickSkillsInQueue();
     this.hasUsedSKill = {};
-    //console.log("Start player phase for: " + player1.getId())
-    const bCount2 = this.startPlayerPhase(nextPlayer);
-    //console.log("End player phase for: " + player2.getId())
-    const bCount1 = this.endPlayerPhase(currentPlayer);
 
+    log.info(`- [END] start ${nextPlayer.username}'s turn`);
+    const bCount2 = this.startPlayerPhase(nextPlayer);
+    const bCount1 = this.endPlayerPhase(currentPlayer);
     if (bCount1 === 3) return this.gameOver(nextPlayer, currentPlayer);
     if (bCount2 === 3) return this.gameOver(currentPlayer, nextPlayer);
 
@@ -278,8 +284,16 @@ export class Arena {
     }
   }
 
+  clearEffectsFromCharacters() {
+    for (const char of this.characters) {
+      char.clearBuffs();
+      char.clearDebuffs();
+      char.effectStack.clearStack();
+    }
+  }
+
   public clearSkillMods(p: Player) {
-    //console.log("CLEARED SKILL MODS")
+    log.info("cleared skill mods");
     const arr = p.getMyCharsIndex();
     for (const i of arr) {
       this.characters[i].clearSkillMods();
@@ -294,13 +308,9 @@ export class Arena {
 
       if (c && !c.isKnockedOut()) {
         c.lowerCooldowns(c);
-        c.clearDebuffs();
-        c.getBuffs().validateDD();
         const energyIndex = c.generateEnergy();
         player.increaseEnergyPool(energyIndex);
       } else {
-        c.clearDebuffs();
-        c.clearBuffs();
         bodyCount++;
       }
     }
@@ -316,13 +326,9 @@ export class Arena {
     for (const i of myChar) {
       const c = this.characters[i];
       if (!c.isKnockedOut()) {
-        c.clearBuffs();
         c.validadeSkillsCompletely(pool, this.characters, player.getId(), i);
-        c.effectStack.clearStack();
         //log.info(`[${c.name}] Effect stack and buffs have been cleared`);
       } else {
-        c.clearBuffs();
-        c.clearDebuffs();
         bodyCount++;
       }
     }

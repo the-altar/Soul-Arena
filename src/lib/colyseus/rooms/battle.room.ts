@@ -28,9 +28,15 @@ export class Battle extends Room {
   private evaluateGroupInterval = 60000;
   private delay: Delayed;
   private playerState: { [x: string]: number } = {};
-
+  private updateMissions: boolean;
+  private allowMatchCalculations: boolean;
+  private roomCode: number;
   // When room is initialized
   onCreate(options: any) {
+    this.updateMissions = options.updateMissions;
+    this.allowMatchCalculations = options.allowMatchCalculations;
+    this.roomCode = options.roomCode;
+
     this.setState(new MatchState());
     this.onMessage("end-game-turn", async (client: Client, payload: any) => {
       this.delay.reset();
@@ -101,7 +107,9 @@ export class Battle extends Room {
     if (this.arena.winner && this.arena.loser)
       try {
         await this.updateGameRecords(this.arena.winner, this.arena.loser);
+        if (!this.updateMissions) return;
         await this.updateMissionGoals(this.arena.winner, this.arena.loser);
+        if (!this.allowMatchCalculations) return;
         await results.updateGameResults({
           ...this.arena.loser.season,
           coins: this.arena.loser.coins,
@@ -134,16 +142,19 @@ export class Battle extends Room {
     const isOver = this.arena.startGame();
     this.state.turnData = JSON.stringify(this.arena.getClientData());
     if (isOver) {
-      const payload1 = results.matchCalculations(
-        this.arena.winner,
-        this.arena.loser,
-        true
-      );
-      const payload2 = results.matchCalculations(
-        this.arena.loser,
-        this.arena.winner,
-        false
-      );
+      let payload1, payload2;
+      if (this.allowMatchCalculations) {
+        payload1 = results.matchCalculations(
+          this.arena.winner,
+          this.arena.loser,
+          true
+        );
+        payload2 = results.matchCalculations(
+          this.arena.loser,
+          this.arena.winner,
+          false
+        );
+      } else payload1 = payload2 = {};
 
       this.broadcast("end-game", {
         winner: { playerData: this.arena.winner, results: payload1 },
@@ -154,16 +165,20 @@ export class Battle extends Room {
 
   async surrender(id: number) {
     this.arena.surrender(id);
-    const payload1 = results.matchCalculations(
-      this.arena.winner,
-      this.arena.loser,
-      true
-    );
-    const payload2 = results.matchCalculations(
-      this.arena.loser,
-      this.arena.winner,
-      false
-    );
+    let payload1, payload2;
+
+    if (this.allowMatchCalculations) {
+      payload1 = results.matchCalculations(
+        this.arena.winner,
+        this.arena.loser,
+        true
+      );
+      payload2 = results.matchCalculations(
+        this.arena.loser,
+        this.arena.winner,
+        false
+      );
+    } else payload1 = payload2 = {};
 
     this.broadcast("end-game", {
       winner: {
@@ -175,6 +190,7 @@ export class Battle extends Room {
   }
 
   async updateMissionGoals(winner: Player, loser: Player) {
+    if (!this.updateMissions) return;
     const sql = `select
         tm.goals as "trackingGoals",
         tm.mission_id,
@@ -279,17 +295,19 @@ export class Battle extends Room {
 
   async updateGameRecords(winner: Player, loser: Player) {
     const query1 = `INSERT INTO game_stats DEFAULT VALUES;`;
-    const query2 = `INSERT INTO game_result (winner_id, loser_id) VALUES($1, $2);`;
+    const query2 = `INSERT INTO game_result (winner_id, loser_id, game_room) VALUES($1, $2, $3);`;
     const query3 = `UPDATE entity SET games_won= games_won + 1 WHERE id=ANY($1)`;
     const query4 = `UPDATE entity SET games_lost= games_lost + 1 WHERE id=ANY($1)`;
     const client = await pool.connect();
 
     try {
       await client.query("BEGIN");
-      await client.query(query1);
-      await client.query(query2, [winner.id, loser.id]);
-      await client.query(query3, [winner.myCharsRealId]);
-      await client.query(query4, [loser.myCharsRealId]);
+      if (this.allowMatchCalculations) {
+        await client.query(query1);
+        await client.query(query3, [winner.myCharsRealId]);
+        await client.query(query4, [loser.myCharsRealId]);
+      }
+      await client.query(query2, [winner.id, loser.id, this.roomCode]);
       await client.query("COMMIT");
     } catch (e) {
       await client.query("ROLLBACK");
