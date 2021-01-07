@@ -110,6 +110,11 @@ class Counter extends base_1.Effect {
                     effect.setTargets([caster]);
                     origin.effects.push(effect);
                 }
+                else if (trigger.victim) {
+                    effect.triggerRate = 100;
+                    effect.setTargets(targets);
+                    origin.effects.push(effect);
+                }
             }
         }
     }

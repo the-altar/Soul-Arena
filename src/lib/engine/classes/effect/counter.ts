@@ -132,6 +132,10 @@ export class Counter extends Effect {
           effect.triggerRate = 100;
           effect.setTargets([caster]);
           origin.effects.push(effect);
+        } else if (trigger.victim) {
+          effect.triggerRate = 100;
+          effect.setTargets(targets);
+          origin.effects.push(effect);
         }
       }
     }
