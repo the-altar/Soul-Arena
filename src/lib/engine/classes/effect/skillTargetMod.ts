@@ -184,6 +184,7 @@ export class IncreaseCasterSkillDuration extends Effect {
   }
 
   effectConclusion() {
+    if (!this.skillReference) return;
     this.skillReference.mods.increaseDuration -= this.value;
   }
 
@@ -240,6 +241,7 @@ export class IncreaseTargetSkillDuration extends Effect {
   }
 
   effectConclusion() {
+    if (!this.charReference) return;
     delete this.charReference.getDebuffs().increaseSkillDuration[
       this.targetSkillId
     ];

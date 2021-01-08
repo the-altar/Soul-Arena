@@ -145,6 +145,8 @@ class IncreaseCasterSkillDuration extends base_1.Effect {
         }
     }
     effectConclusion() {
+        if (!this.skillReference)
+            return;
         this.skillReference.mods.increaseDuration -= this.value;
     }
     getPublicData() {
@@ -189,6 +191,8 @@ class IncreaseTargetSkillDuration extends base_1.Effect {
         }
     }
     effectConclusion() {
+        if (!this.charReference)
+            return;
         delete this.charReference.getDebuffs().increaseSkillDuration[this.targetSkillId];
     }
     getPublicData() {
