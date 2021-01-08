@@ -174,13 +174,13 @@ exports.defaultAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function
 });
 exports.matchHistory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `
-  select gr.created_at, winner_id, jsonb_agg(jsonb_build_object('username', u2.username, 'id', u2.id)) as players from game_result gr 
+  select gr.game_room, gr.created_at, winner_id, jsonb_agg(jsonb_build_object('username', u2.username, 'id', u2.id)) as players from game_result gr 
   left join users u2 
     on u2.id = gr.winner_id or u2.id = gr.loser_id 
   left join ladderboard l2 
     on l2.user_id = $1
   where (gr.winner_id = $1 or gr.loser_id = $1) and gr.created_at >= (NOW() - INTERVAL '24 HOURS')
-  group by gr.winner_id, gr.loser_id, gr.created_at
+  group by gr.winner_id, gr.loser_id, gr.created_at, gr.game_room 
   order by gr.created_at DESC;
   `;
     try {
