@@ -21,7 +21,7 @@ exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.json({ code: 1 });
     }
     catch (err) {
-        throw (err);
+        throw err;
     }
 });
 exports.update = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -37,7 +37,9 @@ exports.update = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.find = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const char = yield db_1.pool.query("SELECT * from entity where entity.id = $1", [req.params.id]);
+        const char = yield db_1.pool.query("SELECT * from entity where entity.id = $1", [
+            req.params.id,
+        ]);
         return res.json(char.rows[0]);
     }
     catch (err) {
@@ -56,7 +58,7 @@ exports.getAll = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getIds = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const text = "SELECT id, data -> 'name' AS name from entity";
+    const text = `SELECT id, data -> 'name' AS name, data -> 'dexNumber' as "dexNumber" from entity`;
     try {
         const r = yield db_1.pool.query(text);
         return res.json(r.rows);
@@ -75,13 +77,13 @@ exports.purchase = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
     catch (err) {
         res.json({ success: true });
-        throw (err);
+        throw err;
     }
 });
 exports.upload = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     for (const file in req.files) {
         const f = req.files[file];
-        const p = path_1.join(process.cwd(), '/public/game/uploads', f.name + ".jpg");
+        const p = path_1.join(process.cwd(), "/public/game/uploads", f.name + ".jpg");
         f.mv(p, (err) => {
             if (err) {
                 console.log(err);
@@ -89,18 +91,20 @@ exports.upload = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
         });
     }
-    return res.send('File uploaded!');
+    return res.send("File uploaded!");
 });
 exports.uploadFiles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const response = [];
     for (const file in req.files) {
         const f = req.files[file];
-        const p = path_1.join(process.cwd(), '/public/game/uploads', req.params.filename + ".jpg");
+        const p = path_1.join(process.cwd(), "/public/game/uploads", req.params.filename + ".jpg");
         f.mv(p, (err) => {
             if (err) {
                 return res.status(500).json({});
             }
-            response.push({ url: `http://localhost:3000/img/game/${req.params.filename}.jpg` });
+            response.push({
+                url: `http://localhost:3000/img/game/${req.params.filename}.jpg`,
+            });
         });
     }
     return 1;

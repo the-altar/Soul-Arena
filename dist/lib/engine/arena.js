@@ -159,11 +159,37 @@ class Arena {
         return chars;
     }
     getCharactersLiteralIdByIndex(indexes) {
-        const chars = [];
+        const dex = new Set();
+        const groups = new Set();
+        const dexHeadCount = {};
+        const groupHeadCount = {};
         for (const index of indexes) {
-            chars.push(this.characters[index].literalId);
+            if (!this.characters[index])
+                continue;
+            const char = this.characters[index];
+            if (dex.has(char.dexNumber)) {
+                dexHeadCount[char.dexNumber]++;
+            }
+            else {
+                dex.add(char.dexNumber);
+                dexHeadCount[char.dexNumber] = 1;
+            }
+            this.characters[index].getTyping().forEach((e) => {
+                if (groups.has(e)) {
+                    groupHeadCount[e]++;
+                }
+                else {
+                    groups.add(e);
+                    groupHeadCount[e] = 1;
+                }
+            });
         }
-        return chars;
+        return {
+            ids: dex,
+            groups: groups,
+            groupHeadCount: groupHeadCount,
+            idsHeadCount: dexHeadCount,
+        };
     }
     getCharacterIdByIndexes(indexes) {
         const chars = [];
@@ -178,12 +204,37 @@ class Arena {
             indexes = [0, 1, 2];
         else
             indexes = [3, 4, 5];
-        const ids = [];
+        const dex = new Set();
+        const groups = new Set();
+        const dexHeadCount = {};
+        const groupHeadCount = {};
         for (const index of indexes) {
-            if (this.characters[index])
-                ids.push(this.characters[index].literalId);
+            if (!this.characters[index])
+                continue;
+            const char = this.characters[index];
+            if (dex.has(char.dexNumber)) {
+                dexHeadCount[char.dexNumber]++;
+            }
+            else {
+                dex.add(char.dexNumber);
+                dexHeadCount[char.dexNumber] = 1;
+            }
+            this.characters[index].getTyping().forEach((e) => {
+                if (groups.has(e)) {
+                    groupHeadCount[e]++;
+                }
+                else {
+                    groups.add(e);
+                    groupHeadCount[e] = 1;
+                }
+            });
         }
-        return ids;
+        return {
+            ids: dex,
+            groups: groups,
+            groupHeadCount: groupHeadCount,
+            idsHeadCount: dexHeadCount,
+        };
     }
     removeSkillFromTempQueue(cordinates) {
         const char = this.characters[cordinates.caster];

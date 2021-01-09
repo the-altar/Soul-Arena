@@ -219,7 +219,14 @@ export class Battle extends Room {
     player: Player,
     stats: {
       entity_id: number;
-      trackingGoals: Array<any>;
+      trackingGoals: Array<{
+        against: number;
+        againstGroup: number;
+        with: number;
+        withGroup: number;
+        completed: boolean;
+        battlesWon: number;
+      }>;
       mission_id: number;
       user_id: number;
       goals: Array<any>;
@@ -227,29 +234,39 @@ export class Battle extends Room {
   ) {
     if (player.id < 0) return;
     let completeTracks = 0;
-    let includesTarget;
+    let includesTarget: boolean;
 
-    const chars = this.arena.getCharactersLiteralIdByIndex(
+    const challenged = this.arena.getCharactersLiteralIdByIndex(
       player.getMyCharsIndex()
     );
     const challenger = this.arena.getChallengerLiteralIds(
       player.getMyCharsIndex()
     );
-
     for (const i in stats.trackingGoals) {
       let goal = stats.trackingGoals[i];
+      let bonus = 0;
       if (goal.completed) {
         completeTracks++;
         continue;
       }
 
-      includesTarget = chars.includes(goal.with);
+      includesTarget = challenged.ids.has(goal.with);
       if (goal.with !== -1 && includesTarget === false) continue;
 
-      includesTarget = challenger.includes(goal.against);
-      if (goal.against !== -1 && includesTarget === false) continue;
+      includesTarget = challenged.groups.has(goal.withGroup);
+      if (goal.withGroup !== -1 && includesTarget === false) continue;
 
-      goal.battlesWon++;
+      includesTarget = challenger.ids.has(goal.against);
+      if (goal.against !== -1 && includesTarget === false) continue;
+      else bonus += challenged.idsHeadCount[goal.against] || 0;
+
+      includesTarget = challenger.groups.has(goal.againstGroup);
+      if (goal.againstGroup !== -1 && includesTarget === false) continue;
+      else {
+        bonus += challenger.groupHeadCount[goal.againstGroup] || 0;
+      }
+
+      goal.battlesWon = bonus || goal.battlesWon + 1;
 
       if (goal.battlesWon >= stats.goals[i].battlesWon) {
         completeTracks++;
@@ -328,7 +345,7 @@ export class Battle extends Room {
     }
   ) {
     if (player.id < 0) return;
-    const chars = this.arena.getCharactersLiteralIdByIndex(
+    const challenged = this.arena.getCharactersLiteralIdByIndex(
       player.getMyCharsIndex()
     );
     const challenger = this.arena.getChallengerLiteralIds(
@@ -339,9 +356,13 @@ export class Battle extends Room {
       const goal = stats.trackingGoals[i];
       if (goal.completed) continue;
       if (goal.inRow) {
-        if (chars.includes(goal.with)) {
+        if (challenged.ids.has(goal.with)) {
           goal.battlesWon = 0;
-        } else if (challenger.includes(goal.against)) {
+        } else if (challenger.ids.has(goal.against)) {
+          goal.battlesWon = 0;
+        } else if (challenged.groups.has(goal.withGroup)) {
+          goal.battlesWon = 0;
+        } else if (challenger.groups.has(goal.withGroup)) {
           goal.battlesWon = 0;
         } else if (goal.against === -1 && goal.with === -1) {
           goal.battlesWon = 0;

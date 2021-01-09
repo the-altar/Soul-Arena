@@ -1,10 +1,10 @@
 import { iCharacter } from "../../interfaces";
 import {
-  Types,
   BuffTypes,
   DebuffTypes,
   effectType,
   SkillClassType,
+  CharacterTypes,
 } from "../../enums";
 import { Skill } from "../skill";
 // IMPORTANT TO THIS CLASS ONLY
@@ -33,12 +33,13 @@ export class Character {
   private buffs: Buffs;
   private debuffs: Debuffs;
   private notifications: Array<Notification>;
-  private type: Set<Types>;
+  private type: Set<CharacterTypes>;
   private energyGain: Array<number>;
   private belongs: { [key: number]: boolean };
   public skills: Array<Skill>;
   private arenaReference: Arena;
   public effectStack: EffectStack;
+  public dexNumber:number
 
   constructor(data: iCharacter, playerId: number, world: Arena) {
     this.buffs = new Buffs();
@@ -53,6 +54,7 @@ export class Character {
     this.description = data.description;
     this.hitPoints = 100;
     this.type = new Set(data.type);
+    this.dexNumber = data.dexNumber
     this.energyGain = data.energyGain;
     this.belongs = {};
     this.belongs[playerId] = true;
@@ -294,7 +296,7 @@ export class Character {
     return this.id;
   }
 
-  public getTyping(): Set<Types> {
+  public getTyping(): Set<CharacterTypes> {
     return this.type;
   }
 

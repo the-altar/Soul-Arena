@@ -1,7 +1,6 @@
 import { Effect } from "./base";
 import {
   DamageType,
-  Types,
   BuffTypes,
   SkillClassType,
   triggerClauseType,
@@ -360,7 +359,7 @@ export class DecreaseDamageTaken extends Effect {
 }
 /**[Buff] Convert damage into health at certain ratio */
 export class AbsorbDamage extends Effect {
-  private skillType: Types;
+  private skillType: SkillClassType;
   private damageType: DamageType;
 
   constructor(data: any, caster: number) {
@@ -383,11 +382,11 @@ export class AbsorbDamage extends Effect {
   public generateToolTip() {
     if (this.value === 100)
       this.message = `This character takes no damage from ${
-        Types[this.skillType]
+        SkillClassType[this.skillType]
       } skills`;
     else
       this.message = `This character will be healed by ${
-        Types[this.skillType]
+        SkillClassType[this.skillType]
       } skills`;
   }
 }

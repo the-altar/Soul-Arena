@@ -1,6 +1,5 @@
 import { log } from "../../../logger";
 import {
-  Types,
   BuffTypes,
   DamageType,
   SkillClassType,
@@ -98,7 +97,7 @@ export class Buffs {
   }
 
   public setAbsorbDamage(params: {
-    skillType: Types;
+    skillType: SkillClassType;
     value: number;
     damageType: DamageType;
   }) {

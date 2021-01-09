@@ -1,5 +1,5 @@
 import { Effect } from "./base";
-import { effectType, Types } from "../../enums";
+import { effectType, SkillClassType } from "../../enums";
 import { Character } from "../character";
 import { Skill } from "..";
 import { Arena } from "../../arena";
@@ -8,7 +8,7 @@ import { isHarmful } from "./z.helpers";
 export class EffectRemoval extends Effect {
   private harmful: boolean;
   private friendly: boolean;
-  private specificSkillType: Types;
+  private specificSkillType: SkillClassType;
   private specificEffect: effectType;
   private specificSkillId: number;
 

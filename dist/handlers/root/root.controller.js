@@ -83,7 +83,6 @@ exports.topStreak = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.enums = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     return res.json({
-        pokemonTypings: e.Types,
         effectTypings: e.effectType,
         activationTypings: e.activationType,
         damageTypings: e.DamageType,

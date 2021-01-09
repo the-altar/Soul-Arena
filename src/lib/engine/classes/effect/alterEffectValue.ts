@@ -1,5 +1,5 @@
 import { Effect } from "./base";
-import { effectType, SkillClassType, Types } from "../../enums";
+import { effectType, SkillClassType} from "../../enums";
 import { Character } from "../character";
 import { Skill } from "..";
 import { Arena } from "../../arena";

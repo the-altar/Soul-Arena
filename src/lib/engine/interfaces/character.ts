@@ -1,4 +1,4 @@
-import { Types } from "../enums";
+import { CharacterTypes } from "../enums";
 
 export interface iCharacter {
     name: string
@@ -6,8 +6,9 @@ export interface iCharacter {
     description: string,
     id:number,
     banner: string
+    dexNumber:number,
     hitPoints: number
     energyGain: Array<number>
-    type: Array<Types> 
+    type: Array<CharacterTypes> 
     skills:Array<any>
 }

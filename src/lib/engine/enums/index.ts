@@ -20,7 +20,9 @@ export enum CharacterTypes {
   Arrancar,
   Captain,
   Visored,
-  Fullbringerß,
+  Fullbringer,
+  Ryoka,
+  Quincy
 }
 
 export enum effectType {
@@ -107,15 +109,6 @@ export enum DamageType {
   Affliction,
   True,
   Any,
-}
-
-export enum Types {
-  Human,
-  Hollow,
-  Shinigami,
-  Fullbringer,
-  Quincy,
-  Captain,
 }
 
 export enum BuffTypes {

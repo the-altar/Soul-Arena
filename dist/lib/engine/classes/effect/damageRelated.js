@@ -299,9 +299,9 @@ class AbsorbDamage extends base_1.Effect {
     }
     generateToolTip() {
         if (this.value === 100)
-            this.message = `This character takes no damage from ${enums_1.Types[this.skillType]} skills`;
+            this.message = `This character takes no damage from ${enums_1.SkillClassType[this.skillType]} skills`;
         else
-            this.message = `This character will be healed by ${enums_1.Types[this.skillType]} skills`;
+            this.message = `This character will be healed by ${enums_1.SkillClassType[this.skillType]} skills`;
     }
 }
 exports.AbsorbDamage = AbsorbDamage;

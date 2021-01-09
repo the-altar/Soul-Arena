@@ -215,21 +215,39 @@ class Battle extends colyseus_1.Room {
                 return;
             let completeTracks = 0;
             let includesTarget;
-            const chars = this.arena.getCharactersLiteralIdByIndex(player.getMyCharsIndex());
+            const challenged = this.arena.getCharactersLiteralIdByIndex(player.getMyCharsIndex());
             const challenger = this.arena.getChallengerLiteralIds(player.getMyCharsIndex());
             for (const i in stats.trackingGoals) {
                 let goal = stats.trackingGoals[i];
+                let bonus = 0;
                 if (goal.completed) {
                     completeTracks++;
                     continue;
                 }
-                includesTarget = chars.includes(goal.with);
+                includesTarget = challenged.ids.has(goal.with);
                 if (goal.with !== -1 && includesTarget === false)
                     continue;
-                includesTarget = challenger.includes(goal.against);
+                logger_1.log.info(goal);
+                logger_1.log.info("Made it past");
+                includesTarget = challenged.groups.has(goal.withGroup);
+                if (goal.withGroup !== -1 && includesTarget === false)
+                    continue;
+                logger_1.log.info("Made it past");
+                includesTarget = challenger.ids.has(goal.against);
                 if (goal.against !== -1 && includesTarget === false)
                     continue;
-                goal.battlesWon++;
+                else
+                    bonus += challenged.idsHeadCount[goal.against] || 0;
+                logger_1.log.info("Challenger groups: ", challenger.groups, goal.againstGroup);
+                includesTarget = challenger.groups.has(goal.againstGroup);
+                if (goal.againstGroup !== -1 && includesTarget === false)
+                    continue;
+                else {
+                    bonus += challenger.groupHeadCount[goal.againstGroup] || 0;
+                }
+                logger_1.log.info("Made it past");
+                logger_1.log.info(`[MISSION] - ${bonus}`);
+                goal.battlesWon = bonus || goal.battlesWon + 1;
                 if (goal.battlesWon >= stats.goals[i].battlesWon) {
                     completeTracks++;
                     goal.completed = true;
@@ -299,17 +317,23 @@ class Battle extends colyseus_1.Room {
         return __awaiter(this, void 0, void 0, function* () {
             if (player.id < 0)
                 return;
-            const chars = this.arena.getCharactersLiteralIdByIndex(player.getMyCharsIndex());
+            const challenged = this.arena.getCharactersLiteralIdByIndex(player.getMyCharsIndex());
             const challenger = this.arena.getChallengerLiteralIds(player.getMyCharsIndex());
             for (const i in stats.trackingGoals) {
                 const goal = stats.trackingGoals[i];
                 if (goal.completed)
                     continue;
                 if (goal.inRow) {
-                    if (chars.includes(goal.with)) {
+                    if (challenged.ids.has(goal.with)) {
                         goal.battlesWon = 0;
                     }
-                    else if (challenger.includes(goal.against)) {
+                    else if (challenger.ids.has(goal.against)) {
+                        goal.battlesWon = 0;
+                    }
+                    else if (challenged.groups.has(goal.withGroup)) {
+                        goal.battlesWon = 0;
+                    }
+                    else if (challenger.groups.has(goal.withGroup)) {
                         goal.battlesWon = 0;
                     }
                     else if (goal.against === -1 && goal.with === -1) {

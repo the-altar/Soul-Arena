@@ -1,4 +1,4 @@
-import { Types } from "../enums"
+import {} from "../enums"
 
 /*const chart:{[x:number]:{[x:number]:number}} = {
     [Types.Normal]: {

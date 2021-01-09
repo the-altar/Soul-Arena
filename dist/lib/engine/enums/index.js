@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.triggerClauseType = exports.PlayerPhase = exports.ControlType = exports.SkillClassType = exports.CostTypes = exports.DebuffTypes = exports.BuffTypes = exports.Types = exports.DamageType = exports.effectTargetBehavior = exports.targetType = exports.activationType = exports.effectType = exports.CharacterTypes = exports.ReiatsuTypes = exports.memberRank = void 0;
+exports.triggerClauseType = exports.PlayerPhase = exports.ControlType = exports.SkillClassType = exports.CostTypes = exports.DebuffTypes = exports.BuffTypes = exports.DamageType = exports.effectTargetBehavior = exports.targetType = exports.activationType = exports.effectType = exports.CharacterTypes = exports.ReiatsuTypes = exports.memberRank = void 0;
 var memberRank;
 (function (memberRank) {
     memberRank[memberRank["Guest"] = 0] = "Guest";
@@ -24,7 +24,9 @@ var CharacterTypes;
     CharacterTypes[CharacterTypes["Arrancar"] = 3] = "Arrancar";
     CharacterTypes[CharacterTypes["Captain"] = 4] = "Captain";
     CharacterTypes[CharacterTypes["Visored"] = 5] = "Visored";
-    CharacterTypes[CharacterTypes["Fullbringer\u00DF"] = 6] = "Fullbringer\u00DF";
+    CharacterTypes[CharacterTypes["Fullbringer"] = 6] = "Fullbringer";
+    CharacterTypes[CharacterTypes["Ryoka"] = 7] = "Ryoka";
+    CharacterTypes[CharacterTypes["Quincy"] = 8] = "Quincy";
 })(CharacterTypes = exports.CharacterTypes || (exports.CharacterTypes = {}));
 var effectType;
 (function (effectType) {
@@ -112,15 +114,6 @@ var DamageType;
     DamageType[DamageType["True"] = 4] = "True";
     DamageType[DamageType["Any"] = 5] = "Any";
 })(DamageType = exports.DamageType || (exports.DamageType = {}));
-var Types;
-(function (Types) {
-    Types[Types["Human"] = 0] = "Human";
-    Types[Types["Hollow"] = 1] = "Hollow";
-    Types[Types["Shinigami"] = 2] = "Shinigami";
-    Types[Types["Fullbringer"] = 3] = "Fullbringer";
-    Types[Types["Quincy"] = 4] = "Quincy";
-    Types[Types["Captain"] = 5] = "Captain";
-})(Types = exports.Types || (exports.Types = {}));
 var BuffTypes;
 (function (BuffTypes) {
     BuffTypes[BuffTypes["Invulnerability"] = 0] = "Invulnerability";

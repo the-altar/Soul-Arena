@@ -22,6 +22,7 @@ class Character {
         this.description = data.description;
         this.hitPoints = 100;
         this.type = new Set(data.type);
+        this.dexNumber = data.dexNumber;
         this.energyGain = data.energyGain;
         this.belongs = {};
         this.belongs[playerId] = true;

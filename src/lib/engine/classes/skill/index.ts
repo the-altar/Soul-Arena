@@ -2,7 +2,6 @@ import { Character } from "../character";
 import {
   targetType,
   activationType,
-  Types,
   SkillClassType,
   triggerClauseType,
   ControlType,

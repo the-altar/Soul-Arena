@@ -57,7 +57,6 @@ export const topStreak = async (req: Request, res: Response) => {
 
 export const enums = async (req: Request, res: Response) => {
   return res.json({
-    pokemonTypings: e.Types,
     effectTypings: e.effectType,
     activationTypings: e.activationType,
     damageTypings: e.DamageType,
