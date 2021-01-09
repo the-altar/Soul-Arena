@@ -255,8 +255,6 @@ export class Skill {
 
     for (const effect of this.effects) {
       effect.tick++;
-      //log.info(`xxx [${this.name}], targets: ${this.targets}`)
-      effect.setTargets(this.targets);
 
       if (this.casterReference.isStunned(this)) {
         //log.info(`[STATUS] - STUNNED`);
@@ -333,8 +331,10 @@ export class Skill {
   }
 
   public areTargetsValidated() {
+    //log.info(`xxx [${this.name}] - targets status`)
     for (let i = this.targets.length - 1; i >= 0; i--) {
       const c = this.arenaReference.getCharactersByIndex([this.targets[i]])[0];
+      //log.info(`Validating: [${c.name}] - ${c.isInvulnerable(this)}`)
       if (
         c.isKnockedOut() ||
         (c.isInvulnerable(this) && this.persistence === ControlType.Control)

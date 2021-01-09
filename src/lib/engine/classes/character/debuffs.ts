@@ -82,4 +82,8 @@ export class Debuffs {
     this.ignoreInvulnerability = false;
     this.ignoreBenefitialEffects = false;
   }
+
+  public clearStuns(){
+    this.stun = {};
+  }
 }

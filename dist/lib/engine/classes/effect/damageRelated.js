@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IgnoreDecreaseDamageTaken = exports.AbsorbDamage = exports.DecreaseDamageTaken = exports.IncreaseDamageTaken = exports.DamageIncreasal = exports.DamageReduction = exports.Damage = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
-const logger_1 = require("../../../logger");
 /**Deals damage */
 class Damage extends base_1.Effect {
     constructor(data, caster) {
@@ -61,7 +60,6 @@ class Damage extends base_1.Effect {
         const d = char.getBuffs().decreaseDamageTaken.bySkillId[skill.getId()] || 0;
         const e = char.getBuffs().decreaseDamageTaken.bySkillClass[skill.class] || 0;
         const f = char.getBuffs().decreaseDamageTaken.bySkillClass[enums_1.SkillClassType.Any] || 0;
-        console.log(c, d, e, f);
         return c + d + e + f;
     }
     destroyDestructibleDefense(char, damage) {
@@ -272,8 +270,10 @@ class DecreaseDamageTaken extends base_1.Effect {
             dr.bySkillClass[enums_1.SkillClassType.Any] += this.value;
         else
             dr.bySkillClass[enums_1.SkillClassType.Any] = this.value;
-        logger_1.log.info(`### applied [REDUCE DAMAGE TAKEN] on ${char.name}`);
-        logger_1.log.info(`${char.getBuffs().decreaseDamageTaken.bySkillClass[enums_1.SkillClassType.Any]}`);
+        /*log.info(`### applied [REDUCE DAMAGE TAKEN] on ${char.name}`);
+        log.info(
+          `${char.getBuffs().decreaseDamageTaken.bySkillClass[SkillClassType.Any]}`
+        );*/
     }
     generateToolTip() {
         this.message = `This character has ${this.value} points of damage reduction`;

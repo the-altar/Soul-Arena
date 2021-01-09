@@ -63,6 +63,9 @@ class Debuffs {
         this.ignoreInvulnerability = false;
         this.ignoreBenefitialEffects = false;
     }
+    clearStuns() {
+        this.stun = {};
+    }
 }
 exports.Debuffs = Debuffs;
 //# sourceMappingURL=debuffs.js.map

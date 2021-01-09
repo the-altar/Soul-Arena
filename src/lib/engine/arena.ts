@@ -9,7 +9,6 @@ export class Arena {
   private turnCount: number;
   private skillQueue: Array<Skill>;
   private renewSkillQueue: Array<Skill>;
-  private oldSkillQueue: Array<Skill>;
   public tempQueue: Array<iSkillQueue>;
   public hasUsedSKill: { [key: number]: boolean };
   public winner: Player;
@@ -22,7 +21,6 @@ export class Arena {
     this.skillQueue = [];
     this.tempQueue = [];
     this.renewSkillQueue = [];
-    this.oldSkillQueue = [];
     this.hasUsedSKill = {};
   }
 
@@ -101,7 +99,7 @@ export class Arena {
     currentPlayer.turnCount++;
     currentPlayer.setTurn(false);
     nextPlayer.setTurn(true);
-    this.clearEffectsStack();
+    this.clearEffectsStack(currentPlayer, nextPlayer);
     //console.log("End player phase for: " + player2.getId())
     /*log.info(
       `- [GAME] Ending ${currentPlayer.username}'s turn (decrease cooldowns, clear buffs and debuffs)`
@@ -128,12 +126,11 @@ export class Arena {
 
   public executeNewSkills() {
     const list = this.tempQueue;
-    const oldNewSkills = this.renewSkillQueue.slice();
-    this.renewSkillQueue = [];
 
-    for (const s of oldNewSkills) {
-      s.executeEffects();
+    for (const s of this.renewSkillQueue) {
+      s.executeInitEffects()
     }
+    this.renewSkillQueue = []
 
     for (const cordinates of list) {
       const char = this.characters[cordinates.caster];
@@ -173,7 +170,7 @@ export class Arena {
       )
         this.renewSkillQueue.push(skill);
       //.log("---> Executing: " + skill.name)
-      skill.executeEffects();
+      else skill.executeEffects();
     }
   }
 
@@ -302,11 +299,18 @@ export class Arena {
     }
   }
 
-  clearEffectsStack() {
-    for (const char of this.characters) {
-      char.effectStack.clearStack();
-      char.clearBuffs();
-      char.clearDebuffs();
+  clearEffectsStack(player: Player, player2: Player) {
+    for (const i of player.getMyCharsIndex()) {
+      const c = this.characters[i];
+      c.clearBuffs();
+      c.clearDebuffs();
+      c.effectStack.clearStack();
+    }
+
+    for (const i of player2.getMyCharsIndex()) {
+      const c = this.characters[i];
+      c.getDebuffs().clearStuns();
+      c.effectStack.clearStack();
     }
   }
 

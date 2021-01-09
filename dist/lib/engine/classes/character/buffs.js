@@ -7,8 +7,14 @@ class Buffs {
         this.invulnerability = {
             toFriendly: false,
             toHarmful: false,
-            toSkillClass: new Set(),
-            toSpecificSkill: new Set(),
+            toSkillClass: {
+                [enums_1.SkillClassType.Any]: false,
+                [enums_1.SkillClassType.Affliction]: false,
+                [enums_1.SkillClassType.Physical]: false,
+                [enums_1.SkillClassType.Reiatsu]: false,
+                [enums_1.SkillClassType.Strategic]: false,
+            },
+            toSpecificSkill: {},
         };
         this.cooldownReduction = { ofAllSkills: 0, ofSkillId: {} };
         this.decreaseDamageTaken = {
@@ -25,16 +31,28 @@ class Buffs {
         };
     }
     isInvulnerable(skill, effect) {
-        if (this.invulnerability.toSkillClass.has(enums_1.SkillClassType.Any))
+        if (this.invulnerability.toSkillClass[enums_1.SkillClassType.Any]) {
+            //log.info("Character is invulnerable to ANY skill class");
             return true;
-        if (this.invulnerability.toHarmful && skill.isHarmful)
+        }
+        if (this.invulnerability.toHarmful && skill.isHarmful()) {
+            //log.info("Character is invulnerable to HARMFUL skills");
             return true;
-        if (this.invulnerability.toFriendly && !skill.isHarmful)
+        }
+        if (this.invulnerability.toFriendly && !skill.isHarmful()) {
+            //log.info("Character is invulnerable to FRIENDLY skills");
             return true;
-        if (this.invulnerability.toSkillClass.has(skill.class))
+        }
+        if (this.invulnerability.toSkillClass[skill.class]) {
+            /*log.info(
+              `Character is invulnerable to ${SkillClassType[skill.class]} skills`
+            );*/
             return true;
-        if (this.invulnerability.toSpecificSkill.has(skill.getId()))
+        }
+        if (this.invulnerability.toSpecificSkill[skill.getId()]) {
+            //log.info(`Character is invulnerable to an specific skill`);
             return true;
+        }
     }
     setAbsorbDamage(params) {
         const { skillType, damageType, value } = params;
@@ -87,8 +105,8 @@ class Buffs {
     clearInvulnerability() {
         this.invulnerability.toFriendly = false;
         this.invulnerability.toHarmful = false;
-        this.invulnerability.toSpecificSkill.clear();
-        this.invulnerability.toSkillClass.clear();
+        this.invulnerability.toSpecificSkill = {};
+        this.invulnerability.toSkillClass = {};
     }
     clearDamageIncreasal() {
         this.damageIncreasal = { byDamage: {}, bySkillClass: {}, bySkillId: {} };

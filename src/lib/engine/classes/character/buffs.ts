@@ -1,3 +1,4 @@
+import { log } from "../../../logger";
 import {
   Types,
   BuffTypes,
@@ -19,8 +20,12 @@ export class Buffs {
   invulnerability: {
     toFriendly: boolean;
     toHarmful: boolean;
-    toSpecificSkill: Set<number>;
-    toSkillClass: Set<number>;
+    toSpecificSkill: {
+      [x: string]: boolean;
+    };
+    toSkillClass: {
+      [x: string]: boolean;
+    };
   };
 
   cooldownReduction: {
@@ -43,8 +48,14 @@ export class Buffs {
     this.invulnerability = {
       toFriendly: false,
       toHarmful: false,
-      toSkillClass: new Set(),
-      toSpecificSkill: new Set(),
+      toSkillClass: {
+        [SkillClassType.Any]: false,
+        [SkillClassType.Affliction]: false,
+        [SkillClassType.Physical]: false,
+        [SkillClassType.Reiatsu]: false,
+        [SkillClassType.Strategic]: false,
+      },
+      toSpecificSkill: {},
     };
     this.cooldownReduction = { ofAllSkills: 0, ofSkillId: {} };
     this.decreaseDamageTaken = {
@@ -62,11 +73,28 @@ export class Buffs {
   }
 
   public isInvulnerable(skill: Skill, effect?: Effect): boolean {
-    if (this.invulnerability.toSkillClass.has(SkillClassType.Any)) return true;
-    if (this.invulnerability.toHarmful && skill.isHarmful) return true;
-    if (this.invulnerability.toFriendly && !skill.isHarmful) return true;
-    if (this.invulnerability.toSkillClass.has(skill.class)) return true;
-    if (this.invulnerability.toSpecificSkill.has(skill.getId())) return true;
+    if (this.invulnerability.toSkillClass[SkillClassType.Any]) {
+      //log.info("Character is invulnerable to ANY skill class");
+      return true;
+    }
+    if (this.invulnerability.toHarmful && skill.isHarmful()) {
+      //log.info("Character is invulnerable to HARMFUL skills");
+      return true;
+    }
+    if (this.invulnerability.toFriendly && !skill.isHarmful()) {
+      //log.info("Character is invulnerable to FRIENDLY skills");
+      return true;
+    }
+    if (this.invulnerability.toSkillClass[skill.class]) {
+      /*log.info(
+        `Character is invulnerable to ${SkillClassType[skill.class]} skills`
+      );*/
+      return true;
+    }
+    if (this.invulnerability.toSpecificSkill[skill.getId()]) {
+      //log.info(`Character is invulnerable to an specific skill`);
+      return true;
+    }
   }
 
   public setAbsorbDamage(params: {
@@ -132,8 +160,8 @@ export class Buffs {
   public clearInvulnerability() {
     this.invulnerability.toFriendly = false;
     this.invulnerability.toHarmful = false;
-    this.invulnerability.toSpecificSkill.clear();
-    this.invulnerability.toSkillClass.clear();
+    this.invulnerability.toSpecificSkill = {};
+    this.invulnerability.toSkillClass = {};
   }
 
   public clearDamageIncreasal() {
