@@ -81,6 +81,7 @@ export enum targetType {
   OneEnemyAndAllAllies,
   OneAllyAndSelf,
   AllEnemiesAndSelf,
+  OneAllyOrSelf
 }
 
 export enum effectTargetBehavior {
