@@ -255,6 +255,7 @@ export class Skill {
 
     for (const effect of this.effects) {
       effect.tick++;
+      //log.info(`xxx [${this.name}], targets: ${this.targets}`)
       effect.setTargets(this.targets);
 
       if (this.casterReference.isStunned(this)) {
@@ -347,11 +348,11 @@ export class Skill {
   }
 
   public isCancelled() {
-    log.info(
+    /*log.info(
       `[${
         this.casterReference.name
       }] - stunned: ${this.casterReference.isStunned(this)}`
-    );
+    );**/
     if (
       this.persistence === ControlType.Control &&
       this.casterReference.isStunned(this)

@@ -6,6 +6,7 @@ class Player {
         this.username = player.username;
         this.id = player.id;
         this.avatar = player.avatar;
+        this.turnCount = 0;
         this.isTurn = false;
         this.energyPool = [0, 0, 0, 0, 0];
         this.payupCart = [0, 0, 0, 0, 0];
@@ -53,7 +54,9 @@ class Player {
         this.setTotalEnergyPool();
     }
     setTotalEnergyPool() {
-        this.energyPool[4] = this.energyPool.slice(0, 4).reduce((ca, cv) => ca + cv);
+        this.energyPool[4] = this.energyPool
+            .slice(0, 4)
+            .reduce((ca, cv) => ca + cv);
     }
     getEnergyPool() {
         return this.energyPool;

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Arena = void 0;
 const classes_1 = require("./classes");
 const logger_1 = require("../logger");
+const enums_1 = require("./enums");
 class Arena {
     constructor() {
         this.players = [];
@@ -10,6 +11,8 @@ class Arena {
         this.turnCount = -1;
         this.skillQueue = [];
         this.tempQueue = [];
+        this.renewSkillQueue = [];
+        this.oldSkillQueue = [];
         this.hasUsedSKill = {};
     }
     addPlayer(player, team) {
@@ -76,26 +79,29 @@ class Arena {
         player.resetPayupCart();
     }
     startGame() {
-        logger_1.log.info("- [START] increase turn");
+        //log.info("- [START] increase turn");
         this.turnCount++;
         const nextPlayer = this.players[this.turnCount % 2];
         const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
+        currentPlayer.turnCount++;
         currentPlayer.setTurn(false);
         nextPlayer.setTurn(true);
-        this.clearEffectsFromCharacters();
+        this.clearEffectsStack();
         //console.log("End player phase for: " + player2.getId())
-        logger_1.log.info(`- [GAME] Ending ${currentPlayer.username}'s turn (decrease cooldowns, clear buffs and debuffs)`);
+        /*log.info(
+          `- [GAME] Ending ${currentPlayer.username}'s turn (decrease cooldowns, clear buffs and debuffs)`
+        );*/
         this.clearCharactersNotifications();
-        logger_1.log.info("- [GAME] Executing old skills");
+        //log.info("- [GAME] Executing old skills");
         this.executeSkills();
-        logger_1.log.info("- [GAME] Executing new skills");
+        //log.info("- [GAME] Executing new skills");
         this.executeNewSkills();
-        logger_1.log.info("- [GAME] Tick skills in queue");
+        //log.info("- [GAME] Tick skills in queue");
         this.tickSkillsInQueue();
         this.hasUsedSKill = {};
-        logger_1.log.info(`- [END] start ${nextPlayer.username}'s turn`);
-        const bCount2 = this.startPlayerPhase(nextPlayer);
+        //log.info(`- [END] start ${nextPlayer.username}'s turn`);
         const bCount1 = this.endPlayerPhase(currentPlayer);
+        const bCount2 = this.startPlayerPhase(nextPlayer);
         if (bCount1 === 3)
             return this.gameOver(nextPlayer, currentPlayer);
         if (bCount2 === 3)
@@ -104,6 +110,11 @@ class Arena {
     }
     executeNewSkills() {
         const list = this.tempQueue;
+        const oldNewSkills = this.renewSkillQueue.slice();
+        this.renewSkillQueue = [];
+        for (const s of oldNewSkills) {
+            s.executeEffects();
+        }
         for (const cordinates of list) {
             const char = this.characters[cordinates.caster];
             char.setSkillCooldownByIndex(cordinates.skill);
@@ -134,6 +145,9 @@ class Arena {
     }
     executeSkills() {
         for (const skill of this.skillQueue) {
+            if (skill.persistence === enums_1.ControlType.Control ||
+                skill.persistence === enums_1.ControlType.Action)
+                this.renewSkillQueue.push(skill);
             //.log("---> Executing: " + skill.name)
             skill.executeEffects();
         }
@@ -243,11 +257,11 @@ class Arena {
                 return player;
         }
     }
-    clearEffectsFromCharacters() {
+    clearEffectsStack() {
         for (const char of this.characters) {
+            char.effectStack.clearStack();
             char.clearBuffs();
             char.clearDebuffs();
-            char.effectStack.clearStack();
         }
     }
     clearSkillMods(p) {
@@ -274,8 +288,8 @@ class Arena {
         return bodyCount;
     }
     startPlayerPhase(player) {
-        const pool = player.getEnergyPool();
         const myChar = player.getMyCharsIndex();
+        const pool = player.getEnergyPool();
         let bodyCount = 0;
         //console.log("-> validating skils and clearing buffs")
         for (const i of myChar) {
@@ -302,6 +316,9 @@ class Arena {
     getClientData() {
         const publicSkillQueue = [];
         for (const skill of this.skillQueue) {
+            publicSkillQueue.push(skill.getPublicData());
+        }
+        for (const skill of this.renewSkillQueue) {
             publicSkillQueue.push(skill.getPublicData());
         }
         return {

@@ -30,7 +30,7 @@ export class Buffs {
     };
   };
 
-  decreaseDamageTaken: { [x: string]: { [x: string]: number } };
+  decreaseDamageTaken: { byDamage: any; bySkillClass: any; bySkillId: any };
   damageIncreasal: { byDamage: any; bySkillClass: any; bySkillId: any };
   absorbDamage: { [x: string]: { [x: string]: number } };
   destructibleDefense: { [x: string]: Effect };
@@ -47,7 +47,11 @@ export class Buffs {
       toSpecificSkill: new Set(),
     };
     this.cooldownReduction = { ofAllSkills: 0, ofSkillId: {} };
-    this.decreaseDamageTaken = {};
+    this.decreaseDamageTaken = {
+      byDamage: {},
+      bySkillClass: {},
+      bySkillId: {},
+    };
     this.damageIncreasal = { byDamage: {}, bySkillClass: {}, bySkillId: {} };
     this.absorbDamage = {};
     this.destructibleDefense = {};
@@ -63,57 +67,6 @@ export class Buffs {
     if (this.invulnerability.toFriendly && !skill.isHarmful) return true;
     if (this.invulnerability.toSkillClass.has(skill.class)) return true;
     if (this.invulnerability.toSpecificSkill.has(skill.getId())) return true;
-  }
-
-  public setDecreaseDamageTaken(params: {
-    damageType: DamageType;
-    value: number;
-    skillType: SkillClassType;
-    class?: SkillClassType;
-  }) {
-    const { damageType, value, skillType } = params;
-
-    if (this.decreaseDamageTaken[skillType] === undefined) {
-      this.decreaseDamageTaken[skillType] = {
-        [damageType]: value,
-      };
-    } else {
-      this.decreaseDamageTaken[skillType][damageType] += value;
-    }
-  }
-
-  public getDecreaseDamageTaken(params: {
-    damageType: DamageType;
-    skillType: SkillClassType;
-    class?: SkillClassType;
-  }) {
-    const { skillType, damageType } = params;
-    const res = {
-      decreased: 0,
-      hasBeenDecreased: false,
-    };
-
-    if (this.decreaseDamageTaken[SkillClassType.Any] !== undefined) {
-      res.decreased +=
-        this.decreaseDamageTaken[SkillClassType.Any][damageType] || 0;
-      res.decreased +=
-        this.decreaseDamageTaken[SkillClassType.Any][DamageType.True] || 0;
-      res.hasBeenDecreased = true;
-    }
-
-    if (skillType !== SkillClassType.Any) {
-      if (this.decreaseDamageTaken[skillType] !== undefined) {
-        res.decreased +=
-          this.decreaseDamageTaken[skillType][DamageType.True] || 0;
-
-        if (this.decreaseDamageTaken[skillType][damageType] !== undefined) {
-          res.decreased += this.decreaseDamageTaken[skillType][damageType] || 0;
-          res.hasBeenDecreased = true;
-        }
-      }
-    }
-
-    return res;
   }
 
   public setAbsorbDamage(params: {
@@ -188,7 +141,11 @@ export class Buffs {
   }
 
   public clearDecreaseDamageTaken() {
-    this.decreaseDamageTaken = {};
+    this.decreaseDamageTaken = {
+      byDamage: {},
+      bySkillClass: {},
+      bySkillId: {},
+    };
   }
 
   public clearAbsorbDamage() {

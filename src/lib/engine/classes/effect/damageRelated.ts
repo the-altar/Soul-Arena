@@ -8,6 +8,7 @@ import {
 } from "../../enums";
 import { Character } from "../character";
 import { Skill } from "..";
+import { log } from "../../../logger";
 /**Deals damage */
 export class Damage extends Effect {
   private damageType: DamageType;
@@ -85,6 +86,21 @@ export class Damage extends Effect {
     return c + d + e;
   }
 
+  protected getDecreaseDamageTaken(
+    char: Character,
+    effect: Damage,
+    skill: Skill
+  ) {
+    const c =
+      char.getBuffs().decreaseDamageTaken.byDamage[effect.damageType] || 0;
+    const d = char.getBuffs().decreaseDamageTaken.bySkillId[skill.getId()] || 0;
+    const e =
+      char.getBuffs().decreaseDamageTaken.bySkillClass[skill.class] || 0;
+    const f =
+      char.getBuffs().decreaseDamageTaken.bySkillClass[SkillClassType.Any] || 0;
+    return c + d + e + f;
+  }
+
   protected destroyDestructibleDefense(char: Character, damage: number) {
     if (char.getDebuffs().ignoreBenefitialEffects) return damage;
 
@@ -126,11 +142,7 @@ export class Damage extends Effect {
       this,
       origin
     );
-
-    let { decreased } = char.getBuffs().getDecreaseDamageTaken({
-      damageType: this.damageType,
-      skillType: origin.class,
-    });
+    let decreased = this.getDecreaseDamageTaken(char, this, origin);
 
     if (char.getDebuffs().ignoreDecreaseDamageTaken) decreased = 0;
 
@@ -331,13 +343,15 @@ export class DecreaseDamageTaken extends Effect {
     if (char.getDebuffs().ignoreBenefitialEffects) return;
     if (char.getDebuffs().ignoreDecreaseDamageTaken) return;
 
-    char.setBuff({
-      damageType: this.damageType,
-      value: this.value,
-      skillType: this.skillType,
-      buffType: BuffTypes.DecreaseDamageTaken,
-      //class?: SkillClassType;
-    });
+    const dr = char.getBuffs().decreaseDamageTaken;
+    if (dr.bySkillClass[SkillClassType.Any])
+      dr.bySkillClass[SkillClassType.Any] += this.value;
+    else dr.bySkillClass[SkillClassType.Any] = this.value;
+
+    /*log.info(`### applied [REDUCE DAMAGE TAKEN] on ${char.name}`);
+    log.info(
+      `${char.getBuffs().decreaseDamageTaken.bySkillClass[SkillClassType.Any]}`
+    );*/
   }
 
   public generateToolTip() {

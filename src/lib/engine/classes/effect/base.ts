@@ -10,6 +10,7 @@ import {
 import { Arena } from "../../arena";
 import { Skill } from "../skill";
 import { isHarmful, isFriendly } from "./z.helpers";
+import { log } from "../../../logger";
 
 export class Effect {
   protected arenaReference: Arena;
@@ -45,8 +46,8 @@ export class Effect {
   public id: number;
   public gameId: number;
   public stackLimit: number;
-
   constructor(data: any, caster: number) {
+
     this.value = data.value;
     this.tick = 1;
     this.message = data.message || null;
@@ -143,13 +144,16 @@ export class Effect {
 
   public execute(origin: Skill) {
     const t: Array<number> = [];
-
+    //log.info("xxxxxx ", this.targets)
     switch (this.behavior) {
       case effectTargetBehavior.Default:
         {
           for (const i of this.targets) {
+            //log.info("X BEFORE > ", this.targets)
             const char = this.arenaReference.getCharactersByIndex([i])[0];
+            //log.info(`xxxxxxxxxx referenced: ${char.name} at index: ${i}`)
             this.activateOnTarget(char, origin, t, i);
+            //log.info("X AFTER > ", this.targets)
           }
         }
         break;

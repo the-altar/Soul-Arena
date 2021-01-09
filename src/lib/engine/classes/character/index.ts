@@ -195,7 +195,7 @@ export class Character {
   public knockOut() {
     this.knockedOut = true;
     this.disableSkills();
-    const myIndex = this.arenaReference.findCharacterById(this.id).index;
+    /*const myIndex = this.arenaReference.findCharacterById(this.id).index;
 
     for (const activeSkill of this.arenaReference.getActiveSkills()) {
       let i = activeSkill.getTargets().indexOf(myIndex);
@@ -205,7 +205,7 @@ export class Character {
         i = activeEffects.getTargets().indexOf(myIndex);
         if (i !== -1) activeEffects.getTargets().splice(i, 1);
       }
-    }
+    }*/
   }
 
   public isKnockedOut(): boolean {
@@ -237,11 +237,6 @@ export class Character {
   public setBuff(params: any) {
     const { buffType } = params;
     switch (buffType) {
-      case BuffTypes.DecreaseDamageTaken:
-        {
-          this.buffs.setDecreaseDamageTaken(params);
-        }
-        break;
       case BuffTypes.AbsorbDamage:
         {
           this.buffs.setAbsorbDamage(params);

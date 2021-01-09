@@ -139,17 +139,17 @@ class Character {
     knockOut() {
         this.knockedOut = true;
         this.disableSkills();
-        const myIndex = this.arenaReference.findCharacterById(this.id).index;
+        /*const myIndex = this.arenaReference.findCharacterById(this.id).index;
+    
         for (const activeSkill of this.arenaReference.getActiveSkills()) {
-            let i = activeSkill.getTargets().indexOf(myIndex);
-            if (i !== -1)
-                activeSkill.getTargets().splice(i, 1);
-            for (const activeEffects of activeSkill.effects) {
-                i = activeEffects.getTargets().indexOf(myIndex);
-                if (i !== -1)
-                    activeEffects.getTargets().splice(i, 1);
-            }
-        }
+          let i = activeSkill.getTargets().indexOf(myIndex);
+          if (i !== -1) activeSkill.getTargets().splice(i, 1);
+    
+          for (const activeEffects of activeSkill.effects) {
+            i = activeEffects.getTargets().indexOf(myIndex);
+            if (i !== -1) activeEffects.getTargets().splice(i, 1);
+          }
+        }*/
     }
     isKnockedOut() {
         return this.knockedOut;
@@ -176,11 +176,6 @@ class Character {
     setBuff(params) {
         const { buffType } = params;
         switch (buffType) {
-            case enums_1.BuffTypes.DecreaseDamageTaken:
-                {
-                    this.buffs.setDecreaseDamageTaken(params);
-                }
-                break;
             case enums_1.BuffTypes.AbsorbDamage:
                 {
                     this.buffs.setAbsorbDamage(params);

@@ -5,7 +5,6 @@ const enums_1 = require("../../enums");
 const effect_1 = require("../effect");
 const targetValidationFactory_1 = require("./targetValidationFactory");
 const mods_1 = require("./mods");
-const logger_1 = require("../../../logger");
 class Skill {
     constructor(data, caster, world, casterReference) {
         this.caster = data.caster;
@@ -181,6 +180,7 @@ class Skill {
         //log.info(`[GAME] Execute effects of ${this.casterReference.name}`);
         for (const effect of this.effects) {
             effect.tick++;
+            //log.info(`xxx [${this.name}], targets: ${this.targets}`)
             effect.setTargets(this.targets);
             if (this.casterReference.isStunned(this)) {
                 //log.info(`[STATUS] - STUNNED`);
@@ -258,7 +258,11 @@ class Skill {
         return true;
     }
     isCancelled() {
-        logger_1.log.info(`[${this.casterReference.name}] - stunned: ${this.casterReference.isStunned(this)}`);
+        /*log.info(
+          `[${
+            this.casterReference.name
+          }] - stunned: ${this.casterReference.isStunned(this)}`
+        );**/
         if (this.persistence === enums_1.ControlType.Control &&
             this.casterReference.isStunned(this))
             return true;

@@ -1,12 +1,15 @@
 import { Character, Player, Skill } from "./classes";
 import { iCharacter, iSkillQueue } from "./interfaces";
 import { log } from "../logger";
+import { ControlType, SkillClassType } from "./enums";
 
 export class Arena {
   private players: Array<Player>;
   public characters: Array<Character>;
   private turnCount: number;
   private skillQueue: Array<Skill>;
+  private renewSkillQueue: Array<Skill>;
+  private oldSkillQueue: Array<Skill>;
   public tempQueue: Array<iSkillQueue>;
   public hasUsedSKill: { [key: number]: boolean };
   public winner: Player;
@@ -18,6 +21,8 @@ export class Arena {
     this.turnCount = -1;
     this.skillQueue = [];
     this.tempQueue = [];
+    this.renewSkillQueue = [];
+    this.oldSkillQueue = [];
     this.hasUsedSKill = {};
   }
 
@@ -88,31 +93,33 @@ export class Arena {
   }
 
   public startGame() {
-    log.info("- [START] increase turn");
+    //log.info("- [START] increase turn");
     this.turnCount++;
     const nextPlayer = this.players[this.turnCount % 2];
     const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
 
+    currentPlayer.turnCount++;
     currentPlayer.setTurn(false);
     nextPlayer.setTurn(true);
-    this.clearEffectsFromCharacters();
+    this.clearEffectsStack();
     //console.log("End player phase for: " + player2.getId())
-    log.info(
+    /*log.info(
       `- [GAME] Ending ${currentPlayer.username}'s turn (decrease cooldowns, clear buffs and debuffs)`
-    );
+    );*/
 
     this.clearCharactersNotifications();
-    log.info("- [GAME] Executing old skills");
+    //log.info("- [GAME] Executing old skills");
     this.executeSkills();
-    log.info("- [GAME] Executing new skills");
+    //log.info("- [GAME] Executing new skills");
+
     this.executeNewSkills();
-    log.info("- [GAME] Tick skills in queue");
+    //log.info("- [GAME] Tick skills in queue");
     this.tickSkillsInQueue();
     this.hasUsedSKill = {};
 
-    log.info(`- [END] start ${nextPlayer.username}'s turn`);
-    const bCount2 = this.startPlayerPhase(nextPlayer);
+    //log.info(`- [END] start ${nextPlayer.username}'s turn`);
     const bCount1 = this.endPlayerPhase(currentPlayer);
+    const bCount2 = this.startPlayerPhase(nextPlayer);
     if (bCount1 === 3) return this.gameOver(nextPlayer, currentPlayer);
     if (bCount2 === 3) return this.gameOver(currentPlayer, nextPlayer);
 
@@ -121,6 +128,12 @@ export class Arena {
 
   public executeNewSkills() {
     const list = this.tempQueue;
+    const oldNewSkills = this.renewSkillQueue.slice();
+    this.renewSkillQueue = [];
+
+    for (const s of oldNewSkills) {
+      s.executeEffects();
+    }
 
     for (const cordinates of list) {
       const char = this.characters[cordinates.caster];
@@ -154,6 +167,11 @@ export class Arena {
 
   public executeSkills() {
     for (const skill of this.skillQueue) {
+      if (
+        skill.persistence === ControlType.Control ||
+        skill.persistence === ControlType.Action
+      )
+        this.renewSkillQueue.push(skill);
       //.log("---> Executing: " + skill.name)
       skill.executeEffects();
     }
@@ -284,11 +302,11 @@ export class Arena {
     }
   }
 
-  clearEffectsFromCharacters() {
+  clearEffectsStack() {
     for (const char of this.characters) {
+      char.effectStack.clearStack();
       char.clearBuffs();
       char.clearDebuffs();
-      char.effectStack.clearStack();
     }
   }
 
@@ -318,8 +336,8 @@ export class Arena {
   }
 
   private startPlayerPhase(player: Player): number {
-    const pool = player.getEnergyPool();
     const myChar = player.getMyCharsIndex();
+    const pool = player.getEnergyPool();
     let bodyCount = 0;
     //console.log("-> validating skils and clearing buffs")
 
@@ -348,6 +366,10 @@ export class Arena {
   public getClientData() {
     const publicSkillQueue = [];
     for (const skill of this.skillQueue) {
+      publicSkillQueue.push(skill.getPublicData());
+    }
+
+    for (const skill of this.renewSkillQueue) {
       publicSkillQueue.push(skill.getPublicData());
     }
 

@@ -11,7 +11,11 @@ class Buffs {
             toSpecificSkill: new Set(),
         };
         this.cooldownReduction = { ofAllSkills: 0, ofSkillId: {} };
-        this.decreaseDamageTaken = {};
+        this.decreaseDamageTaken = {
+            byDamage: {},
+            bySkillClass: {},
+            bySkillId: {},
+        };
         this.damageIncreasal = { byDamage: {}, bySkillClass: {}, bySkillId: {} };
         this.absorbDamage = {};
         this.destructibleDefense = {};
@@ -31,42 +35,6 @@ class Buffs {
             return true;
         if (this.invulnerability.toSpecificSkill.has(skill.getId()))
             return true;
-    }
-    setDecreaseDamageTaken(params) {
-        const { damageType, value, skillType } = params;
-        if (this.decreaseDamageTaken[skillType] === undefined) {
-            this.decreaseDamageTaken[skillType] = {
-                [damageType]: value,
-            };
-        }
-        else {
-            this.decreaseDamageTaken[skillType][damageType] += value;
-        }
-    }
-    getDecreaseDamageTaken(params) {
-        const { skillType, damageType } = params;
-        const res = {
-            decreased: 0,
-            hasBeenDecreased: false,
-        };
-        if (this.decreaseDamageTaken[enums_1.SkillClassType.Any] !== undefined) {
-            res.decreased +=
-                this.decreaseDamageTaken[enums_1.SkillClassType.Any][damageType] || 0;
-            res.decreased +=
-                this.decreaseDamageTaken[enums_1.SkillClassType.Any][enums_1.DamageType.True] || 0;
-            res.hasBeenDecreased = true;
-        }
-        if (skillType !== enums_1.SkillClassType.Any) {
-            if (this.decreaseDamageTaken[skillType] !== undefined) {
-                res.decreased +=
-                    this.decreaseDamageTaken[skillType][enums_1.DamageType.True] || 0;
-                if (this.decreaseDamageTaken[skillType][damageType] !== undefined) {
-                    res.decreased += this.decreaseDamageTaken[skillType][damageType] || 0;
-                    res.hasBeenDecreased = true;
-                }
-            }
-        }
-        return res;
     }
     setAbsorbDamage(params) {
         const { skillType, damageType, value } = params;
@@ -126,7 +94,11 @@ class Buffs {
         this.damageIncreasal = { byDamage: {}, bySkillClass: {}, bySkillId: {} };
     }
     clearDecreaseDamageTaken() {
-        this.decreaseDamageTaken = {};
+        this.decreaseDamageTaken = {
+            byDamage: {},
+            bySkillClass: {},
+            bySkillId: {},
+        };
     }
     clearAbsorbDamage() {
         this.absorbDamage = {};

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IgnoreDecreaseDamageTaken = exports.AbsorbDamage = exports.DecreaseDamageTaken = exports.IncreaseDamageTaken = exports.DamageIncreasal = exports.DamageReduction = exports.Damage = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
+const logger_1 = require("../../../logger");
 /**Deals damage */
 class Damage extends base_1.Effect {
     constructor(data, caster) {
@@ -55,6 +56,14 @@ class Damage extends base_1.Effect {
         const e = char.getDebuffs().increaseDamageTaken.bySkillClass[skill.class] || 0;
         return c + d + e;
     }
+    getDecreaseDamageTaken(char, effect, skill) {
+        const c = char.getBuffs().decreaseDamageTaken.byDamage[effect.damageType] || 0;
+        const d = char.getBuffs().decreaseDamageTaken.bySkillId[skill.getId()] || 0;
+        const e = char.getBuffs().decreaseDamageTaken.bySkillClass[skill.class] || 0;
+        const f = char.getBuffs().decreaseDamageTaken.bySkillClass[enums_1.SkillClassType.Any] || 0;
+        console.log(c, d, e, f);
+        return c + d + e + f;
+    }
     destroyDestructibleDefense(char, damage) {
         if (char.getDebuffs().ignoreBenefitialEffects)
             return damage;
@@ -87,10 +96,7 @@ class Damage extends base_1.Effect {
         const reduction = this.getDamageReductionFromCaster(this.caster, this, origin);
         const increasalTaken = this.getIncreasedDamageTaken(char, this, origin);
         const increasalDealt = this.getIncreasedDamageFromCaster(this.caster, this, origin);
-        let { decreased } = char.getBuffs().getDecreaseDamageTaken({
-            damageType: this.damageType,
-            skillType: origin.class,
-        });
+        let decreased = this.getDecreaseDamageTaken(char, this, origin);
         if (char.getDebuffs().ignoreDecreaseDamageTaken)
             decreased = 0;
         const { conversionRate } = char.getBuffs().getAbsorbDamage({
@@ -261,12 +267,13 @@ class DecreaseDamageTaken extends base_1.Effect {
             return;
         if (char.getDebuffs().ignoreDecreaseDamageTaken)
             return;
-        char.setBuff({
-            damageType: this.damageType,
-            value: this.value,
-            skillType: this.skillType,
-            buffType: enums_1.BuffTypes.DecreaseDamageTaken,
-        });
+        const dr = char.getBuffs().decreaseDamageTaken;
+        if (dr.bySkillClass[enums_1.SkillClassType.Any])
+            dr.bySkillClass[enums_1.SkillClassType.Any] += this.value;
+        else
+            dr.bySkillClass[enums_1.SkillClassType.Any] = this.value;
+        logger_1.log.info(`### applied [REDUCE DAMAGE TAKEN] on ${char.name}`);
+        logger_1.log.info(`${char.getBuffs().decreaseDamageTaken.bySkillClass[enums_1.SkillClassType.Any]}`);
     }
     generateToolTip() {
         this.message = `This character has ${this.value} points of damage reduction`;

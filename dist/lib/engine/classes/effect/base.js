@@ -93,12 +93,16 @@ class Effect {
     }
     execute(origin) {
         const t = [];
+        //log.info("xxxxxx ", this.targets)
         switch (this.behavior) {
             case enums_1.effectTargetBehavior.Default:
                 {
                     for (const i of this.targets) {
+                        //log.info("X BEFORE > ", this.targets)
                         const char = this.arenaReference.getCharactersByIndex([i])[0];
+                        //log.info(`xxxxxxxxxx referenced: ${char.name} at index: ${i}`)
                         this.activateOnTarget(char, origin, t, i);
+                        //log.info("X AFTER > ", this.targets)
                     }
                 }
                 break;
