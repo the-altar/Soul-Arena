@@ -85,6 +85,7 @@ var targetType;
     targetType[targetType["OneEnemyAndAllAllies"] = 8] = "OneEnemyAndAllAllies";
     targetType[targetType["OneAllyAndSelf"] = 9] = "OneAllyAndSelf";
     targetType[targetType["AllEnemiesAndSelf"] = 10] = "AllEnemiesAndSelf";
+    targetType[targetType["OneAllyOrSelf"] = 11] = "OneAllyOrSelf";
 })(targetType = exports.targetType || (exports.targetType = {}));
 var effectTargetBehavior;
 (function (effectTargetBehavior) {

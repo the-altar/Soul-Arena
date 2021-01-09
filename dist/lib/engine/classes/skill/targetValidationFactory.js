@@ -78,6 +78,16 @@ exports.targetSetter = function (skill, targetMode, characters, playerId, self) 
             }
             return choices;
         }
+        case enums_1.targetType.OneAllyOrSelf: {
+            const allies = characters[self].getAllies();
+            choices.choice.push(self);
+            for (let i of allies) {
+                const isInvulnerable = characters[i].isInvulnerable(skill);
+                if (!isInvulnerable && !characters[i].isKnockedOut())
+                    choices.choice.push(i);
+            }
+            return choices;
+        }
         case enums_1.targetType.AllEnemiesAndSelf: {
             characters.forEach((char, index) => {
                 if (!char.belongsTo(playerId) && !char.isKnockedOut()) {
