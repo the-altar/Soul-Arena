@@ -227,26 +227,20 @@ class Battle extends colyseus_1.Room {
                 includesTarget = challenged.ids.has(goal.with);
                 if (goal.with !== -1 && includesTarget === false)
                     continue;
-                logger_1.log.info(goal);
-                logger_1.log.info("Made it past");
                 includesTarget = challenged.groups.has(goal.withGroup);
                 if (goal.withGroup !== -1 && includesTarget === false)
                     continue;
-                logger_1.log.info("Made it past");
                 includesTarget = challenger.ids.has(goal.against);
                 if (goal.against !== -1 && includesTarget === false)
                     continue;
                 else
                     bonus += challenged.idsHeadCount[goal.against] || 0;
-                logger_1.log.info("Challenger groups: ", challenger.groups, goal.againstGroup);
                 includesTarget = challenger.groups.has(goal.againstGroup);
                 if (goal.againstGroup !== -1 && includesTarget === false)
                     continue;
                 else {
                     bonus += challenger.groupHeadCount[goal.againstGroup] || 0;
                 }
-                logger_1.log.info("Made it past");
-                logger_1.log.info(`[MISSION] - ${bonus}`);
                 goal.battlesWon = bonus || goal.battlesWon + 1;
                 if (goal.battlesWon >= stats.goals[i].battlesWon) {
                     completeTracks++;
