@@ -99,7 +99,7 @@ export class Effect {
   public extendDuration(val: number) {
     this.duration += val;
   }
-  
+
   public setIncrement(value: number) {
     this.mods.increment.value = value;
   }

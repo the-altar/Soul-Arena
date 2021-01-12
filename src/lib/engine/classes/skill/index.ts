@@ -200,7 +200,7 @@ export class Skill {
         return t;
       }
 
-      case targetType.OneAllyOrSelf:{
+      case targetType.OneAllyOrSelf: {
         t.push(choice);
         return t;
       }

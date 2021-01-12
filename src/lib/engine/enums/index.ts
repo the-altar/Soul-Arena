@@ -22,7 +22,7 @@ export enum CharacterTypes {
   Visored,
   Fullbringer,
   Ryoka,
-  Quincy
+  Quincy,
 }
 
 export enum effectType {
@@ -56,7 +56,7 @@ export enum effectType {
   IncreaseCasterSkillDuration,
   IncreaseTargetSkillDuration,
   IgnoreEffects,
-  ReplaceSkillCost
+  ReplaceSkillCost,
 }
 
 export enum activationType {
@@ -83,7 +83,7 @@ export enum targetType {
   OneEnemyAndAllAllies,
   OneAllyAndSelf,
   AllEnemiesAndSelf,
-  OneAllyOrSelf
+  OneAllyOrSelf,
 }
 
 export enum effectTargetBehavior {
@@ -159,5 +159,5 @@ export enum triggerClauseType {
   None,
   onKnockOut,
   IfTargeted,
-  IfAlliesUseASkill
+  IfAlliesUseASkill,
 }
