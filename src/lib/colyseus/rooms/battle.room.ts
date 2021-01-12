@@ -266,7 +266,7 @@ export class Battle extends Room {
         bonus += challenger.groupHeadCount[goal.againstGroup] || 0;
       }
 
-      goal.battlesWon = bonus || goal.battlesWon + 1;
+      goal.battlesWon = goal.battlesWon + (bonus || 1);
 
       if (goal.battlesWon >= stats.goals[i].battlesWon) {
         completeTracks++;
