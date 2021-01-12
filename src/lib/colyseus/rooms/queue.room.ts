@@ -135,6 +135,7 @@ export class Queue extends Room {
     try {
       options.team = (await pool.query(sql, options.team)).rows;
       this.manager.addClient(client.sessionId, options, client);
+      client.send("connected_clients", this.manager.countPlayersOnline())
     } catch (err) {
       throw err;
     }

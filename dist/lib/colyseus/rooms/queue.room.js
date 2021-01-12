@@ -129,6 +129,7 @@ class Queue extends colyseus_1.Room {
             try {
                 options.team = (yield db_1.pool.query(sql, options.team)).rows;
                 this.manager.addClient(client.sessionId, options, client);
+                client.send("connected_clients", this.manager.countPlayersOnline());
             }
             catch (err) {
                 throw err;

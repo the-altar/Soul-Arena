@@ -144,6 +144,10 @@ class Skill {
                 t.concat(this.targetChoices.auto);
                 return t;
             }
+            case enums_1.targetType.OneAllyOrSelf: {
+                t.push(choice);
+                return t;
+            }
         }
     }
     validateCoolDown() {

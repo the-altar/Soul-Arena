@@ -30,6 +30,7 @@ export class Effect {
   public triggerRate: number;
   public altTriggerRate: number;
   protected disabled?: boolean;
+  protected increaseDurationByAlliesAlive: boolean;
   protected triggered: boolean;
   protected isInvisible: boolean;
   protected behavior?: effectTargetBehavior;
@@ -47,11 +48,12 @@ export class Effect {
   public gameId: number;
   public stackLimit: number;
   constructor(data: any, caster: number) {
-
     this.value = data.value;
     this.tick = 1;
     this.message = data.message || null;
     this.duration = data.duration || 1;
+    this.increaseDurationByAlliesAlive =
+      data.increaseDurationByAlliesAlive || null;
     this.infinite = data.infinite || false;
     this.delay = data.delay || 0;
     this.disabled = data.disabled || false;
@@ -94,6 +96,10 @@ export class Effect {
     this.altValue = value;
   }
 
+  public extendDuration(val: number) {
+    this.duration += val;
+  }
+  
   public setIncrement(value: number) {
     this.mods.increment.value = value;
   }
@@ -104,10 +110,6 @@ export class Effect {
 
   public setTargets(targets: Array<number>) {
     this.targets = targets;
-  }
-
-  public extendDuration(val: number) {
-    this.duration += val;
   }
 
   public shouldApply() {
@@ -294,6 +296,15 @@ export class Effect {
   public activateTrigger(char: Character, origin?: Skill) {
     if (this.triggered) return;
     this.triggered = true;
+
+    if (this.increaseDurationByAlliesAlive) {
+      for (const ally of this.arenaReference
+        .findCharacterById(this.caster)
+        .char.getAllies()) {
+        if (!this.arenaReference.characters[ally].isKnockedOut())
+          this.duration = this.duration + 2;
+      }
+    }
 
     this.duration =
       this.duration +

@@ -8,6 +8,8 @@ class Effect {
         this.tick = 1;
         this.message = data.message || null;
         this.duration = data.duration || 1;
+        this.increaseDurationByAlliesAlive =
+            data.increaseDurationByAlliesAlive || null;
         this.infinite = data.infinite || false;
         this.delay = data.delay || 0;
         this.disabled = data.disabled || false;
@@ -47,6 +49,9 @@ class Effect {
     setAltValue(value) {
         this.altValue = value;
     }
+    extendDuration(val) {
+        this.duration += val;
+    }
     setIncrement(value) {
         this.mods.increment.value = value;
     }
@@ -55,9 +60,6 @@ class Effect {
     }
     setTargets(targets) {
         this.targets = targets;
-    }
-    extendDuration(val) {
-        this.duration += val;
     }
     shouldApply() {
         const triggerRate = Math.floor(Math.random() * 101);
@@ -222,6 +224,14 @@ class Effect {
         if (this.triggered)
             return;
         this.triggered = true;
+        if (this.increaseDurationByAlliesAlive) {
+            for (const ally of this.arenaReference
+                .findCharacterById(this.caster)
+                .char.getAllies()) {
+                if (!this.arenaReference.characters[ally].isKnockedOut())
+                    this.duration = this.duration + 2;
+            }
+        }
         this.duration =
             this.duration +
                 (char.getDebuffs().increaseSkillDuration[origin.getId()] || 0);

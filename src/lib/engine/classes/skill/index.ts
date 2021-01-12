@@ -199,6 +199,11 @@ export class Skill {
         t.concat(this.targetChoices.auto);
         return t;
       }
+
+      case targetType.OneAllyOrSelf:{
+        t.push(choice);
+        return t;
+      }
     }
   }
 
