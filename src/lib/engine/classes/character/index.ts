@@ -39,7 +39,7 @@ export class Character {
   public skills: Array<Skill>;
   private arenaReference: Arena;
   public effectStack: EffectStack;
-  public dexNumber:number
+  public dexNumber: number;
 
   constructor(data: iCharacter, playerId: number, world: Arena) {
     this.buffs = new Buffs();
@@ -54,7 +54,7 @@ export class Character {
     this.description = data.description;
     this.hitPoints = 100;
     this.type = new Set(data.type);
-    this.dexNumber = data.dexNumber
+    this.dexNumber = data.dexNumber;
     this.energyGain = data.energyGain;
     this.belongs = {};
     this.belongs[playerId] = true;
@@ -269,6 +269,7 @@ export class Character {
     this.buffs.clearAbsorbDamage();
     this.buffs.clearDamageIncreasal();
     this.buffs.clearIgnoreHarmfulEffects();
+    this.buffs.cannotBeKilled = false;
     this.buffs.validateDD();
   }
 

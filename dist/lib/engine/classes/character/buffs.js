@@ -4,6 +4,7 @@ exports.Buffs = void 0;
 const enums_1 = require("../../enums");
 class Buffs {
     constructor() {
+        this.cannotBeKilled = false;
         this.invulnerability = {
             toFriendly: false,
             toHarmful: false,

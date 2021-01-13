@@ -114,6 +114,9 @@ exports.effectFactory = function (effect, caster) {
         case enums_1.effectType.IgnoreEffects: {
             return new effectRemoval_1.IgnoreEffects(effect, caster);
         }
+        case enums_1.effectType.IgnoreDeath: {
+            return new healthRelated_1.IgnoreDeath(effect, caster);
+        }
         default: {
             return new base_1.Effect(effect, caster);
         }

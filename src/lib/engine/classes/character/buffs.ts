@@ -1,10 +1,5 @@
 import { log } from "../../../logger";
-import {
-  BuffTypes,
-  DamageType,
-  SkillClassType,
-  effectType,
-} from "../../enums";
+import { BuffTypes, DamageType, SkillClassType, effectType } from "../../enums";
 import { Effect } from "../effect";
 import { Skill } from "../skill";
 
@@ -34,6 +29,7 @@ export class Buffs {
     };
   };
 
+  cannotBeKilled: boolean;
   decreaseDamageTaken: { byDamage: any; bySkillClass: any; bySkillId: any };
   damageIncreasal: { byDamage: any; bySkillClass: any; bySkillId: any };
   absorbDamage: { [x: string]: { [x: string]: number } };
@@ -44,6 +40,7 @@ export class Buffs {
   };
 
   constructor() {
+    this.cannotBeKilled = false;
     this.invulnerability = {
       toFriendly: false,
       toHarmful: false,
@@ -178,9 +175,11 @@ export class Buffs {
   public clearAbsorbDamage() {
     this.absorbDamage = {};
   }
+
   public getDestructibleDefense() {
     return this.destructibleDefense;
   }
+
   public clearIgnoreHarmfulEffects() {
     this.ignoreHarmfulEffects = {
       status: false,

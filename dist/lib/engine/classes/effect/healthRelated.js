@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HealthDrain = exports.Healing = void 0;
+exports.IgnoreDeath = exports.HealthDrain = exports.Healing = void 0;
 const damageRelated_1 = require("./damageRelated");
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
@@ -72,4 +72,18 @@ class HealthDrain extends damageRelated_1.Damage {
     }
 }
 exports.HealthDrain = HealthDrain;
+class IgnoreDeath extends base_1.Effect {
+    constructor(data, caster) {
+        super(data, caster);
+    }
+    functionality(character, origin) {
+        if (character.getDebuffs().ignoreBenefitialEffects)
+            return;
+        character.getBuffs().cannotBeKilled = true;
+    }
+    generateToolTip() {
+        this.message = this.message || "This character cannot be killed";
+    }
+}
+exports.IgnoreDeath = IgnoreDeath;
 //# sourceMappingURL=healthRelated.js.map

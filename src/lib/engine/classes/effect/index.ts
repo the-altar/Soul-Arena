@@ -10,7 +10,7 @@ import {
   AbsorbDamage,
   IgnoreDecreaseDamageTaken,
 } from "./damageRelated";
-import { Healing, HealthDrain } from "./healthRelated";
+import { Healing, HealthDrain, IgnoreDeath } from "./healthRelated";
 import {
   CooldownReduction,
   CooldownIncreasal,
@@ -124,6 +124,9 @@ export const effectFactory = function (effect: any, caster: number): Effect {
     }
     case effectType.IgnoreEffects: {
       return new IgnoreEffects(effect, caster);
+    }
+    case effectType.IgnoreDeath: {
+      return new IgnoreDeath(effect, caster);
     }
     default: {
       return new Effect(effect, caster);

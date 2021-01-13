@@ -74,3 +74,18 @@ export class HealthDrain extends Damage {
     }
   }
 }
+
+export class IgnoreDeath extends Effect {
+  constructor(data: any, caster: number) {
+    super(data, caster);
+  }
+
+  public functionality(character: Character, origin: Skill) {
+    if (character.getDebuffs().ignoreBenefitialEffects) return;
+    character.getBuffs().cannotBeKilled = true;
+  }
+
+  public generateToolTip() {
+    this.message = this.message || "This character cannot be killed";
+  }
+}
