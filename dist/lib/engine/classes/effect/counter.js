@@ -11,6 +11,7 @@ class Counter extends base_1.Effect {
         this.counterType = data.counterType || false;
         this.counterEffectType = data.counterEffectType || false;
         this.triggerOnCounter = data.triggerOnCounter || [];
+        this.applyPerTrigger = data.applyPerTrigger || true;
     }
     functionality(target, origin) {
         let isTriggered;
@@ -30,13 +31,13 @@ class Counter extends base_1.Effect {
             const casterChar = this.arenaReference.findCharacterById(this.caster)
                 .char;
             const targetsIndex = isTriggered.indexes;
-            this.applyLinkedEffects(origin, casterIndex, targetsIndex);
+            this.applyLinkedEffects(origin, casterIndex, targetsIndex, isTriggered.times);
         }
     }
     OffensiveCounter(target, origin) {
         const temp = this.arenaReference.getTempSkills();
         const indexes = [];
-        let hasCountered = { activated: false, indexes };
+        let hasCountered = { activated: false, indexes, times: 0 };
         for (let i = temp.length - 1; i >= 0; i--) {
             const cordinates = temp[i];
             const caster = this.arenaReference.getCharactersByIndex([
@@ -58,6 +59,7 @@ class Counter extends base_1.Effect {
                     skillName: origin.name,
                 });
                 hasCountered.activated = true;
+                hasCountered.times++;
                 hasCountered.indexes.push(cordinates.caster);
                 this.value--;
             }
@@ -67,7 +69,7 @@ class Counter extends base_1.Effect {
     DefensiveCounter(target, origin) {
         const temp = this.arenaReference.getTempSkills().reverse();
         const indexes = [];
-        let hasCountered = { activated: false, indexes };
+        let hasCountered = { activated: false, indexes, times: 0 };
         for (let i = temp.length - 1; i >= 0; i--) {
             if (this.value === 0)
                 return hasCountered;
@@ -92,6 +94,7 @@ class Counter extends base_1.Effect {
                         });
                         this.value--;
                         hasCountered.activated = true;
+                        hasCountered.times++;
                         hasCountered.indexes.push(cordinates.caster);
                         break;
                     }
@@ -100,7 +103,7 @@ class Counter extends base_1.Effect {
         }
         return hasCountered;
     }
-    applyLinkedEffects(origin, caster, targets) {
+    applyLinkedEffects(origin, caster, targets, times) {
         for (const trigger of this.triggerOnCounter) {
             for (const effect of origin.inactiveEffects) {
                 if (effect.id !== trigger.id)
@@ -108,13 +111,13 @@ class Counter extends base_1.Effect {
                 if (trigger.self) {
                     effect.triggerRate = 100;
                     effect.setTargets([caster]);
-                    origin.effects.push(effect);
                 }
                 else if (trigger.victim) {
                     effect.triggerRate = 100;
                     effect.setTargets(targets);
-                    origin.effects.push(effect);
                 }
+                effect.value *= times;
+                origin.effects.push(effect);
             }
         }
     }
@@ -143,15 +146,19 @@ class Counter extends base_1.Effect {
     generateToolTip() {
         if (this.value === 1 && this.DefensiveCounter) {
             this.message = `The first new skill used on this character will be countered`;
-        }
-        else if (this.value === 1 && this.OffensiveCounter) {
-            this.message = `The first new skill used by this character will be countered`;
-        }
-        else if (this.OffensiveCounter) {
-            this.message = "New skills used on this character will be countered";
+            return;
         }
         else if (this.DefensiveCounter) {
-            this.message = "New skills used by this character will be countered";
+            this.message = "New skills used on this character will be countered";
+            return;
+        }
+        else {
+            if (this.value === 1) {
+                this.message = `The first new skill used by this character will be countered`;
+            }
+            else {
+                this.message = "New skills used by this character will be countered";
+            }
         }
     }
 }

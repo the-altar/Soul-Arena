@@ -4,11 +4,15 @@ import { Character } from "../character";
 import { Arena } from "../../arena";
 import { Skill } from "..";
 import { log } from "../../../logger";
+import { time } from "console";
 
 export class Counter extends Effect {
   private counterType: SkillClassType;
   private counterEffectType: effectType;
+  private counterSkillType: SkillClassType;
+  private harmfulSkillsOnly: boolean;
   private isDefensive: boolean;
+  private applyPerTrigger: boolean;
   private triggerOnCounter: Array<{
     id: Number;
     self: boolean;
@@ -23,10 +27,15 @@ export class Counter extends Effect {
     this.counterType = data.counterType || false;
     this.counterEffectType = data.counterEffectType || false;
     this.triggerOnCounter = data.triggerOnCounter || [];
+    this.applyPerTrigger = data.applyPerTrigger || true;
   }
 
   public functionality(target: Character, origin: Skill) {
-    let isTriggered: { activated: boolean; indexes: Array<number> };
+    let isTriggered: {
+      activated: boolean;
+      indexes: Array<number>;
+      times: number;
+    };
 
     if (this.isDefensive) {
       if (target.getDebuffs().ignoreBenefitialEffects) return;
@@ -42,7 +51,12 @@ export class Counter extends Effect {
       const casterChar = this.arenaReference.findCharacterById(this.caster)
         .char;
       const targetsIndex = isTriggered.indexes;
-      this.applyLinkedEffects(origin, casterIndex, targetsIndex);
+      this.applyLinkedEffects(
+        origin,
+        casterIndex,
+        targetsIndex,
+        isTriggered.times
+      );
     }
   }
 
@@ -50,7 +64,7 @@ export class Counter extends Effect {
     const temp = this.arenaReference.getTempSkills();
     const indexes: Array<number> = [];
 
-    let hasCountered = { activated: false, indexes };
+    let hasCountered = { activated: false, indexes, times: 0 };
 
     for (let i = temp.length - 1; i >= 0; i--) {
       const cordinates = temp[i];
@@ -74,6 +88,7 @@ export class Counter extends Effect {
           skillName: origin.name,
         });
         hasCountered.activated = true;
+        hasCountered.times++;
         hasCountered.indexes.push(cordinates.caster);
         this.value--;
       }
@@ -86,7 +101,7 @@ export class Counter extends Effect {
     const temp = this.arenaReference.getTempSkills().reverse();
     const indexes: Array<number> = [];
 
-    let hasCountered = { activated: false, indexes };
+    let hasCountered = { activated: false, indexes, times: 0 };
 
     for (let i = temp.length - 1; i >= 0; i--) {
       if (this.value === 0) return hasCountered;
@@ -113,6 +128,7 @@ export class Counter extends Effect {
             });
             this.value--;
             hasCountered.activated = true;
+            hasCountered.times++;
             hasCountered.indexes.push(cordinates.caster);
             break;
           }
@@ -123,7 +139,12 @@ export class Counter extends Effect {
     return hasCountered;
   }
 
-  applyLinkedEffects(origin: Skill, caster: number, targets: Array<number>) {
+  applyLinkedEffects(
+    origin: Skill,
+    caster: number,
+    targets: Array<number>,
+    times: number
+  ) {
     for (const trigger of this.triggerOnCounter) {
       for (const effect of origin.inactiveEffects) {
         if (effect.id !== trigger.id) continue;
@@ -131,12 +152,12 @@ export class Counter extends Effect {
         if (trigger.self) {
           effect.triggerRate = 100;
           effect.setTargets([caster]);
-          origin.effects.push(effect);
         } else if (trigger.victim) {
           effect.triggerRate = 100;
           effect.setTargets(targets);
-          origin.effects.push(effect);
         }
+        effect.value *= times;
+        origin.effects.push(effect);
       }
     }
   }
@@ -161,12 +182,16 @@ export class Counter extends Effect {
   generateToolTip() {
     if (this.value === 1 && this.DefensiveCounter) {
       this.message = `The first new skill used on this character will be countered`;
-    } else if (this.value === 1 && this.OffensiveCounter) {
-      this.message = `The first new skill used by this character will be countered`;
-    } else if (this.OffensiveCounter) {
-      this.message = "New skills used on this character will be countered";
+      return;
     } else if (this.DefensiveCounter) {
-      this.message = "New skills used by this character will be countered";
+      this.message = "New skills used on this character will be countered";
+      return;
+    } else {
+      if (this.value === 1) {
+        this.message = `The first new skill used by this character will be countered`;
+      } else {
+        this.message = "New skills used by this character will be countered";
+      }
     }
   }
 }

@@ -98,6 +98,10 @@ export class Character {
 
     this.hitPoints = hp;
     if (this.hitPoints <= 0) {
+      if (this.buffs.cannotBeKilled) {
+        this.hitPoints = 5;
+        return;
+      }
       this.hitPoints = 0;
       this.knockOut();
     } else if (this.hitPoints > 100) this.hitPoints = 100;
