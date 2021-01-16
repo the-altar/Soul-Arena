@@ -49,7 +49,9 @@ class Counter extends base_1.Effect {
             if (skill.uncounterable)
                 continue;
             if ((this.counterType === enums_1.SkillClassType.Any ||
-                skill.class == this.counterType) &&
+                skill.class == this.counterType ||
+                (this.counterType === enums_1.SkillClassType.NonStrategic &&
+                    skill.class !== enums_1.SkillClassType.Strategic)) &&
                 caster.getId() === target.getId()) {
                 temp.splice(i, 1);
                 caster.addNotification({
@@ -81,7 +83,9 @@ class Counter extends base_1.Effect {
             if (skill.uncounterable)
                 continue;
             if (this.counterType === enums_1.SkillClassType.Any ||
-                skill.class === this.counterType) {
+                skill.class == this.counterType ||
+                (this.counterType === enums_1.SkillClassType.NonStrategic &&
+                    skill.class !== enums_1.SkillClassType.Strategic)) {
                 for (const t of cordinates.targets) {
                     const sufferer = this.arenaReference.getCharactersByIndex([t])[0];
                     if (sufferer.getId() === target.getId()) {
@@ -144,20 +148,47 @@ class Counter extends base_1.Effect {
             this.effectConclusion();
     }
     generateToolTip() {
+        let extra = "";
+        switch (this.counterType) {
+            case enums_1.SkillClassType.Reiatsu:
+                {
+                    extra = "reiatsu ";
+                }
+                break;
+            case enums_1.SkillClassType.Physical:
+                {
+                    extra = "physical ";
+                }
+                break;
+            case enums_1.SkillClassType.Strategic:
+                {
+                    extra = "strategic ";
+                }
+                break;
+            case enums_1.SkillClassType.Affliction:
+                {
+                    extra = "affliction ";
+                }
+                break;
+            case enums_1.SkillClassType.NonStrategic: {
+                extra = "non-strategic ";
+            }
+        }
         if (this.value === 1 && this.DefensiveCounter) {
-            this.message = `The first new skill used on this character will be countered`;
+            this.message = `The first new ${extra}skill used on this character will be countered`;
             return;
         }
         else if (this.DefensiveCounter) {
-            this.message = "New skills used on this character will be countered";
+            this.message =
+                "New " + extra + "skills used on this character will be countered";
             return;
         }
         else {
             if (this.value === 1) {
-                this.message = `The first new skill used by this character will be countered`;
+                this.message = `The first new ${extra}skill used by this character will be countered`;
             }
             else {
-                this.message = "New skills used by this character will be countered";
+                this.message = `New ${extra}skills used by this character will be countered`;
             }
         }
     }

@@ -157,10 +157,12 @@ class IncreaseCasterSkillDuration extends base_1.Effect {
     }
 }
 exports.IncreaseCasterSkillDuration = IncreaseCasterSkillDuration;
+// Increase duration of a skill when used on a specific target ONLY!
 class IncreaseTargetSkillDuration extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
         this.targetSkillId = data.targetSkillId;
+        this.effectsId = data.effectsId || [];
     }
     functionality(char, origin) {
         if (char.getBuffs().ignoreHarmfulEffects.status) {
@@ -177,9 +179,14 @@ class IncreaseTargetSkillDuration extends base_1.Effect {
         if (this.noRepeat)
             return;
         this.noRepeat = true;
-        const val = char.getDebuffs().increaseSkillDuration[this.targetSkillId];
-        char.getDebuffs().increaseSkillDuration[this.targetSkillId] =
-            (val || 0) + this.value;
+        const val = char.getDebuffs().increaseSkillDuration[this.targetSkillId] || {
+            value: 0,
+            except: [],
+        };
+        char.getDebuffs().increaseSkillDuration[this.targetSkillId] = {
+            value: (val.value || 0) + this.value,
+            except: this.effectsId,
+        };
         this.targetedSkillName = this.arenaReference
             .findCharacterById(this.caster)
             .char.findSkillById(this.targetSkillId).name;

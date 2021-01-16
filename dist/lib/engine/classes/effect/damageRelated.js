@@ -245,7 +245,7 @@ class IncreaseDamageTaken extends base_1.Effect {
             this.message = `This character will take ${this.value} more damage from ${enums_1.SkillClassType[this.skillType]} skills`;
         }
         else if (this.specificSkill) {
-            this.message = `${this.specificSkillName} will deal ${this.value} damage to this character`;
+            this.message = `${this.specificSkillName} will deal ${this.value} more damage to this character`;
         }
         else if (this.damageType) {
             this.message = `${enums_1.DamageType[this.damageType]} damage will deal ${this.value} more damage to this character`;

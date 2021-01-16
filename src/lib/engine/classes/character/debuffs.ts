@@ -1,4 +1,4 @@
-import {DamageType, DebuffTypes, SkillClassType } from "../../enums";
+import { DamageType, DebuffTypes, SkillClassType } from "../../enums";
 import { Skill } from "../../classes/skill";
 
 export interface iDebuffParams {
@@ -15,7 +15,9 @@ export class Debuffs {
   cooldownIncreasal: { [x: string]: number };
   ignoreInvulnerability: boolean;
   ignoreDecreaseDamageTaken: boolean;
-  increaseSkillDuration: { [x: string]: number };
+  increaseSkillDuration: {
+    [x: string]: { value: number; except: Array<number> };
+  };
   stun: { [x: string]: boolean };
   ignoreBenefitialEffects: boolean;
 
@@ -83,7 +85,7 @@ export class Debuffs {
     this.ignoreBenefitialEffects = false;
   }
 
-  public clearStuns(){
+  public clearStuns() {
     this.stun = {};
   }
 }

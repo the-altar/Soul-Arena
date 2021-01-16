@@ -77,7 +77,9 @@ export class Counter extends Effect {
 
       if (
         (this.counterType === SkillClassType.Any ||
-          skill.class == this.counterType) &&
+          skill.class == this.counterType ||
+          (this.counterType === SkillClassType.NonStrategic &&
+            skill.class !== SkillClassType.Strategic)) &&
         caster.getId() === target.getId()
       ) {
         temp.splice(i, 1);
@@ -114,7 +116,9 @@ export class Counter extends Effect {
 
       if (
         this.counterType === SkillClassType.Any ||
-        skill.class === this.counterType
+        skill.class == this.counterType ||
+        (this.counterType === SkillClassType.NonStrategic &&
+          skill.class !== SkillClassType.Strategic)
       ) {
         for (const t of cordinates.targets) {
           const sufferer = this.arenaReference.getCharactersByIndex([t])[0];
@@ -180,17 +184,44 @@ export class Counter extends Effect {
   }
 
   generateToolTip() {
+    let extra = "";
+    switch (this.counterType) {
+      case SkillClassType.Reiatsu:
+        {
+          extra = "reiatsu ";
+        }
+        break;
+      case SkillClassType.Physical:
+        {
+          extra = "physical ";
+        }
+        break;
+      case SkillClassType.Strategic:
+        {
+          extra = "strategic ";
+        }
+        break;
+      case SkillClassType.Affliction:
+        {
+          extra = "affliction ";
+        }
+        break;
+      case SkillClassType.NonStrategic: {
+        extra = "non-strategic ";
+      }
+    }
     if (this.value === 1 && this.DefensiveCounter) {
-      this.message = `The first new skill used on this character will be countered`;
+      this.message = `The first new ${extra}skill used on this character will be countered`;
       return;
     } else if (this.DefensiveCounter) {
-      this.message = "New skills used on this character will be countered";
+      this.message =
+        "New " + extra + "skills used on this character will be countered";
       return;
     } else {
       if (this.value === 1) {
-        this.message = `The first new skill used by this character will be countered`;
+        this.message = `The first new ${extra}skill used by this character will be countered`;
       } else {
-        this.message = "New skills used by this character will be countered";
+        this.message = `New ${extra}skills used by this character will be countered`;
       }
     }
   }

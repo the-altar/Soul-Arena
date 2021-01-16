@@ -62,6 +62,8 @@ var effectType;
     effectType[effectType["IgnoreEffects"] = 29] = "IgnoreEffects";
     effectType[effectType["ReplaceSkillCost"] = 30] = "ReplaceSkillCost";
     effectType[effectType["IgnoreDeath"] = 31] = "IgnoreDeath";
+    effectType[effectType["ApplyEffect"] = 32] = "ApplyEffect";
+    effectType[effectType["ReplaceSkill"] = 33] = "ReplaceSkill";
 })(effectType = exports.effectType || (exports.effectType = {}));
 var activationType;
 (function (activationType) {
@@ -147,6 +149,7 @@ var SkillClassType;
     SkillClassType[SkillClassType["Strategic"] = 3] = "Strategic";
     SkillClassType[SkillClassType["Affliction"] = 4] = "Affliction";
     SkillClassType[SkillClassType["Any"] = 5] = "Any";
+    SkillClassType[SkillClassType["NonStrategic"] = 6] = "NonStrategic";
 })(SkillClassType = exports.SkillClassType || (exports.SkillClassType = {}));
 var ControlType;
 (function (ControlType) {

@@ -57,7 +57,9 @@ export enum effectType {
   IncreaseTargetSkillDuration,
   IgnoreEffects,
   ReplaceSkillCost,
-  IgnoreDeath
+  IgnoreDeath,
+  ApplyEffect,
+  ReplaceSkill
 }
 
 export enum activationType {
@@ -143,6 +145,7 @@ export enum SkillClassType {
   Strategic,
   Affliction,
   Any,
+  NonStrategic,
 }
 
 export enum ControlType {

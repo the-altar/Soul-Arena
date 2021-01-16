@@ -306,9 +306,12 @@ export class Effect {
       }
     }
 
-    this.duration =
-      this.duration +
-      (char.getDebuffs().increaseSkillDuration[origin.getId()] || 0);
+    const extendEffect = char.getDebuffs().increaseSkillDuration[
+      origin.getId()
+    ];
+    if (extendEffect && extendEffect.except.includes(this.id) === false) {
+      this.duration = this.duration + (extendEffect.value || 0);
+    }
   }
 
   public getPublicData() {
