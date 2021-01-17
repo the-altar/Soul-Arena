@@ -14,6 +14,9 @@ router.get("/register", root_controller_1.baseController);
 router.get("/login", root_controller_1.baseController);
 router.get("/user/:username", root_controller_1.baseController);
 router.get("/news/:id/:title", root_controller_1.baseController);
+router.get("/game-manual", root_controller_1.baseController);
+router.get("/characters-and-skills", root_controller_1.baseController);
+router.get("/characters-and-skills/:characterId", root_controller_1.baseController);
 router.get("/", root_controller_1.baseController);
 exports.rootRouter = router;
 //# sourceMappingURL=root.router.js.map

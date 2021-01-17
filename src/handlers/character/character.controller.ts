@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { join } from "path";
 //import { unlink, existsSync } from 'fs'
+import * as query from "./character.queries";
 import { pool } from "../../db";
+import { log } from "../../lib/logger";
 
 export const create = async (req: Request, res: Response) => {
   // Req.body = [released, charData, isFree]
@@ -69,6 +71,26 @@ export const purchase = async (req: Request, res: Response) => {
   } catch (err) {
     res.json({ success: true });
     throw err;
+  }
+};
+
+export const profiles = async (req: Request, res: Response) => {
+  try {
+    const data = await pool.query(query.profilesQuery);
+    return res.status(200).json(data.rows);
+  } catch (e) {
+    log.error(e);
+    return res.status(500).json([]);
+  }
+};
+
+export const profile = async (req: Request, res: Response) => {
+  try {
+    const data = await pool.query(query.profileQuery, [Number(req.params.id)]);
+    return res.status(200).json(data.rows[0]);
+  } catch (e) {
+    log.error(e);
+    return res.status(500).json([]);
   }
 };
 
