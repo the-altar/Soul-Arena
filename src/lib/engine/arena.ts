@@ -361,6 +361,7 @@ export class Arena {
     for (const i of player2.getMyCharsIndex()) {
       const c = this.characters[i];
       c.getDebuffs().clearStuns();
+      c.getBuffs().clearDecreaseDamageTaken();
       c.effectStack.clearStack();
     }
   }
