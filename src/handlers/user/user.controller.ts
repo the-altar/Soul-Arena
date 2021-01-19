@@ -144,7 +144,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
   const filename = id * 100;
   const p = join(process.cwd(), `/public/img/avatars/${filename}.jpg`);
 
-  const file: any = req.files.file;
+  const file = req.files.file;
   try {
     await file.mv(p);
     await pool.query("UPDATE users SET avatar = $1 where id = $2", [
