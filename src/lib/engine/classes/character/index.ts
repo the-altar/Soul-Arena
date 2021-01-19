@@ -13,6 +13,8 @@ import { Buffs, iBuffParams } from "./buffs";
 import { Notification } from "./notifications";
 import { Debuffs, iDebuffParams } from "./debuffs";
 import { EffectStack } from "./effetStack";
+import { CounterStack } from "./counters";
+import { SkillStack } from "./skillstack";
 import { log } from "../../../logger";
 import { Effect } from "../effect";
 
@@ -25,6 +27,8 @@ export class Character {
   public banner: string;
   private allies: Array<number>;
   private enemies: Array<number>;
+  public skillStack: SkillStack;
+  public counterStack: CounterStack;
   /** This ID is unique to the game instance */
   private id: number;
   private hitPoints: number;
@@ -64,7 +68,8 @@ export class Character {
     this.knockedOut = false;
     this.arenaReference = world;
     this.effectStack = new EffectStack();
-
+    this.counterStack = new CounterStack();
+    this.skillStack = new SkillStack();
     for (const skill of data.skills) {
       this.skills.push(new Skill(skill, this.id, this.arenaReference, this));
     }

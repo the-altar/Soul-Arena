@@ -30,6 +30,7 @@ export class Skill {
   private targets: Array<number>;
   public uncounterable: boolean;
   private targetMode: targetType;
+  public requiresSkillOnTarget: Array<number>;
   public effects: Array<Effect>;
   private casterReference: Character;
   private targetChoices: { [x: string]: Array<number> };
@@ -61,6 +62,7 @@ export class Skill {
     this.effects = [];
     this.inactiveEffects = [];
     this.mods = new SkillMods(data.mods || {});
+    this.requiresSkillOnTarget = data.requiresSkillOnTarget || [];
     this.id = data.id;
     this.harmful = data.harmful || false;
     this.arenaReference = world;

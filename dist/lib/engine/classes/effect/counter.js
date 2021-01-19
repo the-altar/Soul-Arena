@@ -10,7 +10,6 @@ class Counter extends base_1.Effect {
         this.isDefensive = data.isDefensive || false;
         this.counterType = data.counterType || false;
         this.counterEffectType = data.counterEffectType || false;
-        this.triggerOnCounter = data.triggerOnCounter || [];
         this.applyPerTrigger = data.applyPerTrigger || true;
     }
     functionality(target, origin) {
@@ -106,24 +105,6 @@ class Counter extends base_1.Effect {
             }
         }
         return hasCountered;
-    }
-    applyLinkedEffects(origin, caster, targets, times) {
-        for (const trigger of this.triggerOnCounter) {
-            for (const effect of origin.inactiveEffects) {
-                if (effect.id !== trigger.id)
-                    continue;
-                if (trigger.self) {
-                    effect.triggerRate = 100;
-                    effect.setTargets([caster]);
-                }
-                else if (trigger.victim) {
-                    effect.triggerRate = 100;
-                    effect.setTargets(targets);
-                }
-                effect.value *= times;
-                origin.effects.push(effect);
-            }
-        }
     }
     progressTurn() {
         this.delay--;

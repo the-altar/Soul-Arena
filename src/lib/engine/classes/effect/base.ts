@@ -47,6 +47,12 @@ export class Effect {
   public id: number;
   public gameId: number;
   public stackLimit: number;
+  public triggerLinkedEffects: Array<{
+    id: Number;
+    self: boolean;
+    victim: boolean;
+    target: boolean;
+  }>;
   constructor(data: any, caster: number) {
     this.value = data.value;
     this.tick = 1;
@@ -76,6 +82,7 @@ export class Effect {
     this.gameId =
       data.gameId || Math.floor(Math.random() * (0 - 99999) + 99999);
     this.message = data.message;
+    this.triggerLinkedEffects = data.triggerLinkedEffects || [];
     this.mods = data.mods || {
       increment: {
         value: data.increment || 0,
@@ -87,6 +94,7 @@ export class Effect {
   public setArenaReference(world: Arena) {
     this.arenaReference = world;
   }
+
   public functionality(char: Character, origin?: Skill) {
     console.log("This does nothing!");
     return;
@@ -265,6 +273,7 @@ export class Effect {
     targetList: Array<number>,
     charIndex: number
   ) {
+    char.skillStack.add(origin.getId());
     if ((!this.triggered || this.activate) && !char.addEffectStack(this)) {
       return;
     }
@@ -322,4 +331,28 @@ export class Effect {
   }
 
   public apply(char: Character, origin: Skill) {}
+
+  applyLinkedEffects(
+    origin: Skill,
+    caster: number,
+    targets: Array<number>,
+    times: number
+  ) {
+    //log.info(this.triggerLinkedEffects)
+    for (const trigger of this.triggerLinkedEffects) {
+      for (const effect of origin.inactiveEffects) {
+        if (effect.id !== trigger.id) continue;
+
+        if (trigger.self) {
+          effect.triggerRate = 100;
+          effect.setTargets([caster]);
+        } else if (trigger.victim) {
+          effect.triggerRate = 100;
+          effect.setTargets(targets);
+        }
+        effect.value *= times;
+        origin.effects.push(effect);
+      }
+    }
+  }
 }

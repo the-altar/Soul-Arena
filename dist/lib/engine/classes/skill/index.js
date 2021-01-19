@@ -24,6 +24,7 @@ class Skill {
         this.effects = [];
         this.inactiveEffects = [];
         this.mods = new mods_1.SkillMods(data.mods || {});
+        this.requiresSkillOnTarget = data.requiresSkillOnTarget || [];
         this.id = data.id;
         this.harmful = data.harmful || false;
         this.arenaReference = world;

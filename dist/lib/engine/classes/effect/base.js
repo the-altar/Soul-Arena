@@ -32,6 +32,7 @@ class Effect {
         this.gameId =
             data.gameId || Math.floor(Math.random() * (0 - 99999) + 99999);
         this.message = data.message;
+        this.triggerLinkedEffects = data.triggerLinkedEffects || [];
         this.mods = data.mods || {
             increment: {
                 value: data.increment || 0,
@@ -195,6 +196,7 @@ class Effect {
     }
     generateToolTip(triggered) { }
     activateOnTarget(char, origin, targetList, charIndex) {
+        char.skillStack.add(origin.getId());
         if ((!this.triggered || this.activate) && !char.addEffectStack(this)) {
             return;
         }
@@ -243,6 +245,25 @@ class Effect {
         return Object.assign({}, publicData);
     }
     apply(char, origin) { }
+    applyLinkedEffects(origin, caster, targets, times) {
+        //log.info(this.triggerLinkedEffects)
+        for (const trigger of this.triggerLinkedEffects) {
+            for (const effect of origin.inactiveEffects) {
+                if (effect.id !== trigger.id)
+                    continue;
+                if (trigger.self) {
+                    effect.triggerRate = 100;
+                    effect.setTargets([caster]);
+                }
+                else if (trigger.victim) {
+                    effect.triggerRate = 100;
+                    effect.setTargets(targets);
+                }
+                effect.value *= times;
+                origin.effects.push(effect);
+            }
+        }
+    }
 }
 exports.Effect = Effect;
 //# sourceMappingURL=base.js.map

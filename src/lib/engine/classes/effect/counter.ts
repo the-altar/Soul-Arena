@@ -13,12 +13,6 @@ export class Counter extends Effect {
   private harmfulSkillsOnly: boolean;
   private isDefensive: boolean;
   private applyPerTrigger: boolean;
-  private triggerOnCounter: Array<{
-    id: Number;
-    self: boolean;
-    victim: boolean;
-    target: boolean;
-  }>;
 
   constructor(data: any, caster: number) {
     super(data, caster);
@@ -26,7 +20,6 @@ export class Counter extends Effect {
     this.isDefensive = data.isDefensive || false;
     this.counterType = data.counterType || false;
     this.counterEffectType = data.counterEffectType || false;
-    this.triggerOnCounter = data.triggerOnCounter || [];
     this.applyPerTrigger = data.applyPerTrigger || true;
   }
 
@@ -141,29 +134,6 @@ export class Counter extends Effect {
     }
 
     return hasCountered;
-  }
-
-  applyLinkedEffects(
-    origin: Skill,
-    caster: number,
-    targets: Array<number>,
-    times: number
-  ) {
-    for (const trigger of this.triggerOnCounter) {
-      for (const effect of origin.inactiveEffects) {
-        if (effect.id !== trigger.id) continue;
-
-        if (trigger.self) {
-          effect.triggerRate = 100;
-          effect.setTargets([caster]);
-        } else if (trigger.victim) {
-          effect.triggerRate = 100;
-          effect.setTargets(targets);
-        }
-        effect.value *= times;
-        origin.effects.push(effect);
-      }
-    }
   }
 
   public progressTurn() {

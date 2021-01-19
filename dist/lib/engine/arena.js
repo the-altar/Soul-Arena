@@ -312,6 +312,7 @@ class Arena {
             const c = this.characters[i];
             c.clearBuffs();
             c.clearDebuffs();
+            c.skillStack.clearStack();
             c.effectStack.clearStack();
         }
         for (const i of player2.getMyCharsIndex()) {
