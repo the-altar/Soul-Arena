@@ -147,6 +147,8 @@ class IncreaseCasterSkillDuration extends base_1.Effect {
     effectConclusion() {
         if (!this.skillReference)
             return;
+        if (!this.skillReference.mods)
+            return;
         this.skillReference.mods.increaseDuration -= this.value;
     }
     getPublicData() {

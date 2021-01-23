@@ -185,6 +185,7 @@ export class IncreaseCasterSkillDuration extends Effect {
 
   effectConclusion() {
     if (!this.skillReference) return;
+    if (!this.skillReference.mods) return;
     this.skillReference.mods.increaseDuration -= this.value;
   }
 
