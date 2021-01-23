@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -15,6 +34,7 @@ const jsonwebtoken_1 = require("jsonwebtoken");
 const path_1 = require("path");
 const db_1 = require("../../db");
 const logger_1 = require("../../lib/logger");
+const helper = __importStar(require("./user.helpers"));
 function loggerMiddleware(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -41,18 +61,17 @@ exports.mount = function (req, res) {
             return res.json({ authLevel: -1, auth: false, id: -1 });
         }
         const u = req.res.locals.user;
-        return res.json({
-            username: u.username,
-            authLevel: u.authLevel,
-            id: u.id,
-            auth: u.auth,
-        });
+        return res.json(Object.assign({}, u));
     });
 };
 exports.register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const text = `INSERT INTO users (username, passhash, email) values ($1, $2, $3) RETURNING id;`;
     const query2 = `INSERT INTO ladderboard (season, user_id, wins, losses, elo, streak, max_streak, experience, season_level, season_rank)
   values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`;
+    if (!helper.validEmail(req.body.email) ||
+        !helper.validUsername(req.body.username) ||
+        !helper.validPassword(req.body.password))
+        return res.status(500).json({});
     const client = yield db_1.pool.connect();
     try {
         const hashed = yield bcrypt_1.hash(req.body.password, 10);
@@ -62,13 +81,19 @@ exports.register = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             hashed,
             req.body.email,
         ]);
-        yield db_1.pool.query(query2, [0, response.rows[0].id, 0, 0, 0, 0, 0, 0, 0, 0]);
+        const userId = response.rows[0].id;
+        yield db_1.pool.query(query2, [0, userId, 0, 0, 0, 0, 0, 0, 0, 0]);
         yield client.query("COMMIT");
-        return res.json({ success: true });
+        return res.status(200).json({
+            id: userId,
+            authLevel: 0,
+            auth: true,
+            username: req.body.username,
+        });
     }
     catch (err) {
         yield client.query("ROLLBACK");
-        return res.json({ success: false, err: err });
+        return res.status(500).json({ success: false, err: err });
     }
     finally {
         client.release();

@@ -4,6 +4,7 @@ import { sign, verify } from "jsonwebtoken";
 import { join } from "path";
 import { pool } from "../../db";
 import { log } from "../../lib/logger";
+import * as helper from "./user.helpers";
 
 export async function loggerMiddleware(
   req: Request,
@@ -29,18 +30,20 @@ export const mount = async function (req: Request, res: Response) {
     return res.json({ authLevel: -1, auth: false, id: -1 });
   }
   const u = req.res.locals.user;
-  return res.json({
-    username: u.username,
-    authLevel: u.authLevel,
-    id: u.id,
-    auth: u.auth,
-  });
+  return res.json({ ...u });
 };
 
 export const register = async (req: Request, res: Response) => {
   const text = `INSERT INTO users (username, passhash, email) values ($1, $2, $3) RETURNING id;`;
   const query2 = `INSERT INTO ladderboard (season, user_id, wins, losses, elo, streak, max_streak, experience, season_level, season_rank)
   values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`;
+
+  if (
+    !helper.validEmail(req.body.email) ||
+    !helper.validUsername(req.body.username) ||
+    !helper.validPassword(req.body.password)
+  )
+    return res.status(500).json({});
 
   const client = await pool.connect();
   try {
@@ -52,13 +55,19 @@ export const register = async (req: Request, res: Response) => {
       hashed,
       req.body.email,
     ]);
-    await pool.query(query2, [0, response.rows[0].id, 0, 0, 0, 0, 0, 0, 0, 0]);
+    const userId = response.rows[0].id;
+    await pool.query(query2, [0, userId, 0, 0, 0, 0, 0, 0, 0, 0]);
     await client.query("COMMIT");
 
-    return res.json({ success: true });
+    return res.status(200).json({
+      id: userId,
+      authLevel: 0,
+      auth: true,
+      username: req.body.username,
+    });
   } catch (err) {
     await client.query("ROLLBACK");
-    return res.json({ success: false, err: err });
+    return res.status(500).json({ success: false, err: err });
   } finally {
     client.release();
   }
