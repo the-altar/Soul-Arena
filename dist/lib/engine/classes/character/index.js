@@ -97,7 +97,7 @@ class Character {
     validadeSkillsCompletely(pool, chars, playerId, self) {
         for (const skill of this.skills) {
             skill.setTurnCost();
-            if (this.isStunned() || this.isStunned(skill)) {
+            if (this.isStunned(skill)) {
                 skill.disable();
             }
             else {
@@ -110,7 +110,7 @@ class Character {
     }
     validateSkillsCost(pool) {
         for (const skill of this.skills) {
-            if (this.isStunned() || this.isStunned(skill)) {
+            if (this.isStunned(skill)) {
                 skill.disable();
             }
             else {

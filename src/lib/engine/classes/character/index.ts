@@ -149,7 +149,7 @@ export class Character {
   ) {
     for (const skill of this.skills) {
       skill.setTurnCost();
-      if (this.isStunned() || this.isStunned(skill)) {
+      if (this.isStunned(skill)) {
         skill.disable();
       } else {
         skill.enable();
@@ -162,7 +162,7 @@ export class Character {
 
   public validateSkillsCost(pool: Array<number>) {
     for (const skill of this.skills) {
-      if (this.isStunned() || this.isStunned(skill)) {
+      if (this.isStunned(skill)) {
         skill.disable();
       } else {
         skill.enable();

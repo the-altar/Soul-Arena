@@ -155,6 +155,8 @@ export class Counter extends Effect {
 
   generateToolTip() {
     let extra = "";
+    if (this.message) return;
+
     switch (this.counterType) {
       case SkillClassType.Reiatsu:
         {

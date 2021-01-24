@@ -107,9 +107,6 @@ class ReplaceSkillCost extends base_1.Effect {
             }
         }
     }
-    generateToolTip() {
-        this.message = "Costs have been replaced";
-    }
 }
 exports.ReplaceSkillCost = ReplaceSkillCost;
 class IncreaseCasterSkillDuration extends base_1.Effect {

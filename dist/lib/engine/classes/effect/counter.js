@@ -130,6 +130,8 @@ class Counter extends base_1.Effect {
     }
     generateToolTip() {
         let extra = "";
+        if (this.message)
+            return;
         switch (this.counterType) {
             case enums_1.SkillClassType.Reiatsu:
                 {

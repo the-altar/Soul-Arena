@@ -62,7 +62,11 @@ export class Debuffs {
   }
 
   public isStunned(skill: Skill): boolean {
-    if (this.stun[skill.persistence] || this.stun[SkillClassType.Any])
+    if (
+      this.stun[skill.persistence] ||
+      this.stun[SkillClassType.Any] ||
+      this.stun[skill.class]
+    )
       return true;
     return false;
   }

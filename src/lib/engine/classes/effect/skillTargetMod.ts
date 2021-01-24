@@ -137,10 +137,6 @@ export class ReplaceSkillCost extends Effect {
       }
     }
   }
-
-  generateToolTip() {
-    this.message = "Costs have been replaced";
-  }
 }
 
 export class IncreaseCasterSkillDuration extends Effect {

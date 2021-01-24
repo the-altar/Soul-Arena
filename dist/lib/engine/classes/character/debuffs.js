@@ -42,7 +42,9 @@ class Debuffs {
         return r;
     }
     isStunned(skill) {
-        if (this.stun[skill.persistence] || this.stun[enums_1.SkillClassType.Any])
+        if (this.stun[skill.persistence] ||
+            this.stun[enums_1.SkillClassType.Any] ||
+            this.stun[skill.class])
             return true;
         return false;
     }

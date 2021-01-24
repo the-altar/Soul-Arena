@@ -63,6 +63,8 @@ export class Damage extends Effect {
     skill: Skill
   ): number {
     const effectCaster = this.arenaReference.findCharacterById(caster).char;
+    //log.info(`Damage reduction applied on ${effectCaster.name}`);
+    //log.info("xxxxxx", effectCaster.getBuffs().ignoreHarmfulEffects);
     if (effectCaster.getBuffs().ignoreHarmfulEffects.status) return 0;
     const buff = effectCaster.getDebuffs().damageReduction;
     const c = buff.byDamage[effect.damageType] || 0;
