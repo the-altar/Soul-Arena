@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserThemeQuery = exports.selectThemeQuery = exports.selectCharacterQuery = exports.selectMissionQuery = exports.deleteMissionTrackQuery = exports.missionTrackQuery = exports.trackMissionQuery = exports.userQuery = void 0;
+exports.updateUserThemeQuery = exports.selectThemeQuery = exports.selectMasterCharacterQuery = exports.selectCharacterQuery = exports.selectMissionQuery = exports.deleteMissionTrackQuery = exports.missionTrackQuery = exports.trackMissionQuery = exports.userQuery = void 0;
 exports.userQuery = `
 select
 	u.id,
@@ -77,6 +77,16 @@ from
 join skill as sk on
     sk.entity_id = entity.id
 where entity.released = true    
+group by
+    entity.id;        
+`;
+exports.selectMasterCharacterQuery = `
+select
+    jsonb_build_object('id', entity.id, 'isFree', entity.isfree) || entity.data || jsonb_build_object('skills', jsonb_agg(sk.data order by sk.priority)) as data
+from
+    entity
+join skill as sk on
+    sk.entity_id = entity.id 
 group by
     entity.id;        
 `;

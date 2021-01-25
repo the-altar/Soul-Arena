@@ -93,8 +93,14 @@ exports.missions = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.character = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let r;
     try {
-        const r = yield db_1.pool.query(sql.selectCharacterQuery);
+        if (req.res.locals.token.authLevel < 10) {
+            r = yield db_1.pool.query(sql.selectCharacterQuery);
+        }
+        else {
+            r = yield db_1.pool.query(sql.selectMasterCharacterQuery);
+        }
         return res.json(r.rows);
     }
     catch (err) {

@@ -59,3 +59,4 @@ export const isFriendly = function (EffectType: effectType): boolean {
       return false;
   }
 };
+

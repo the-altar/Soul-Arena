@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Effect = void 0;
 const enums_1 = require("../../enums");
+const index_1 = require("./index");
+const logger_1 = require("../../../logger");
 class Effect {
     constructor(data, caster) {
         this.value = data.value;
@@ -13,7 +15,6 @@ class Effect {
         this.infinite = data.infinite || false;
         this.delay = data.delay || 0;
         this.disabled = data.disabled || false;
-        this.linked = data.linked || false;
         this.isInvisible = data.isInvisible || false;
         this.type = data.type;
         this.caster = caster;
@@ -26,7 +27,6 @@ class Effect {
         this.activate = data.activate || true;
         this.activationType = data.activationType || enums_1.activationType.Immediate;
         this.altValue = data.altValue || null;
-        this.linked = data.linked || null;
         this.id = data.id;
         this.stackLimit = data.stackLimit || 0;
         this.gameId =
@@ -39,12 +39,13 @@ class Effect {
                 isMultiplier: data.isMultiplier || false,
             },
         };
+        this.ignoresInvulnerability = data.ignoresInvulnerability || false;
+        this.arenaReference = data.arenaReference || null;
     }
     setArenaReference(world) {
         this.arenaReference = world;
     }
     functionality(char, origin) {
-        console.log("This does nothing!");
         return;
     }
     setAltValue(value) {
@@ -96,115 +97,133 @@ class Effect {
     }
     execute(origin) {
         const t = [];
-        //log.info("xxxxxx ", this.targets)
-        switch (this.behavior) {
-            case enums_1.effectTargetBehavior.Default:
-                {
-                    for (const i of this.targets) {
-                        //log.info("X BEFORE > ", this.targets)
-                        const char = this.arenaReference.getCharactersByIndex([i])[0];
-                        //log.info(`xxxxxxxxxx referenced: ${char.name} at index: ${i}`)
-                        this.activateOnTarget(char, origin, t, i);
-                        //log.info("X AFTER > ", this.targets)
-                    }
-                }
-                break;
-            case enums_1.effectTargetBehavior.OnlyOne:
-                {
-                    const char = this.arenaReference.getCharactersByIndex([
-                        this.targets[0],
-                    ])[0];
-                    this.activateOnTarget(char, origin, t, this.targets[0]);
-                }
-                break;
-            case enums_1.effectTargetBehavior.AllOthers:
-                {
-                    const slice = this.targets.slice(1, this.targets.length);
-                    for (const i of slice) {
-                        const char = this.arenaReference.getCharactersByIndex([i])[0];
-                        this.activateOnTarget(char, origin, t, i);
-                    }
-                }
-                break;
-            case enums_1.effectTargetBehavior.IfAlly:
-                {
-                    const { char } = this.arenaReference.findCharacterById(this.caster);
-                    const allies = char.getAllies();
-                    for (const i of this.targets) {
-                        if (allies.includes(i)) {
-                            const ally = this.arenaReference.getCharactersByIndex([i])[0];
-                            this.activateOnTarget(ally, origin, t, i);
+        try {
+            //log.info("xxxxxx ", this.targets)
+            if (!this.triggered) {
+            }
+            switch (this.behavior) {
+                case enums_1.effectTargetBehavior.Default:
+                    {
+                        for (const i of this.targets) {
+                            //log.info("X BEFORE > ", this.targets)
+                            const char = this.arenaReference.getCharactersByIndex([i])[0];
+                            //log.info(`xxxxxxxxxx referenced: ${char.name} at index: ${i}`)
+                            this.activateOnTarget(char, origin, t, i);
+                            //log.info("X AFTER > ", this.targets)
                         }
                     }
-                }
-                break;
-            case enums_1.effectTargetBehavior.IfEnemy:
-                {
-                    const { char } = this.arenaReference.findCharacterById(this.caster);
-                    const enemies = char.getEnemies();
-                    for (const i of enemies) {
-                        if (this.targets.includes(i)) {
-                            const enemy = this.arenaReference.getCharactersByIndex([i])[0];
-                            this.activateOnTarget(enemy, origin, t, i);
+                    break;
+                case enums_1.effectTargetBehavior.OnlyOne:
+                    {
+                        const char = this.arenaReference.getCharactersByIndex([
+                            this.targets[0],
+                        ])[0];
+                        this.activateOnTarget(char, origin, t, this.targets[0]);
+                    }
+                    break;
+                case enums_1.effectTargetBehavior.AllOthers:
+                    {
+                        const slice = this.targets.slice(1, this.targets.length);
+                        for (const i of slice) {
+                            const char = this.arenaReference.getCharactersByIndex([i])[0];
+                            this.activateOnTarget(char, origin, t, i);
                         }
                     }
-                }
-                break;
-            case enums_1.effectTargetBehavior.ifSelf:
-                {
-                    const { char, index } = this.arenaReference.findCharacterById(this.caster);
-                    this.activateOnTarget(char, origin, t, index);
-                }
-                break;
-            case enums_1.effectTargetBehavior.First:
-                {
-                    const char = this.arenaReference.getCharactersByIndex([
-                        this.targets[0],
-                    ])[0];
-                    this.activateOnTarget(char, origin, t, this.targets[0]);
-                }
-                break;
-            case enums_1.effectTargetBehavior.Second:
-                {
-                    if (this.targets.length < 2)
-                        break;
-                    const char = this.arenaReference.getCharactersByIndex([
-                        this.targets[1],
-                    ])[0];
-                    this.activateOnTarget(char, origin, t, this.targets[1]);
-                }
-                break;
-            case enums_1.effectTargetBehavior.Third:
-                {
-                    if (this.targets.length < 3)
-                        break;
-                    const char = this.arenaReference.getCharactersByIndex([
-                        this.targets[2],
-                    ])[0];
-                    this.activateOnTarget(char, origin, t, this.targets[2]);
-                }
-                break;
+                    break;
+                case enums_1.effectTargetBehavior.IfAlly:
+                    {
+                        const { char } = this.arenaReference.findCharacterById(this.caster);
+                        const allies = char.getAllies();
+                        for (const i of this.targets) {
+                            if (allies.includes(i)) {
+                                const ally = this.arenaReference.getCharactersByIndex([i])[0];
+                                this.activateOnTarget(ally, origin, t, i);
+                            }
+                        }
+                    }
+                    break;
+                case enums_1.effectTargetBehavior.IfEnemy:
+                    {
+                        const { char } = this.arenaReference.findCharacterById(this.caster);
+                        const enemies = char.getEnemies();
+                        for (const i of enemies) {
+                            if (this.targets.includes(i)) {
+                                const enemy = this.arenaReference.getCharactersByIndex([i])[0];
+                                this.activateOnTarget(enemy, origin, t, i);
+                            }
+                        }
+                    }
+                    break;
+                case enums_1.effectTargetBehavior.ifSelf:
+                    {
+                        const { char, index } = this.arenaReference.findCharacterById(this.caster);
+                        this.activateOnTarget(char, origin, t, index);
+                    }
+                    break;
+                case enums_1.effectTargetBehavior.First:
+                    {
+                        const char = this.arenaReference.getCharactersByIndex([
+                            this.targets[0],
+                        ])[0];
+                        this.activateOnTarget(char, origin, t, this.targets[0]);
+                    }
+                    break;
+                case enums_1.effectTargetBehavior.Second:
+                    {
+                        logger_1.log.info(this.targets);
+                        let index = 1;
+                        if (this.targets.length < 2 && !this.triggered)
+                            break;
+                        if (this.triggered)
+                            index = 0;
+                        const char = this.arenaReference.getCharactersByIndex([
+                            this.targets[index],
+                        ])[0];
+                        this.activateOnTarget(char, origin, t, this.targets[index]);
+                    }
+                    break;
+                case enums_1.effectTargetBehavior.Third:
+                    {
+                        let index = 2;
+                        if (this.targets.length < 3 && !this.triggered)
+                            break;
+                        if (this.triggered)
+                            index = 0;
+                        const char = this.arenaReference.getCharactersByIndex([
+                            this.targets[index],
+                        ])[0];
+                        this.activateOnTarget(char, origin, t, this.targets[index]);
+                    }
+                    break;
+            }
+            if (this.mods.increment.isMultiplier && this.mods.increment.value)
+                this.value *= this.mods.increment.value;
+            else if (this.mods.increment.value)
+                this.value += this.mods.increment.value;
+            this.setTargets(t);
         }
-        if (this.mods.increment.isMultiplier && this.mods.increment.value)
-            this.value *= this.mods.increment.value;
-        else if (this.mods.increment.value)
-            this.value += this.mods.increment.value;
-        this.setTargets(t);
+        catch (e) {
+            logger_1.log.error(e);
+            this.setTargets(t);
+        }
     }
     getType() {
         return this.type;
     }
-    generateToolTip(triggered) { }
+    generateToolTip(triggered) {
+        this.message = this.message || null;
+    }
     activateOnTarget(char, origin, targetList, charIndex) {
-        char.skillStack.add(origin.getId());
+        char.skillStack.add(origin.getId(), this.caster);
         if ((!this.triggered || this.activate) && !char.addEffectStack(this)) {
             return;
         }
         if (origin.persistence === enums_1.ControlType.Control &&
+            !this.ignoresInvulnerability &&
             char.isInvulnerable(origin))
             return;
         targetList.push(charIndex);
-        if (char.isInvulnerable(origin))
+        if (!this.ignoresInvulnerability && char.isInvulnerable(origin))
             return;
         if (char.isKnockedOut())
             return;
@@ -249,18 +268,19 @@ class Effect {
         //log.info(this.triggerLinkedEffects)
         for (const trigger of this.triggerLinkedEffects) {
             for (const effect of origin.inactiveEffects) {
-                if (effect.id !== trigger.id)
+                const nEffect = index_1.effectFactory(effect, effect.caster);
+                if (nEffect.id !== trigger.id)
                     continue;
                 if (trigger.self) {
-                    effect.triggerRate = 100;
-                    effect.setTargets([caster]);
+                    nEffect.triggerRate = 100;
+                    nEffect.setTargets([caster]);
                 }
                 else if (trigger.victim) {
-                    effect.triggerRate = 100;
-                    effect.setTargets(targets);
+                    nEffect.triggerRate = 100;
+                    nEffect.setTargets(targets);
                 }
-                effect.value *= times;
-                origin.effects.push(effect);
+                nEffect.value *= times;
+                origin.effects.push(nEffect);
             }
         }
     }

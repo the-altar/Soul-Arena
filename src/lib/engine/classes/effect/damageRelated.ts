@@ -349,6 +349,38 @@ export class DecreaseDamageTaken extends Effect {
       dr.bySkillClass[SkillClassType.Any] += this.value;
     else dr.bySkillClass[SkillClassType.Any] = this.value;
 
+    for (const linked of this.triggerLinkedEffects) {
+      switch (linked.condition) {
+        case triggerClauseType.IfTargeted:
+          {
+            for (const temp of this.arenaReference.tempQueue) {
+              if (
+                this.targets.filter((e) => {
+                  return temp.targets.includes(e);
+                }).length
+              ) {
+                log.info(`Apply linked effect on ${temp.caster}`);
+                this.applyLinkedEffects(origin, this.caster, [temp.caster], 1);
+              }
+            }
+          }
+          break;
+
+        case triggerClauseType.IfTargetedByHarmful:
+          {
+            for (const temp of this.arenaReference.tempQueue) {
+              if (
+                this.targets.filter((e) => {
+                  return temp.targets.includes(e);
+                }).length
+              ) {
+                this.applyLinkedEffects(origin, this.caster, [temp.caster], 1);
+              }
+            }
+          }
+          break;
+      }
+    }
     /*log.info(`### applied [REDUCE DAMAGE TAKEN] on ${char.name}`);
     log.info(
       `${char.getBuffs().decreaseDamageTaken.bySkillClass[SkillClassType.Any]}`

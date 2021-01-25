@@ -60,6 +60,7 @@ export class Counter extends Effect {
     let hasCountered = { activated: false, indexes, times: 0 };
 
     for (let i = temp.length - 1; i >= 0; i--) {
+      if (temp[i].cancelled) continue;
       const cordinates = temp[i];
       const caster = this.arenaReference.getCharactersByIndex([
         cordinates.caster,
@@ -100,6 +101,7 @@ export class Counter extends Effect {
 
     for (let i = temp.length - 1; i >= 0; i--) {
       if (this.value === 0) return hasCountered;
+      if (temp[i].cancelled) continue;
       const cordinates = temp[i];
       const char = this.arenaReference.getCharactersByIndex([
         cordinates.caster,

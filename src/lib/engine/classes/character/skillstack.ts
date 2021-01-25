@@ -5,16 +5,16 @@ export class SkillStack {
   constructor() {
     this.skills = {};
   }
-  add(id: number) {
-    this.skills[id] = true;
+  add(id: number, caster: number) {
+    this.skills[`${id}-${caster}`] = true;
   }
-  remove(id: number) {
-    delete this.skills[id];
+  remove(id: number, caster: number) {
+    delete this.skills[`${id}-${caster}`];
   }
   clearStack() {
     this.skills = {};
   }
-  isTargetOf(ids: Array<number>) {
+  isTargetOf(ids: Array<string>) {
     for (const id of ids) {
       if (this.skills[id]) return true;
     }

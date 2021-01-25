@@ -5,11 +5,11 @@ class SkillStack {
     constructor() {
         this.skills = {};
     }
-    add(id) {
-        this.skills[id] = true;
+    add(id, caster) {
+        this.skills[`${id}-${caster}`] = true;
     }
-    remove(id) {
-        delete this.skills[id];
+    remove(id, caster) {
+        delete this.skills[`${id}-${caster}`];
     }
     clearStack() {
         this.skills = {};

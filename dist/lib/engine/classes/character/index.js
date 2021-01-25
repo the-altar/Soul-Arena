@@ -57,7 +57,7 @@ class Character {
     }
     setHitPoints(hp) {
         if (!hp && hp !== 0) {
-            logger_1.log.info("[GAME] problem setting health");
+            logger_1.log.info(`[GAME] problem setting health ${hp}`);
             return;
         }
         this.hitPoints = hp;

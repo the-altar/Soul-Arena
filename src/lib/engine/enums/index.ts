@@ -59,7 +59,7 @@ export enum effectType {
   ReplaceSkillCost,
   IgnoreDeath,
   ApplyEffect,
-  ReplaceSkill
+  ReplaceSkill,
 }
 
 export enum activationType {
@@ -164,4 +164,6 @@ export enum triggerClauseType {
   onKnockOut,
   IfTargeted,
   IfAlliesUseASkill,
+  IfEnemiesUseASkill,
+  IfTargetedByHarmful
 }

@@ -67,8 +67,13 @@ export const missions = async (req: Request, res: Response) => {
 };
 
 export const character = async (req: Request, res: Response) => {
+  let r;
   try {
-    const r = await pool.query(sql.selectCharacterQuery);
+    if (req.res.locals.token.authLevel < 10) {
+      r = await pool.query(sql.selectCharacterQuery);
+    } else {
+      r = await pool.query(sql.selectMasterCharacterQuery);
+    }
     return res.json(r.rows);
   } catch (err) {
     res.status(500).send("Something went wrong...");

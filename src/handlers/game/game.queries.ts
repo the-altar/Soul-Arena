@@ -81,6 +81,17 @@ where entity.released = true
 group by
     entity.id;        
 `;
+
+export const selectMasterCharacterQuery = `
+select
+    jsonb_build_object('id', entity.id, 'isFree', entity.isfree) || entity.data || jsonb_build_object('skills', jsonb_agg(sk.data order by sk.priority)) as data
+from
+    entity
+join skill as sk on
+    sk.entity_id = entity.id 
+group by
+    entity.id;        
+`;
 export const selectThemeQuery = `select * from theme where theme."permission" <= $1`;
 
 export const updateUserThemeQuery = `UPDATE users SET preferred_theme=$2 WHERE users.id = $1;

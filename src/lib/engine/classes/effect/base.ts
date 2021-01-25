@@ -10,6 +10,7 @@ import {
 import { Arena } from "../../arena";
 import { Skill } from "../skill";
 import { isHarmful, isFriendly } from "./z.helpers";
+import { effectFactory } from "./index";
 import { log } from "../../../logger";
 
 export class Effect {
@@ -25,7 +26,6 @@ export class Effect {
       isMultiplier: boolean;
     };
   };
-  protected linked?: boolean;
   protected message: string;
   public triggerRate: number;
   public altTriggerRate: number;
@@ -47,11 +47,13 @@ export class Effect {
   public id: number;
   public gameId: number;
   public stackLimit: number;
+  public ignoresInvulnerability: boolean;
   public triggerLinkedEffects: Array<{
     id: Number;
     self: boolean;
     victim: boolean;
     target: boolean;
+    condition: triggerClauseType;
   }>;
   constructor(data: any, caster: number) {
     this.value = data.value;
@@ -63,7 +65,6 @@ export class Effect {
     this.infinite = data.infinite || false;
     this.delay = data.delay || 0;
     this.disabled = data.disabled || false;
-    this.linked = data.linked || false;
     this.isInvisible = data.isInvisible || false;
     this.type = data.type;
     this.caster = caster;
@@ -76,7 +77,6 @@ export class Effect {
     this.activate = data.activate || true;
     this.activationType = data.activationType || activationType.Immediate;
     this.altValue = data.altValue || null;
-    this.linked = data.linked || null;
     this.id = data.id;
     this.stackLimit = data.stackLimit || 0;
     this.gameId =
@@ -89,6 +89,8 @@ export class Effect {
         isMultiplier: data.isMultiplier || false,
       },
     };
+    this.ignoresInvulnerability = data.ignoresInvulnerability || false;
+    this.arenaReference = data.arenaReference || null;
   }
 
   public setArenaReference(world: Arena) {
@@ -96,7 +98,6 @@ export class Effect {
   }
 
   public functionality(char: Character, origin?: Skill) {
-    console.log("This does nothing!");
     return;
   }
 
@@ -154,118 +155,133 @@ export class Effect {
 
   public execute(origin: Skill) {
     const t: Array<number> = [];
-    //log.info("xxxxxx ", this.targets)
-    switch (this.behavior) {
-      case effectTargetBehavior.Default:
-        {
-          for (const i of this.targets) {
-            //log.info("X BEFORE > ", this.targets)
-            const char = this.arenaReference.getCharactersByIndex([i])[0];
-            //log.info(`xxxxxxxxxx referenced: ${char.name} at index: ${i}`)
-            this.activateOnTarget(char, origin, t, i);
-            //log.info("X AFTER > ", this.targets)
-          }
-        }
-        break;
-
-      case effectTargetBehavior.OnlyOne:
-        {
-          const char = this.arenaReference.getCharactersByIndex([
-            this.targets[0],
-          ])[0];
-          this.activateOnTarget(char, origin, t, this.targets[0]);
-        }
-        break;
-
-      case effectTargetBehavior.AllOthers:
-        {
-          const slice = this.targets.slice(1, this.targets.length);
-
-          for (const i of slice) {
-            const char = this.arenaReference.getCharactersByIndex([i])[0];
-            this.activateOnTarget(char, origin, t, i);
-          }
-        }
-        break;
-
-      case effectTargetBehavior.IfAlly:
-        {
-          const { char } = this.arenaReference.findCharacterById(this.caster);
-          const allies = char.getAllies();
-          for (const i of this.targets) {
-            if (allies.includes(i)) {
-              const ally = this.arenaReference.getCharactersByIndex([i])[0];
-              this.activateOnTarget(ally, origin, t, i);
+    try {
+      //log.info("xxxxxx ", this.targets)
+      if (!this.triggered) {
+      }
+      switch (this.behavior) {
+        case effectTargetBehavior.Default:
+          {
+            for (const i of this.targets) {
+              //log.info("X BEFORE > ", this.targets)
+              const char = this.arenaReference.getCharactersByIndex([i])[0];
+              //log.info(`xxxxxxxxxx referenced: ${char.name} at index: ${i}`)
+              this.activateOnTarget(char, origin, t, i);
+              //log.info("X AFTER > ", this.targets)
             }
           }
-        }
-        break;
+          break;
 
-      case effectTargetBehavior.IfEnemy:
-        {
-          const { char } = this.arenaReference.findCharacterById(this.caster);
-          const enemies = char.getEnemies();
+        case effectTargetBehavior.OnlyOne:
+          {
+            const char = this.arenaReference.getCharactersByIndex([
+              this.targets[0],
+            ])[0];
+            this.activateOnTarget(char, origin, t, this.targets[0]);
+          }
+          break;
 
-          for (const i of enemies) {
-            if (this.targets.includes(i)) {
-              const enemy = this.arenaReference.getCharactersByIndex([i])[0];
-              this.activateOnTarget(enemy, origin, t, i);
+        case effectTargetBehavior.AllOthers:
+          {
+            const slice = this.targets.slice(1, this.targets.length);
+
+            for (const i of slice) {
+              const char = this.arenaReference.getCharactersByIndex([i])[0];
+              this.activateOnTarget(char, origin, t, i);
             }
           }
-        }
-        break;
+          break;
 
-      case effectTargetBehavior.ifSelf:
-        {
-          const { char, index } = this.arenaReference.findCharacterById(
-            this.caster
-          );
-          this.activateOnTarget(char, origin, t, index);
-        }
-        break;
+        case effectTargetBehavior.IfAlly:
+          {
+            const { char } = this.arenaReference.findCharacterById(this.caster);
+            const allies = char.getAllies();
+            for (const i of this.targets) {
+              if (allies.includes(i)) {
+                const ally = this.arenaReference.getCharactersByIndex([i])[0];
+                this.activateOnTarget(ally, origin, t, i);
+              }
+            }
+          }
+          break;
 
-      case effectTargetBehavior.First:
-        {
-          const char = this.arenaReference.getCharactersByIndex([
-            this.targets[0],
-          ])[0];
-          this.activateOnTarget(char, origin, t, this.targets[0]);
-        }
-        break;
+        case effectTargetBehavior.IfEnemy:
+          {
+            const { char } = this.arenaReference.findCharacterById(this.caster);
+            const enemies = char.getEnemies();
 
-      case effectTargetBehavior.Second:
-        {
-          if (this.targets.length < 2) break;
-          const char = this.arenaReference.getCharactersByIndex([
-            this.targets[1],
-          ])[0];
-          this.activateOnTarget(char, origin, t, this.targets[1]);
-        }
-        break;
+            for (const i of enemies) {
+              if (this.targets.includes(i)) {
+                const enemy = this.arenaReference.getCharactersByIndex([i])[0];
+                this.activateOnTarget(enemy, origin, t, i);
+              }
+            }
+          }
+          break;
 
-      case effectTargetBehavior.Third:
-        {
-          if (this.targets.length < 3) break;
-          const char = this.arenaReference.getCharactersByIndex([
-            this.targets[2],
-          ])[0];
-          this.activateOnTarget(char, origin, t, this.targets[2]);
-        }
-        break;
+        case effectTargetBehavior.ifSelf:
+          {
+            const { char, index } = this.arenaReference.findCharacterById(
+              this.caster
+            );
+            this.activateOnTarget(char, origin, t, index);
+          }
+          break;
+
+        case effectTargetBehavior.First:
+          {
+            const char = this.arenaReference.getCharactersByIndex([
+              this.targets[0],
+            ])[0];
+            this.activateOnTarget(char, origin, t, this.targets[0]);
+          }
+          break;
+
+        case effectTargetBehavior.Second:
+          {
+            log.info(this.targets)
+            let index = 1;
+            if (this.targets.length < 2 && !this.triggered) break;
+            if (this.triggered) index = 0;
+            const char = this.arenaReference.getCharactersByIndex([
+              this.targets[index],
+            ])[0];
+            this.activateOnTarget(char, origin, t, this.targets[index]);
+          }
+          break;
+
+        case effectTargetBehavior.Third:
+          {
+            let index = 2;
+            if (this.targets.length < 3 && !this.triggered) break;
+            if (this.triggered) index = 0;
+            const char = this.arenaReference.getCharactersByIndex([
+              this.targets[index],
+            ])[0];
+            this.activateOnTarget(char, origin, t, this.targets[index]);
+          }
+          break;
+      }
+
+      if (this.mods.increment.isMultiplier && this.mods.increment.value)
+        this.value *= this.mods.increment.value;
+      else if (this.mods.increment.value)
+        this.value += this.mods.increment.value;
+
+      this.setTargets(t);
+    } catch (e) {
+      log.error(e);
+      this.setTargets(t);
     }
-
-    if (this.mods.increment.isMultiplier && this.mods.increment.value)
-      this.value *= this.mods.increment.value;
-    else if (this.mods.increment.value) this.value += this.mods.increment.value;
-
-    this.setTargets(t);
   }
 
   public getType(): effectType {
     return this.type;
   }
 
-  public generateToolTip(triggered?: number) {}
+  public generateToolTip(triggered?: number) {
+    this.message = this.message || null;
+  }
 
   private activateOnTarget(
     char: Character,
@@ -273,18 +289,19 @@ export class Effect {
     targetList: Array<number>,
     charIndex: number
   ) {
-    char.skillStack.add(origin.getId());
+    char.skillStack.add(origin.getId(), this.caster);
     if ((!this.triggered || this.activate) && !char.addEffectStack(this)) {
       return;
     }
 
     if (
       origin.persistence === ControlType.Control &&
+      !this.ignoresInvulnerability &&
       char.isInvulnerable(origin)
     )
       return;
     targetList.push(charIndex);
-    if (char.isInvulnerable(origin)) return;
+    if (!this.ignoresInvulnerability && char.isInvulnerable(origin)) return;
     if (char.isKnockedOut()) return;
     this.activateTrigger(char, origin);
     if (!this.activate) return;
@@ -341,17 +358,18 @@ export class Effect {
     //log.info(this.triggerLinkedEffects)
     for (const trigger of this.triggerLinkedEffects) {
       for (const effect of origin.inactiveEffects) {
-        if (effect.id !== trigger.id) continue;
+        const nEffect = effectFactory(effect, effect.caster);
+        if (nEffect.id !== trigger.id) continue;
 
         if (trigger.self) {
-          effect.triggerRate = 100;
-          effect.setTargets([caster]);
+          nEffect.triggerRate = 100;
+          nEffect.setTargets([caster]);
         } else if (trigger.victim) {
-          effect.triggerRate = 100;
-          effect.setTargets(targets);
+          nEffect.triggerRate = 100;
+          nEffect.setTargets(targets);
         }
-        effect.value *= times;
-        origin.effects.push(effect);
+        nEffect.value *= times;
+        origin.effects.push(nEffect);
       }
     }
   }

@@ -5,6 +5,7 @@ const enums_1 = require("../../enums");
 const effect_1 = require("../effect");
 const targetValidationFactory_1 = require("./targetValidationFactory");
 const mods_1 = require("./mods");
+const logger_1 = require("../../../logger");
 class Skill {
     constructor(data, caster, world, casterReference) {
         this.caster = data.caster;
@@ -24,46 +25,66 @@ class Skill {
         this.effects = [];
         this.inactiveEffects = [];
         this.mods = new mods_1.SkillMods(data.mods || {});
-        this.requiresSkillOnTarget = data.requiresSkillOnTarget || [];
         this.id = data.id;
         this.harmful = data.harmful || false;
         this.arenaReference = world;
         this.casterReference = casterReference;
         this.turnCost = this.cost.slice();
-        for (const e of data.effects) {
-            const built = effect_1.effectFactory(e, caster);
-            built.setArenaReference(this.arenaReference);
-            if (built.triggerRate > 0)
-                this.effects.push(built);
-            else {
-                this.inactiveEffects.push(built);
-            }
-        }
-        // This here for when the skill gets copied and all inactive effects have already been parsed
-        // and need to be rebuilt (the first loop won't include them)
-        if (data.inactiveEffects) {
-            for (const e of data.inactiveEffects) {
+        this.ignoresInvulnerability = data.ignoresInvulnerability || false;
+        try {
+            for (const e of data.effects) {
                 const built = effect_1.effectFactory(e, caster);
                 built.setArenaReference(this.arenaReference);
-                this.inactiveEffects.push(built);
+                if (built.triggerRate > 0)
+                    this.effects.push(built);
+                else {
+                    this.inactiveEffects.push(built);
+                }
             }
+            // This here for when the skill gets copied and all inactive effects have already been parsed
+            // and need to be rebuilt (the first loop won't include them)
+            if (data.inactiveEffects) {
+                for (const e of data.inactiveEffects) {
+                    const built = effect_1.effectFactory(e, caster);
+                    built.setArenaReference(this.arenaReference);
+                    this.inactiveEffects.push(built);
+                }
+            }
+            if (data.requiresSkillOnTarget) {
+                this.requiresSkillOnTarget = data.requiresSkillOnTarget.map((e) => {
+                    return `${e}-${caster}`;
+                });
+            }
+            else {
+                this.requiresSkillOnTarget = [];
+            }
+        }
+        catch (e) {
+            logger_1.log.error(e);
+            this.inactiveEffects = [];
+            this.requiresSkillOnTarget = [];
         }
     }
     isDisabled() {
         return this.disabled;
     }
     validateCost(energyPool) {
-        const totalPool = energyPool[4];
-        let totalCost = this.turnCost.reduce((ca, cv) => ca + cv);
-        for (let i = 0; i <= 4; i++) {
-            if (this.turnCost[i] > energyPool[i]) {
+        try {
+            const totalPool = energyPool[4];
+            let totalCost = this.turnCost.reduce((ca, cv) => ca + cv);
+            for (let i = 0; i <= 4; i++) {
+                if (this.turnCost[i] > energyPool[i]) {
+                    this.disabled = true;
+                    return;
+                }
+            }
+            if (totalCost > totalPool) {
                 this.disabled = true;
                 return;
             }
         }
-        if (totalCost > totalPool) {
-            this.disabled = true;
-            return;
+        catch (e) {
+            logger_1.log.error(e);
         }
     }
     enable() {
@@ -85,70 +106,75 @@ class Skill {
     getValidatedTargets(choice) {
         let t = [];
         const targetMode = this.getTargetMod() || this.targetMode;
-        switch (targetMode) {
-            case enums_1.targetType.Any: {
-                t.push(choice);
-                return t;
-            }
-            case enums_1.targetType.Self: {
-                t.push(choice);
-                return t;
-            }
-            case enums_1.targetType.OneEnemy: {
-                t.push(choice);
-                return t;
-            }
-            case enums_1.targetType.OneAlly: {
-                t.push(choice);
-                return t;
-            }
-            case enums_1.targetType.AllEnemies: {
-                t.push(choice);
-                for (const opt of this.targetChoices.choice) {
-                    if (opt !== choice) {
-                        t.push(opt);
-                    }
+        try {
+            switch (targetMode) {
+                case enums_1.targetType.Any: {
+                    t.push(choice);
+                    return t;
                 }
-                return t;
-            }
-            case enums_1.targetType.AllAllies: {
-                t.push(choice);
-                for (const opt of this.targetChoices.choice) {
-                    if (opt !== choice) {
-                        t.push(opt);
-                    }
+                case enums_1.targetType.Self: {
+                    t.push(choice);
+                    return t;
                 }
-                return t;
-            }
-            case enums_1.targetType.OneEnemyAndAllAllies: {
-                t.push(choice);
-                t = t.concat(this.targetChoices.auto);
-                return t;
-            }
-            case enums_1.targetType.OneEnemyAndSelf: {
-                t.push(choice);
-                t = t.concat(this.targetChoices.auto);
-                return t;
-            }
-            case enums_1.targetType.OneAllyAndSelf: {
-                t.push(choice);
-                t = t.concat(this.targetChoices.auto);
-                return t;
-            }
-            case enums_1.targetType.AllEnemiesAndSelf: {
-                t.push(choice);
-                for (const opt of this.targetChoices.choice) {
-                    if (opt !== choice) {
-                        t.push(opt);
-                    }
+                case enums_1.targetType.OneEnemy: {
+                    t.push(choice);
+                    return t;
                 }
-                t.concat(this.targetChoices.auto);
-                return t;
+                case enums_1.targetType.OneAlly: {
+                    t.push(choice);
+                    return t;
+                }
+                case enums_1.targetType.AllEnemies: {
+                    t.push(choice);
+                    for (const opt of this.targetChoices.choice) {
+                        if (opt !== choice) {
+                            t.push(opt);
+                        }
+                    }
+                    return t;
+                }
+                case enums_1.targetType.AllAllies: {
+                    t.push(choice);
+                    for (const opt of this.targetChoices.choice) {
+                        if (opt !== choice) {
+                            t.push(opt);
+                        }
+                    }
+                    return t;
+                }
+                case enums_1.targetType.OneEnemyAndAllAllies: {
+                    t.push(choice);
+                    t = t.concat(this.targetChoices.auto);
+                    return t;
+                }
+                case enums_1.targetType.OneEnemyAndSelf: {
+                    t.push(choice);
+                    t = t.concat(this.targetChoices.auto);
+                    return t;
+                }
+                case enums_1.targetType.OneAllyAndSelf: {
+                    t.push(choice);
+                    t = t.concat(this.targetChoices.auto);
+                    return t;
+                }
+                case enums_1.targetType.AllEnemiesAndSelf: {
+                    t.push(choice);
+                    for (const opt of this.targetChoices.choice) {
+                        if (opt !== choice) {
+                            t.push(opt);
+                        }
+                    }
+                    t.concat(this.targetChoices.auto);
+                    return t;
+                }
+                case enums_1.targetType.OneAllyOrSelf: {
+                    t.push(choice);
+                    return t;
+                }
             }
-            case enums_1.targetType.OneAllyOrSelf: {
-                t.push(choice);
-                return t;
-            }
+        }
+        catch (e) {
+            logger_1.log.error(e);
         }
     }
     validateCoolDown() {
@@ -204,7 +230,8 @@ class Skill {
             effect.tick++;
             effect.shouldApply();
             effect.extendDuration(this.mods.increaseDuration);
-            effect.setTargets(this.targets);
+            if (!effect.getTargets().length)
+                effect.setTargets(this.targets);
             effect.execute(this);
             effect.generateToolTip();
         }

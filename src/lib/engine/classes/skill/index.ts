@@ -30,13 +30,14 @@ export class Skill {
   private targets: Array<number>;
   public uncounterable: boolean;
   private targetMode: targetType;
-  public requiresSkillOnTarget: Array<number>;
+  public requiresSkillOnTarget: Array<string>;
   public effects: Array<Effect>;
   private casterReference: Character;
   private targetChoices: { [x: string]: Array<number> };
   private id: number;
   public caster: number;
   private turnCost: Array<number>;
+  public ignoresInvulnerability: boolean;
   private arenaReference: Arena;
 
   constructor(
@@ -62,29 +63,45 @@ export class Skill {
     this.effects = [];
     this.inactiveEffects = [];
     this.mods = new SkillMods(data.mods || {});
-    this.requiresSkillOnTarget = data.requiresSkillOnTarget || [];
     this.id = data.id;
     this.harmful = data.harmful || false;
     this.arenaReference = world;
     this.casterReference = casterReference;
     this.turnCost = this.cost.slice();
+    this.ignoresInvulnerability = data.ignoresInvulnerability || false;
 
-    for (const e of data.effects) {
-      const built = effectFactory(e, caster);
-      built.setArenaReference(this.arenaReference);
-      if (built.triggerRate > 0) this.effects.push(built);
-      else {
-        this.inactiveEffects.push(built);
-      }
-    }
-    // This here for when the skill gets copied and all inactive effects have already been parsed
-    // and need to be rebuilt (the first loop won't include them)
-    if (data.inactiveEffects) {
-      for (const e of data.inactiveEffects) {
+    try {
+      for (const e of data.effects) {
         const built = effectFactory(e, caster);
         built.setArenaReference(this.arenaReference);
-        this.inactiveEffects.push(built);
+        if (built.triggerRate > 0) this.effects.push(built);
+        else {
+          this.inactiveEffects.push(built);
+        }
       }
+      // This here for when the skill gets copied and all inactive effects have already been parsed
+      // and need to be rebuilt (the first loop won't include them)
+      if (data.inactiveEffects) {
+        for (const e of data.inactiveEffects) {
+          const built = effectFactory(e, caster);
+          built.setArenaReference(this.arenaReference);
+          this.inactiveEffects.push(built);
+        }
+      }
+
+      if (data.requiresSkillOnTarget) {
+        this.requiresSkillOnTarget = data.requiresSkillOnTarget.map(
+          (e: any) => {
+            return `${e}-${caster}`;
+          }
+        );
+      } else {
+        this.requiresSkillOnTarget = [];
+      }
+    } catch (e) {
+      log.error(e);
+      this.inactiveEffects = [];
+      this.requiresSkillOnTarget = [];
     }
   }
 
@@ -93,18 +110,22 @@ export class Skill {
   }
 
   public validateCost(energyPool: Array<number>) {
-    const totalPool = energyPool[4];
-    let totalCost = this.turnCost.reduce((ca, cv) => ca + cv);
+    try {
+      const totalPool = energyPool[4];
+      let totalCost = this.turnCost.reduce((ca, cv) => ca + cv);
 
-    for (let i = 0; i <= 4; i++) {
-      if (this.turnCost[i] > energyPool[i]) {
+      for (let i = 0; i <= 4; i++) {
+        if (this.turnCost[i] > energyPool[i]) {
+          this.disabled = true;
+          return;
+        }
+      }
+      if (totalCost > totalPool) {
         this.disabled = true;
         return;
       }
-    }
-    if (totalCost > totalPool) {
-      this.disabled = true;
-      return;
+    } catch (e) {
+      log.error(e);
     }
   }
 
@@ -132,80 +153,84 @@ export class Skill {
     let t: Array<number> = [];
     const targetMode = this.getTargetMod() || this.targetMode;
 
-    switch (targetMode) {
-      case targetType.Any: {
-        t.push(choice);
-        return t;
-      }
-
-      case targetType.Self: {
-        t.push(choice);
-        return t;
-      }
-
-      case targetType.OneEnemy: {
-        t.push(choice);
-        return t;
-      }
-
-      case targetType.OneAlly: {
-        t.push(choice);
-        return t;
-      }
-
-      case targetType.AllEnemies: {
-        t.push(choice);
-        for (const opt of this.targetChoices.choice) {
-          if (opt !== choice) {
-            t.push(opt);
-          }
+    try {
+      switch (targetMode) {
+        case targetType.Any: {
+          t.push(choice);
+          return t;
         }
-        return t;
-      }
 
-      case targetType.AllAllies: {
-        t.push(choice);
-        for (const opt of this.targetChoices.choice) {
-          if (opt !== choice) {
-            t.push(opt);
-          }
+        case targetType.Self: {
+          t.push(choice);
+          return t;
         }
-        return t;
-      }
 
-      case targetType.OneEnemyAndAllAllies: {
-        t.push(choice);
-        t = t.concat(this.targetChoices.auto);
-        return t;
-      }
-
-      case targetType.OneEnemyAndSelf: {
-        t.push(choice);
-        t = t.concat(this.targetChoices.auto);
-        return t;
-      }
-
-      case targetType.OneAllyAndSelf: {
-        t.push(choice);
-        t = t.concat(this.targetChoices.auto);
-        return t;
-      }
-
-      case targetType.AllEnemiesAndSelf: {
-        t.push(choice);
-        for (const opt of this.targetChoices.choice) {
-          if (opt !== choice) {
-            t.push(opt);
-          }
+        case targetType.OneEnemy: {
+          t.push(choice);
+          return t;
         }
-        t.concat(this.targetChoices.auto);
-        return t;
-      }
 
-      case targetType.OneAllyOrSelf: {
-        t.push(choice);
-        return t;
+        case targetType.OneAlly: {
+          t.push(choice);
+          return t;
+        }
+
+        case targetType.AllEnemies: {
+          t.push(choice);
+          for (const opt of this.targetChoices.choice) {
+            if (opt !== choice) {
+              t.push(opt);
+            }
+          }
+          return t;
+        }
+
+        case targetType.AllAllies: {
+          t.push(choice);
+          for (const opt of this.targetChoices.choice) {
+            if (opt !== choice) {
+              t.push(opt);
+            }
+          }
+          return t;
+        }
+
+        case targetType.OneEnemyAndAllAllies: {
+          t.push(choice);
+          t = t.concat(this.targetChoices.auto);
+          return t;
+        }
+
+        case targetType.OneEnemyAndSelf: {
+          t.push(choice);
+          t = t.concat(this.targetChoices.auto);
+          return t;
+        }
+
+        case targetType.OneAllyAndSelf: {
+          t.push(choice);
+          t = t.concat(this.targetChoices.auto);
+          return t;
+        }
+
+        case targetType.AllEnemiesAndSelf: {
+          t.push(choice);
+          for (const opt of this.targetChoices.choice) {
+            if (opt !== choice) {
+              t.push(opt);
+            }
+          }
+          t.concat(this.targetChoices.auto);
+          return t;
+        }
+
+        case targetType.OneAllyOrSelf: {
+          t.push(choice);
+          return t;
+        }
       }
+    } catch (e) {
+      log.error(e);
     }
   }
 
@@ -281,7 +306,7 @@ export class Skill {
       effect.tick++;
       effect.shouldApply();
       effect.extendDuration(this.mods.increaseDuration);
-      effect.setTargets(this.targets);
+      if (!effect.getTargets().length) effect.setTargets(this.targets);
       effect.execute(this);
       effect.generateToolTip();
     }

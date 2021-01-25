@@ -97,7 +97,7 @@ export class Character {
 
   public setHitPoints(hp: number): void {
     if (!hp && hp !== 0) {
-      log.info("[GAME] problem setting health");
+      log.info(`[GAME] problem setting health ${hp}`);
       return;
     }
 
