@@ -286,9 +286,8 @@ export class Skill {
 
     for (const effect of this.effects) {
       effect.tick++;
-
+      //log.info(`[${this.casterReference.name}]`, this.casterReference.getDebuffs().stun)
       if (this.casterReference.isStunned(this)) {
-        //log.info(`[STATUS] - STUNNED`);
         if (this.persistence === ControlType.Action) continue;
         else if (this.persistence === ControlType.Control)
           effect.terminate = true;
@@ -304,9 +303,15 @@ export class Skill {
     //log.info("[GAME] Execute NEW effects")
     for (const effect of this.effects) {
       effect.tick++;
-      effect.shouldApply();
       effect.extendDuration(this.mods.increaseDuration);
       if (!effect.getTargets().length) effect.setTargets(this.targets);
+
+      if (this.casterReference.isStunned(this)) {
+        if (this.persistence === ControlType.Action) continue;
+        else if (this.persistence === ControlType.Control)
+          effect.terminate = true;
+      }
+      effect.shouldApply();
       effect.execute(this);
       effect.generateToolTip();
     }
