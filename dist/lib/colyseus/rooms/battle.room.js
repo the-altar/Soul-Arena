@@ -214,38 +214,11 @@ class Battle extends colyseus_1.Room {
             if (player.id < 0)
                 return;
             let completeTracks = 0;
-            let includesTarget;
             const challenged = this.arena.getCharactersLiteralIdByIndex(player.getMyCharsIndex());
             const challenger = this.arena.getChallengerLiteralIds(player.getMyCharsIndex());
             for (const i in stats.trackingGoals) {
                 let goal = stats.trackingGoals[i];
-                let bonus = 0;
-                if (goal.completed) {
-                    completeTracks++;
-                    continue;
-                }
-                includesTarget = challenged.ids.has(goal.with);
-                if (goal.with !== -1 && includesTarget === false)
-                    continue;
-                includesTarget = challenged.groups.has(goal.withGroup);
-                if (goal.withGroup !== -1 && includesTarget === false)
-                    continue;
-                includesTarget = challenger.ids.has(goal.against);
-                if (goal.against !== -1 && includesTarget === false)
-                    continue;
-                else
-                    bonus += challenged.idsHeadCount[goal.against] || 0;
-                includesTarget = challenger.groups.has(goal.againstGroup);
-                if (goal.againstGroup !== -1 && includesTarget === false)
-                    continue;
-                else {
-                    bonus += challenger.groupHeadCount[goal.againstGroup] || 0;
-                }
-                goal.battlesWon = goal.battlesWon + (bonus || 1);
-                if (goal.battlesWon >= stats.goals[i].battlesWon) {
-                    completeTracks++;
-                    goal.completed = true;
-                }
+                completeTracks = checkGoalProgression(goal, challenged, challenger, stats, completeTracks, i);
             }
             if (completeTracks === stats.goals.length) {
                 const client = yield db_1.pool.connect();
@@ -309,33 +282,43 @@ class Battle extends colyseus_1.Room {
     }
     breakMissionStreaks(player, stats) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (player.id < 0)
-                return;
-            const challenged = this.arena.getCharactersLiteralIdByIndex(player.getMyCharsIndex());
-            const challenger = this.arena.getChallengerLiteralIds(player.getMyCharsIndex());
-            for (const i in stats.trackingGoals) {
-                const goal = stats.trackingGoals[i];
-                if (goal.completed)
-                    continue;
-                if (goal.inRow) {
-                    if (challenged.ids.has(goal.with)) {
-                        goal.battlesWon = 0;
-                    }
-                    else if (challenger.ids.has(goal.against)) {
-                        goal.battlesWon = 0;
-                    }
-                    else if (challenged.groups.has(goal.withGroup)) {
-                        goal.battlesWon = 0;
-                    }
-                    else if (challenger.groups.has(goal.withGroup)) {
-                        goal.battlesWon = 0;
-                    }
-                    else if (goal.against === -1 && goal.with === -1) {
-                        goal.battlesWon = 0;
+            try {
+                if (player.id < 0)
+                    return;
+                const challenged = this.arena.getCharactersLiteralIdByIndex(player.getMyCharsIndex());
+                const challenger = this.arena.getChallengerLiteralIds(player.getMyCharsIndex());
+                for (const i in stats.trackingGoals) {
+                    const goal = stats.trackingGoals[i];
+                    if (goal.completed)
+                        continue;
+                    if (goal.inRow) {
+                        if (goal.with !== -1 && challenged.ids.has(goal.with)) {
+                            if (goal.against !== -1 && challenger.ids.has(goal.against))
+                                goal.battlesWon = 0;
+                            else if (goal.againstGroup !== -1 &&
+                                challenger.groups.has(goal.againstGroup))
+                                goal.battlesWon = 0;
+                        }
+                        else if (goal.withGroup !== -1 &&
+                            challenged.groups.has(goal.withGroup)) {
+                            if (goal.against !== -1 && challenger.ids.has(goal.against))
+                                goal.battlesWon = 0;
+                            else if (goal.againstGroup !== -1 &&
+                                challenger.groups.has(goal.againstGroup))
+                                goal.battlesWon = 0;
+                        }
+                        else if (goal.with === -1 && goal.withGroup === -1) {
+                            if (goal.against !== -1 && challenger.ids.has(goal.against))
+                                goal.battlesWon = 0;
+                            else if (goal.againstGroup !== -1 &&
+                                challenger.groups.has(goal.againstGroup))
+                                goal.battlesWon = 0;
+                        }
+                        else {
+                            goal.battlesWon = 0;
+                        }
                     }
                 }
-            }
-            try {
                 const sql = "UPDATE public.tracking_mission SET goals=$3 WHERE user_id=$1 AND mission_id=$2;";
                 yield db_1.pool.query(sql, [
                     stats.user_id,
@@ -350,4 +333,41 @@ class Battle extends colyseus_1.Room {
     }
 }
 exports.Battle = Battle;
+function checkGoalProgression(goal, challenged, challenger, stats, completeTracks, index) {
+    let includesTarget;
+    let bonus = 0;
+    try {
+        if (goal.completed) {
+            completeTracks++;
+            return;
+        }
+        includesTarget = challenged.ids.has(goal.with);
+        if (goal.with !== -1 && includesTarget === false)
+            return;
+        includesTarget = challenged.groups.has(goal.withGroup);
+        if (goal.withGroup !== -1 && includesTarget === false)
+            return;
+        includesTarget = challenger.ids.has(goal.against);
+        if (goal.against !== -1 && includesTarget === false)
+            return;
+        else
+            bonus += challenged.idsHeadCount[goal.against] || 0;
+        includesTarget = challenger.groups.has(goal.againstGroup);
+        if (goal.againstGroup !== -1 && includesTarget === false)
+            return;
+        else {
+            bonus += challenger.groupHeadCount[goal.againstGroup] || 0;
+        }
+        goal.battlesWon = goal.battlesWon + (bonus || 1);
+        if (goal.battlesWon >= stats.goals[index].battlesWon) {
+            completeTracks++;
+            goal.completed = true;
+        }
+        return completeTracks;
+    }
+    catch (e) {
+        logger_1.log.error(e);
+        return completeTracks;
+    }
+}
 //# sourceMappingURL=battle.room.js.map
