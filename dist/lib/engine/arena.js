@@ -16,16 +16,20 @@ class Arena {
     }
     addPlayer(player, team) {
         const playerInstance = new classes_1.Player(player);
+        let charIndex;
         this.players.push(playerInstance);
         if (this.players.length === 1) {
             const i = Math.floor(Math.random() * (3 + 1));
             this.players[0].increaseEnergyPool(i);
             this.players[0].setMyCharsIndex([0, 1, 2]);
+            charIndex = 0;
         }
-        else if (this.players.length === 2)
+        else if (this.players.length === 2) {
             this.players[1].setMyCharsIndex([3, 4, 5]);
+            charIndex = 3;
+        }
         for (let c of team) {
-            this.characters.push(new classes_1.Character(c, player.id, this));
+            this.characters.push(new classes_1.Character(c, player.id, this, charIndex));
             const index = this.characters.length - 1;
             playerInstance.myCharsRealId.push(this.characters[index].literalId);
             if (index < 3) {
@@ -68,6 +72,7 @@ class Arena {
                         break;
                 }
             }
+            charIndex++;
         }
     }
     processTurn(energySpent) {

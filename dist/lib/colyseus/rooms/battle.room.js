@@ -39,6 +39,7 @@ const colyseus_1 = require("colyseus");
 const schema_1 = require("@colyseus/schema");
 const engine_1 = require("../../engine");
 const results = __importStar(require("../../helpers/battleResults"));
+const lodash_1 = require("lodash");
 const db_1 = require("../../../db");
 const logger_1 = require("../../logger");
 class MatchState extends schema_1.Schema {
@@ -219,7 +220,6 @@ class Battle extends colyseus_1.Room {
             for (const i in stats.trackingGoals) {
                 let goal = stats.trackingGoals[i];
                 completeTracks = checkGoalProgression(goal, challenged, challenger, stats, completeTracks, i);
-                logger_1.log.info(completeTracks);
             }
             if (completeTracks === stats.goals.length) {
                 const client = yield db_1.pool.connect();
@@ -263,12 +263,15 @@ class Battle extends colyseus_1.Room {
             const query3 = `UPDATE entity SET games_won= games_won + 1 WHERE id=ANY($1)`;
             const query4 = `UPDATE entity SET games_lost= games_lost + 1 WHERE id=ANY($1)`;
             const client = yield db_1.pool.connect();
+            const same_ids = lodash_1.intersection(winner.myCharsRealId, loser.myCharsRealId);
+            const winnerIds = lodash_1.difference(winner.myCharsRealId, same_ids);
+            const loserIds = lodash_1.difference(loser.myCharsRealId, same_ids);
             try {
                 yield client.query("BEGIN");
                 if (this.allowMatchCalculations) {
                     yield client.query(query1);
-                    yield client.query(query3, [winner.myCharsRealId]);
-                    yield client.query(query4, [loser.myCharsRealId]);
+                    yield client.query(query3, [winnerIds]);
+                    yield client.query(query4, [loserIds]);
                 }
                 yield client.query(query2, [winner.id, loser.id, this.roomCode]);
                 yield client.query("COMMIT");
@@ -339,7 +342,6 @@ function checkGoalProgression(goal, challenged, challenger, stats, completeTrack
     let includesTarget;
     let bonus = 0;
     try {
-        logger_1.log.info("Coming  complete tracks: ", completeTracks);
         if (goal.completed) {
             completeTracks++;
             return;

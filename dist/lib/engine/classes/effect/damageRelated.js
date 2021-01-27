@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IgnoreDecreaseDamageTaken = exports.AbsorbDamage = exports.DecreaseDamageTaken = exports.IncreaseDamageTaken = exports.DamageIncreasal = exports.DamageReduction = exports.Damage = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
-const logger_1 = require("../../../logger");
 /**Deals damage */
 class Damage extends base_1.Effect {
     constructor(data, caster) {
@@ -275,26 +274,25 @@ class DecreaseDamageTaken extends base_1.Effect {
             dr.bySkillClass[enums_1.SkillClassType.Any] += this.value;
         else
             dr.bySkillClass[enums_1.SkillClassType.Any] = this.value;
+        if (!this.triggerLinkedEffects.length)
+            return;
         for (const linked of this.triggerLinkedEffects) {
             switch (linked.condition) {
                 case enums_1.triggerClauseType.IfTargeted:
                     {
                         for (const temp of this.arenaReference.tempQueue) {
-                            if (this.targets.filter((e) => {
-                                return temp.targets.includes(e);
-                            }).length) {
-                                logger_1.log.info(`Apply linked effect on ${temp.caster}`);
+                            if (temp.targets.includes(char.myIndex)) {
+                                //log.info(`Apply linked effect on ${temp.caster}`);
                                 this.applyLinkedEffects(origin, this.caster, [temp.caster], 1);
                             }
                         }
                     }
                     break;
-                case enums_1.triggerClauseType.IfTargetedByHarmful:
+                case enums_1.triggerClauseType.IfTargetedByHarmfulSkill:
                     {
                         for (const temp of this.arenaReference.tempQueue) {
-                            if (this.targets.filter((e) => {
-                                return temp.targets.includes(e);
-                            }).length) {
+                            const skill = this.arenaReference.characters[temp.caster].skills[temp.skill];
+                            if (temp.targets.includes(char.myIndex) && skill.isHarmful) {
                                 this.applyLinkedEffects(origin, this.caster, [temp.caster], 1);
                             }
                         }

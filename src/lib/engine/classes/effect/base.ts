@@ -239,7 +239,7 @@ export class Effect {
 
         case effectTargetBehavior.Second:
           {
-            log.info(this.targets)
+            //log.info(this.targets)
             let index = 1;
             if (this.targets.length < 2 && !this.triggered) break;
             if (this.triggered) index = 0;

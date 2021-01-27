@@ -228,6 +228,12 @@ export class Skill {
           t.push(choice);
           return t;
         }
+
+        case targetType.OneAllyOrSelfAndSelf: {
+          t.push(choice);
+          t = t.concat(this.targetChoices.auto);
+          return t;
+        }
       }
     } catch (e) {
       log.error(e);

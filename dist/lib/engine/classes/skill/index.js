@@ -171,6 +171,11 @@ class Skill {
                     t.push(choice);
                     return t;
                 }
+                case enums_1.targetType.OneAllyOrSelfAndSelf: {
+                    t.push(choice);
+                    t = t.concat(this.targetChoices.auto);
+                    return t;
+                }
             }
         }
         catch (e) {

@@ -77,6 +77,8 @@ var activationType;
     activationType[activationType["Countered"] = 7] = "Countered";
     activationType[activationType["Reflected"] = 8] = "Reflected";
 })(activationType = exports.activationType || (exports.activationType = {}));
+// Must update getValidatedTargets at src/lib/engine/classes/skill/index.ts
+// and targetSetter at src/lib/engine/classes/skill/targetValidationFactory.ts
 var targetType;
 (function (targetType) {
     targetType[targetType["OneEnemy"] = 0] = "OneEnemy";
@@ -91,6 +93,7 @@ var targetType;
     targetType[targetType["OneAllyAndSelf"] = 9] = "OneAllyAndSelf";
     targetType[targetType["AllEnemiesAndSelf"] = 10] = "AllEnemiesAndSelf";
     targetType[targetType["OneAllyOrSelf"] = 11] = "OneAllyOrSelf";
+    targetType[targetType["OneAllyOrSelfAndSelf"] = 12] = "OneAllyOrSelfAndSelf";
 })(targetType = exports.targetType || (exports.targetType = {}));
 var effectTargetBehavior;
 (function (effectTargetBehavior) {
@@ -169,6 +172,6 @@ var triggerClauseType;
     triggerClauseType[triggerClauseType["IfTargeted"] = 2] = "IfTargeted";
     triggerClauseType[triggerClauseType["IfAlliesUseASkill"] = 3] = "IfAlliesUseASkill";
     triggerClauseType[triggerClauseType["IfEnemiesUseASkill"] = 4] = "IfEnemiesUseASkill";
-    triggerClauseType[triggerClauseType["IfTargetedByHarmful"] = 5] = "IfTargetedByHarmful";
+    triggerClauseType[triggerClauseType["IfTargetedByHarmfulSkill"] = 5] = "IfTargetedByHarmfulSkill";
 })(triggerClauseType = exports.triggerClauseType || (exports.triggerClauseType = {}));
 //# sourceMappingURL=index.js.map

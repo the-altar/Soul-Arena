@@ -11,7 +11,7 @@ const counters_1 = require("./counters");
 const skillstack_1 = require("./skillstack");
 const logger_1 = require("../../../logger");
 class Character {
-    constructor(data, playerId, world) {
+    constructor(data, playerId, world, index) {
         this.buffs = new buffs_1.Buffs();
         this.debuffs = new debuffs_1.Debuffs();
         this.notifications = [];
@@ -36,6 +36,7 @@ class Character {
         this.effectStack = new effetStack_1.EffectStack();
         this.counterStack = new counters_1.CounterStack();
         this.skillStack = new skillstack_1.SkillStack();
+        this.myIndex = index;
         for (const skill of data.skills) {
             this.skills.push(new skill_1.Skill(skill, this.id, this.arenaReference, this));
         }

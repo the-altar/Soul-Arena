@@ -170,7 +170,7 @@ class Effect {
                     break;
                 case enums_1.effectTargetBehavior.Second:
                     {
-                        logger_1.log.info(this.targets);
+                        //log.info(this.targets)
                         let index = 1;
                         if (this.targets.length < 2 && !this.triggered)
                             break;

@@ -40,15 +40,6 @@ export const targetSetter = function (
         return choices;
       }
 
-      case targetType.OneAllyAndSelf: {
-        const allies = characters[self].getAllies();
-        allies.forEach((i) => {
-          if (validTarget(characters[i], skill)) choices.choice.push(i);
-        });
-        choices.auto.push(self);
-        return choices;
-      }
-
       case targetType.AllEnemies: {
         const enemies = characters[self].getEnemies();
         enemies.forEach((i) => {
@@ -80,6 +71,25 @@ export const targetSetter = function (
         for (let i of allies) {
           if (validTarget(characters[i], skill)) choices.choice.push(i);
         }
+        return choices;
+      }
+
+      case targetType.OneAllyAndSelf: {
+        const allies = characters[self].getAllies();
+        allies.forEach((i) => {
+          if (validTarget(characters[i], skill)) choices.choice.push(i);
+        });
+        choices.auto.push(self);
+        return choices;
+      }
+
+      case targetType.OneAllyOrSelfAndSelf: {
+        const allies = characters[self].getAllies();
+        choices.choice.push(self);
+        allies.forEach((i) => {
+          if (validTarget(characters[i], skill)) choices.choice.push(i);
+        });
+        choices.auto.push(self);
         return choices;
       }
 

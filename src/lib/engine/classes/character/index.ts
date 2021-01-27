@@ -44,8 +44,9 @@ export class Character {
   private arenaReference: Arena;
   public effectStack: EffectStack;
   public dexNumber: number;
+  public myIndex: number;
 
-  constructor(data: iCharacter, playerId: number, world: Arena) {
+  constructor(data: iCharacter, playerId: number, world: Arena, index: number) {
     this.buffs = new Buffs();
     this.debuffs = new Debuffs();
     this.notifications = [];
@@ -70,6 +71,8 @@ export class Character {
     this.effectStack = new EffectStack();
     this.counterStack = new CounterStack();
     this.skillStack = new SkillStack();
+    this.myIndex = index;
+
     for (const skill of data.skills) {
       this.skills.push(new Skill(skill, this.id, this.arenaReference, this));
     }

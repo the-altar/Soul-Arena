@@ -9,6 +9,8 @@ exports.isHarmful = function (EffectType, exceptDamage) {
                 return false;
             return true;
         }
+        case enums_1.effectType.DamageReduction:
+            return true;
         case enums_1.effectType.EnergyRemoval:
             return true;
         case enums_1.effectType.EnergySteal:

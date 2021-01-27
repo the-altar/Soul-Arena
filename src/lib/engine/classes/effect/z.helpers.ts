@@ -10,6 +10,8 @@ export const isHarmful = function (
       if (exceptDamage) return false;
       return true;
     }
+    case effectType.DamageReduction:
+      return true;
     case effectType.EnergyRemoval:
       return true;
     case effectType.EnergySteal:
@@ -59,4 +61,3 @@ export const isFriendly = function (EffectType: effectType): boolean {
       return false;
   }
 };
-

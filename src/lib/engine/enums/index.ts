@@ -74,6 +74,8 @@ export enum activationType {
   Reflected,
 }
 
+// Must update getValidatedTargets at src/lib/engine/classes/skill/index.ts
+// and targetSetter at src/lib/engine/classes/skill/targetValidationFactory.ts
 export enum targetType {
   OneEnemy,
   AllEnemies,
@@ -87,6 +89,7 @@ export enum targetType {
   OneAllyAndSelf,
   AllEnemiesAndSelf,
   OneAllyOrSelf,
+  OneAllyOrSelfAndSelf,
 }
 
 export enum effectTargetBehavior {
@@ -165,5 +168,5 @@ export enum triggerClauseType {
   IfTargeted,
   IfAlliesUseASkill,
   IfEnemiesUseASkill,
-  IfTargetedByHarmful
+  IfTargetedByHarmfulSkill,
 }

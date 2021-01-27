@@ -3,6 +3,7 @@ import { Room, Client, Delayed } from "colyseus";
 import { Schema, type } from "@colyseus/schema";
 import { Arena, iCharacter, Player } from "../../engine";
 import * as results from "../../helpers/battleResults";
+import { difference, intersection } from "lodash";
 import { pool } from "../../../db";
 import { log } from "../../logger";
 
@@ -295,13 +296,16 @@ export class Battle extends Room {
     const query3 = `UPDATE entity SET games_won= games_won + 1 WHERE id=ANY($1)`;
     const query4 = `UPDATE entity SET games_lost= games_lost + 1 WHERE id=ANY($1)`;
     const client = await pool.connect();
+    const same_ids = intersection(winner.myCharsRealId, loser.myCharsRealId);
+    const winnerIds = difference(winner.myCharsRealId, same_ids);
+    const loserIds = difference(loser.myCharsRealId, same_ids);
 
     try {
       await client.query("BEGIN");
       if (this.allowMatchCalculations) {
         await client.query(query1);
-        await client.query(query3, [winner.myCharsRealId]);
-        await client.query(query4, [loser.myCharsRealId]);
+        await client.query(query3, [winnerIds]);
+        await client.query(query4, [loserIds]);
       }
       await client.query(query2, [winner.id, loser.id, this.roomCode]);
       await client.query("COMMIT");
@@ -402,14 +406,16 @@ function checkGoalProgression(
     if (goal.with !== -1 && includesTarget === false) return completeTracks;
 
     includesTarget = challenged.groups.has(goal.withGroup);
-    if (goal.withGroup !== -1 && includesTarget === false) return completeTracks;
+    if (goal.withGroup !== -1 && includesTarget === false)
+      return completeTracks;
 
     includesTarget = challenger.ids.has(goal.against);
     if (goal.against !== -1 && includesTarget === false) return completeTracks;
     else bonus += challenged.idsHeadCount[goal.against] || 0;
 
     includesTarget = challenger.groups.has(goal.againstGroup);
-    if (goal.againstGroup !== -1 && includesTarget === false) return completeTracks;
+    if (goal.againstGroup !== -1 && includesTarget === false)
+      return completeTracks;
     else {
       bonus += challenger.groupHeadCount[goal.againstGroup] || 0;
     }
