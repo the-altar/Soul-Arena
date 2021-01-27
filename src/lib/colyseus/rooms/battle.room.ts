@@ -252,7 +252,6 @@ export class Battle extends Room {
         i
       );
     }
-
     if (completeTracks === stats.goals.length) {
       const client = await pool.connect();
       try {
@@ -276,6 +275,7 @@ export class Battle extends Room {
       }
     } else if (completeTracks < stats.goals.length) {
       try {
+        console.log(stats.trackingGoals);
         const sql =
           "UPDATE public.tracking_mission SET goals=$3 WHERE user_id=$1 AND mission_id=$2;";
         await pool.query(sql, [
@@ -399,21 +399,20 @@ function checkGoalProgression(
     }
 
     includesTarget = challenged.ids.has(goal.with);
-    if (goal.with !== -1 && includesTarget === false) return;
+    if (goal.with !== -1 && includesTarget === false) return completeTracks;
 
     includesTarget = challenged.groups.has(goal.withGroup);
-    if (goal.withGroup !== -1 && includesTarget === false) return;
+    if (goal.withGroup !== -1 && includesTarget === false) return completeTracks;
 
     includesTarget = challenger.ids.has(goal.against);
-    if (goal.against !== -1 && includesTarget === false) return;
+    if (goal.against !== -1 && includesTarget === false) return completeTracks;
     else bonus += challenged.idsHeadCount[goal.against] || 0;
 
     includesTarget = challenger.groups.has(goal.againstGroup);
-    if (goal.againstGroup !== -1 && includesTarget === false) return;
+    if (goal.againstGroup !== -1 && includesTarget === false) return completeTracks;
     else {
       bonus += challenger.groupHeadCount[goal.againstGroup] || 0;
     }
-
     goal.battlesWon = goal.battlesWon + (bonus || 1);
 
     if (goal.battlesWon >= stats.goals[index].battlesWon) {
@@ -421,6 +420,7 @@ function checkGoalProgression(
       goal.completed = true;
     }
 
+    log.info(`Complete tracks: ${completeTracks}`);
     return completeTracks;
   } catch (e) {
     log.error(e);

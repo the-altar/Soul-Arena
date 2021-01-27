@@ -219,6 +219,7 @@ class Battle extends colyseus_1.Room {
             for (const i in stats.trackingGoals) {
                 let goal = stats.trackingGoals[i];
                 completeTracks = checkGoalProgression(goal, challenged, challenger, stats, completeTracks, i);
+                logger_1.log.info(completeTracks);
             }
             if (completeTracks === stats.goals.length) {
                 const client = yield db_1.pool.connect();
@@ -241,6 +242,7 @@ class Battle extends colyseus_1.Room {
             }
             else if (completeTracks < stats.goals.length) {
                 try {
+                    console.log(stats.trackingGoals);
                     const sql = "UPDATE public.tracking_mission SET goals=$3 WHERE user_id=$1 AND mission_id=$2;";
                     yield db_1.pool.query(sql, [
                         stats.user_id,
@@ -337,24 +339,25 @@ function checkGoalProgression(goal, challenged, challenger, stats, completeTrack
     let includesTarget;
     let bonus = 0;
     try {
+        logger_1.log.info("Coming  complete tracks: ", completeTracks);
         if (goal.completed) {
             completeTracks++;
             return;
         }
         includesTarget = challenged.ids.has(goal.with);
         if (goal.with !== -1 && includesTarget === false)
-            return;
+            return completeTracks;
         includesTarget = challenged.groups.has(goal.withGroup);
         if (goal.withGroup !== -1 && includesTarget === false)
-            return;
+            return completeTracks;
         includesTarget = challenger.ids.has(goal.against);
         if (goal.against !== -1 && includesTarget === false)
-            return;
+            return completeTracks;
         else
             bonus += challenged.idsHeadCount[goal.against] || 0;
         includesTarget = challenger.groups.has(goal.againstGroup);
         if (goal.againstGroup !== -1 && includesTarget === false)
-            return;
+            return completeTracks;
         else {
             bonus += challenger.groupHeadCount[goal.againstGroup] || 0;
         }
@@ -363,6 +366,7 @@ function checkGoalProgression(goal, challenged, challenger, stats, completeTrack
             completeTracks++;
             goal.completed = true;
         }
+        logger_1.log.info(`Complete tracks: ${completeTracks}`);
         return completeTracks;
     }
     catch (e) {
