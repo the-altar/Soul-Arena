@@ -54,7 +54,7 @@ class Counter extends base_1.Effect {
                 (this.counterType === enums_1.SkillClassType.NonStrategic &&
                     skill.class !== enums_1.SkillClassType.Strategic)) &&
                 caster.getId() === target.getId()) {
-                temp.splice(i, 1);
+                temp[i].cancelled = true;
                 caster.addNotification({
                     msg: "This character has been countered",
                     id: origin.getId(),

@@ -344,7 +344,7 @@ function checkGoalProgression(goal, challenged, challenger, stats, completeTrack
     try {
         if (goal.completed) {
             completeTracks++;
-            return;
+            return completeTracks;
         }
         includesTarget = challenged.ids.has(goal.with);
         if (goal.with !== -1 && includesTarget === false)
@@ -368,7 +368,6 @@ function checkGoalProgression(goal, challenged, challenger, stats, completeTrack
             completeTracks++;
             goal.completed = true;
         }
-        logger_1.log.info(`Complete tracks: ${completeTracks}`);
         return completeTracks;
     }
     catch (e) {

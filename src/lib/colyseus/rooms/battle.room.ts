@@ -227,6 +227,7 @@ export class Battle extends Room {
         withGroup: number;
         completed: boolean;
         battlesWon: number;
+        description: string;
       }>;
       mission_id: number;
       user_id: number;
@@ -399,7 +400,7 @@ function checkGoalProgression(
   try {
     if (goal.completed) {
       completeTracks++;
-      return;
+      return completeTracks;
     }
 
     includesTarget = challenged.ids.has(goal.with);
