@@ -426,7 +426,6 @@ function checkGoalProgression(
       goal.completed = true;
     }
 
-    log.info(`Complete tracks: ${completeTracks}`);
     return completeTracks;
   } catch (e) {
     log.error(e);

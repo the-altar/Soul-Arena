@@ -76,7 +76,7 @@ export class Counter extends Effect {
             skill.class !== SkillClassType.Strategic)) &&
         caster.getId() === target.getId()
       ) {
-        temp.splice(i, 1);
+        temp[i].cancelled = true;
         caster.addNotification({
           msg: "This character has been countered",
           id: origin.getId(),
