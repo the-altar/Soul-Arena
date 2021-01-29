@@ -106,6 +106,32 @@ exports.targetSetter = function (skill, targetMode, characters, playerId, self) 
                 choices.auto.push(self);
                 return choices;
             }
+            case enums_1.targetType.AllAny: {
+                characters.forEach((char, index) => {
+                    if (validTarget(char, skill))
+                        choices.choice.push(index);
+                });
+                return choices;
+            }
+            case enums_1.targetType.AllAnyAndSelf: {
+                const allies = characters[self].getAllies();
+                const enemies = characters[self].getEnemies();
+                allies.concat(enemies).forEach((char) => {
+                    if (validTarget(characters[char], skill))
+                        choices.choice.push(char);
+                });
+                choices.auto.push(self);
+                return choices;
+            }
+            case enums_1.targetType.AllAnyExceptSelf: {
+                const allies = characters[self].getAllies();
+                const enemies = characters[self].getEnemies();
+                allies.concat(enemies).forEach((char) => {
+                    if (validTarget(characters[char], skill))
+                        choices.choice.push(char);
+                });
+                return choices;
+            }
             case enums_1.targetType.Self: {
                 if (validTarget(characters[self], skill))
                     choices.choice.push(self);

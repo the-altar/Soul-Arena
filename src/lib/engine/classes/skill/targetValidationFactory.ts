@@ -114,6 +114,34 @@ export const targetSetter = function (
         return choices;
       }
 
+      case targetType.AllAny: {
+        characters.forEach((char, index) => {
+          if (validTarget(char, skill)) choices.choice.push(index);
+        });
+        return choices;
+      }
+
+      case targetType.AllAnyAndSelf: {
+        const allies = characters[self].getAllies();
+        const enemies = characters[self].getEnemies();
+
+        allies.concat(enemies).forEach((char) => {
+          if (validTarget(characters[char], skill)) choices.choice.push(char);
+        });
+        choices.auto.push(self);
+        return choices;
+      }
+
+      case targetType.AllAnyExceptSelf: {
+        const allies = characters[self].getAllies();
+        const enemies = characters[self].getEnemies();
+
+        allies.concat(enemies).forEach((char) => {
+          if (validTarget(characters[char], skill)) choices.choice.push(char);
+        });
+        return choices;
+      }
+
       case targetType.Self: {
         if (validTarget(characters[self], skill)) choices.choice.push(self);
         return choices;

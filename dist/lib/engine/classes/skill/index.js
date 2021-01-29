@@ -6,6 +6,7 @@ const effect_1 = require("../effect");
 const targetValidationFactory_1 = require("./targetValidationFactory");
 const mods_1 = require("./mods");
 const logger_1 = require("../../../logger");
+const z_helpers_1 = require("../effect/z.helpers");
 class Skill {
     constructor(data, caster, world, casterReference) {
         this.caster = data.caster;
@@ -26,7 +27,6 @@ class Skill {
         this.inactiveEffects = [];
         this.mods = new mods_1.SkillMods(data.mods || {});
         this.id = data.id;
-        this.harmful = data.harmful || false;
         this.arenaReference = world;
         this.casterReference = casterReference;
         this.turnCost = this.cost.slice();
@@ -35,6 +35,7 @@ class Skill {
             for (const e of data.effects) {
                 const built = effect_1.effectFactory(e, caster);
                 built.setArenaReference(this.arenaReference);
+                this.harmful = this.harmful || z_helpers_1.isHarmful(built.getType());
                 if (built.triggerRate > 0)
                     this.effects.push(built);
                 else {
@@ -174,6 +175,25 @@ class Skill {
                 case enums_1.targetType.OneAllyOrSelfAndSelf: {
                     t.push(choice);
                     t = t.concat(this.targetChoices.auto);
+                    return t;
+                }
+                case enums_1.targetType.AllAny: {
+                    for (const opt of this.targetChoices.choice) {
+                        t.push(opt);
+                    }
+                    return t;
+                }
+                case enums_1.targetType.AllAnyAndSelf: {
+                    for (const opt of this.targetChoices.choice) {
+                        t.push(opt);
+                    }
+                    t = t.concat(this.targetChoices.auto);
+                    return t;
+                }
+                case enums_1.targetType.AllAnyExceptSelf: {
+                    for (const opt of this.targetChoices.choice) {
+                        t.push(opt);
+                    }
                     return t;
                 }
             }

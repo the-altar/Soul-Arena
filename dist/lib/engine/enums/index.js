@@ -94,6 +94,9 @@ var targetType;
     targetType[targetType["AllEnemiesAndSelf"] = 10] = "AllEnemiesAndSelf";
     targetType[targetType["OneAllyOrSelf"] = 11] = "OneAllyOrSelf";
     targetType[targetType["OneAllyOrSelfAndSelf"] = 12] = "OneAllyOrSelfAndSelf";
+    targetType[targetType["AllAnyAndSelf"] = 13] = "AllAnyAndSelf";
+    targetType[targetType["AllAny"] = 14] = "AllAny";
+    targetType[targetType["AllAnyExceptSelf"] = 15] = "AllAnyExceptSelf";
 })(targetType = exports.targetType || (exports.targetType = {}));
 var effectTargetBehavior;
 (function (effectTargetBehavior) {
@@ -110,6 +113,7 @@ var effectTargetBehavior;
     effectTargetBehavior[effectTargetBehavior["Fourth"] = 10] = "Fourth";
     effectTargetBehavior[effectTargetBehavior["Fifth"] = 11] = "Fifth";
     effectTargetBehavior[effectTargetBehavior["Sixth"] = 12] = "Sixth";
+    effectTargetBehavior[effectTargetBehavior["IfAllyIncludingSelf"] = 13] = "IfAllyIncludingSelf";
 })(effectTargetBehavior = exports.effectTargetBehavior || (exports.effectTargetBehavior = {}));
 var DamageType;
 (function (DamageType) {
@@ -173,5 +177,7 @@ var triggerClauseType;
     triggerClauseType[triggerClauseType["IfAlliesUseASkill"] = 3] = "IfAlliesUseASkill";
     triggerClauseType[triggerClauseType["IfEnemiesUseASkill"] = 4] = "IfEnemiesUseASkill";
     triggerClauseType[triggerClauseType["IfTargetedByHarmfulSkill"] = 5] = "IfTargetedByHarmfulSkill";
+    triggerClauseType[triggerClauseType["UsesANewSkill"] = 6] = "UsesANewSkill";
+    triggerClauseType[triggerClauseType["UsesANewNonStrategicSkill"] = 7] = "UsesANewNonStrategicSkill";
 })(triggerClauseType = exports.triggerClauseType || (exports.triggerClauseType = {}));
 //# sourceMappingURL=index.js.map

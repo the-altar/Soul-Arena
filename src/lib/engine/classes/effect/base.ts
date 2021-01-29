@@ -6,6 +6,7 @@ import {
   PlayerPhase,
   triggerClauseType,
   ControlType,
+  SkillClassType,
 } from "../../enums";
 import { Arena } from "../../arena";
 import { Skill } from "../skill";
@@ -98,7 +99,86 @@ export class Effect {
   }
 
   public functionality(char: Character, origin?: Skill) {
-    return;
+    if (!this.triggerLinkedEffects.length) return;
+
+    for (const linked of this.triggerLinkedEffects) {
+      switch (linked.condition) {
+        case triggerClauseType.IfTargeted:
+          {
+            for (const temp of this.arenaReference.tempQueue) {
+              if (temp.targets.includes(char.myIndex)) {
+                //log.info(`Apply linked effect on ${temp.caster}`);
+                this.applyLinkedEffects(
+                  origin,
+                  this.caster,
+                  [temp.caster],
+                  [char.myIndex],
+                  1
+                );
+              }
+            }
+          }
+          break;
+
+        case triggerClauseType.IfTargetedByHarmfulSkill:
+          {
+            for (const temp of this.arenaReference.tempQueue) {
+              const skill = this.arenaReference.characters[temp.caster].skills[
+                temp.skill
+              ];
+              if (temp.targets.includes(char.myIndex) && skill.isHarmful()) {
+                this.applyLinkedEffects(
+                  origin,
+                  this.caster,
+                  [temp.caster],
+                  [char.myIndex],
+                  1
+                );
+              }
+            }
+          }
+          break;
+        case triggerClauseType.UsesANewSkill:
+          {
+            for (const temp of this.arenaReference.tempQueue) {
+              if (temp.caster === char.myIndex) {
+                this.applyLinkedEffects(
+                  origin,
+                  this.caster,
+                  [temp.caster],
+                  [char.myIndex],
+                  1
+                );
+                break;
+              }
+            }
+          }
+          break;
+
+        case triggerClauseType.UsesANewNonStrategicSkill:
+          {
+            for (const temp of this.arenaReference.tempQueue) {
+              const skill = this.arenaReference.characters[temp.caster].skills[
+                temp.skill
+              ];
+              if (
+                temp.caster === char.myIndex &&
+                skill.class !== SkillClassType.Strategic
+              ) {
+                this.applyLinkedEffects(
+                  origin,
+                  this.caster,
+                  [temp.caster],
+                  [char.myIndex],
+                  1
+                );
+                break;
+              }
+            }
+          }
+          break;
+      }
+    }
   }
 
   public setAltValue(value: number) {
@@ -195,6 +275,22 @@ export class Effect {
         case effectTargetBehavior.IfAlly:
           {
             const { char } = this.arenaReference.findCharacterById(this.caster);
+            const allies = char.getAllies();
+            for (const i of this.targets) {
+              if (allies.includes(i)) {
+                const ally = this.arenaReference.getCharactersByIndex([i])[0];
+                this.activateOnTarget(ally, origin, t, i);
+              }
+            }
+          }
+          break;
+
+        case effectTargetBehavior.IfAllyIncludingSelf:
+          {
+            const { char, index } = this.arenaReference.findCharacterById(
+              this.caster
+            );
+            this.activateOnTarget(char, origin, t, index);
             const allies = char.getAllies();
             for (const i of this.targets) {
               if (allies.includes(i)) {
@@ -352,8 +448,9 @@ export class Effect {
   applyLinkedEffects(
     origin: Skill,
     caster: number,
+    victims: Array<number>,
     targets: Array<number>,
-    times: number
+    times?: number
   ) {
     //log.info(this.triggerLinkedEffects)
     for (const trigger of this.triggerLinkedEffects) {
@@ -365,6 +462,9 @@ export class Effect {
           nEffect.triggerRate = 100;
           nEffect.setTargets([caster]);
         } else if (trigger.victim) {
+          nEffect.triggerRate = 100;
+          nEffect.setTargets(victims);
+        } else if (trigger.target) {
           nEffect.triggerRate = 100;
           nEffect.setTargets(targets);
         }

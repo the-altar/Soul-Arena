@@ -12,6 +12,7 @@ import { Effect } from "../effect/base";
 import { Arena } from "../../arena";
 import { SkillMods } from "./mods";
 import { log } from "../../../logger";
+import { isHarmful } from "../effect/z.helpers";
 
 export class Skill {
   public banner: string;
@@ -64,7 +65,6 @@ export class Skill {
     this.inactiveEffects = [];
     this.mods = new SkillMods(data.mods || {});
     this.id = data.id;
-    this.harmful = data.harmful || false;
     this.arenaReference = world;
     this.casterReference = casterReference;
     this.turnCost = this.cost.slice();
@@ -74,6 +74,8 @@ export class Skill {
       for (const e of data.effects) {
         const built = effectFactory(e, caster);
         built.setArenaReference(this.arenaReference);
+
+        this.harmful = this.harmful || isHarmful(built.getType());
         if (built.triggerRate > 0) this.effects.push(built);
         else {
           this.inactiveEffects.push(built);
@@ -232,6 +234,25 @@ export class Skill {
         case targetType.OneAllyOrSelfAndSelf: {
           t.push(choice);
           t = t.concat(this.targetChoices.auto);
+          return t;
+        }
+        case targetType.AllAny: {
+          for (const opt of this.targetChoices.choice) {
+            t.push(opt);
+          }
+          return t;
+        }
+        case targetType.AllAnyAndSelf: {
+          for (const opt of this.targetChoices.choice) {
+            t.push(opt);
+          }
+          t = t.concat(this.targetChoices.auto);
+          return t;
+        }
+        case targetType.AllAnyExceptSelf: {
+          for (const opt of this.targetChoices.choice) {
+            t.push(opt);
+          }
           return t;
         }
       }

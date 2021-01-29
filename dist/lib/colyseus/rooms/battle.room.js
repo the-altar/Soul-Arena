@@ -242,7 +242,6 @@ class Battle extends colyseus_1.Room {
             }
             else if (completeTracks < stats.goals.length) {
                 try {
-                    console.log(stats.trackingGoals);
                     const sql = "UPDATE public.tracking_mission SET goals=$3 WHERE user_id=$1 AND mission_id=$2;";
                     yield db_1.pool.query(sql, [
                         stats.user_id,

@@ -277,7 +277,6 @@ export class Battle extends Room {
       }
     } else if (completeTracks < stats.goals.length) {
       try {
-        console.log(stats.trackingGoals);
         const sql =
           "UPDATE public.tracking_mission SET goals=$3 WHERE user_id=$1 AND mission_id=$2;";
         await pool.query(sql, [

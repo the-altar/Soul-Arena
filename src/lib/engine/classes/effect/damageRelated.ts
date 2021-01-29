@@ -359,7 +359,13 @@ export class DecreaseDamageTaken extends Effect {
             for (const temp of this.arenaReference.tempQueue) {
               if (temp.targets.includes(char.myIndex)) {
                 //log.info(`Apply linked effect on ${temp.caster}`);
-                this.applyLinkedEffects(origin, this.caster, [temp.caster], 1);
+                this.applyLinkedEffects(
+                  origin,
+                  this.caster,
+                  [temp.caster],
+                  intersection(this.targets, temp.targets),
+                  1
+                );
               }
             }
           }
@@ -371,8 +377,14 @@ export class DecreaseDamageTaken extends Effect {
               const skill = this.arenaReference.characters[temp.caster].skills[
                 temp.skill
               ];
-              if (temp.targets.includes(char.myIndex) && skill.isHarmful) {
-                this.applyLinkedEffects(origin, this.caster, [temp.caster], 1);
+              if (temp.targets.includes(char.myIndex) && skill.isHarmful()) {
+                this.applyLinkedEffects(
+                  origin,
+                  this.caster,
+                  [temp.caster],
+                  intersection(this.targets, temp.targets),
+                  1
+                );
               }
             }
           }

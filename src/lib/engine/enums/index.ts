@@ -90,6 +90,9 @@ export enum targetType {
   AllEnemiesAndSelf,
   OneAllyOrSelf,
   OneAllyOrSelfAndSelf,
+  AllAnyAndSelf,
+  AllAny,
+  AllAnyExceptSelf,
 }
 
 export enum effectTargetBehavior {
@@ -106,6 +109,7 @@ export enum effectTargetBehavior {
   Fourth,
   Fifth,
   Sixth,
+  IfAllyIncludingSelf,
 }
 
 export enum DamageType {
@@ -169,4 +173,6 @@ export enum triggerClauseType {
   IfAlliesUseASkill,
   IfEnemiesUseASkill,
   IfTargetedByHarmfulSkill,
+  UsesANewSkill,
+  UsesANewNonStrategicSkill,
 }

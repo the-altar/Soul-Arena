@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IgnoreDecreaseDamageTaken = exports.AbsorbDamage = exports.DecreaseDamageTaken = exports.IncreaseDamageTaken = exports.DamageIncreasal = exports.DamageReduction = exports.Damage = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
+const lodash_1 = require("lodash");
 /**Deals damage */
 class Damage extends base_1.Effect {
     constructor(data, caster) {
@@ -283,7 +284,7 @@ class DecreaseDamageTaken extends base_1.Effect {
                         for (const temp of this.arenaReference.tempQueue) {
                             if (temp.targets.includes(char.myIndex)) {
                                 //log.info(`Apply linked effect on ${temp.caster}`);
-                                this.applyLinkedEffects(origin, this.caster, [temp.caster], 1);
+                                this.applyLinkedEffects(origin, this.caster, [temp.caster], lodash_1.intersection(this.targets, temp.targets), 1);
                             }
                         }
                     }
@@ -292,8 +293,8 @@ class DecreaseDamageTaken extends base_1.Effect {
                     {
                         for (const temp of this.arenaReference.tempQueue) {
                             const skill = this.arenaReference.characters[temp.caster].skills[temp.skill];
-                            if (temp.targets.includes(char.myIndex) && skill.isHarmful) {
-                                this.applyLinkedEffects(origin, this.caster, [temp.caster], 1);
+                            if (temp.targets.includes(char.myIndex) && skill.isHarmful()) {
+                                this.applyLinkedEffects(origin, this.caster, [temp.caster], lodash_1.intersection(this.targets, temp.targets), 1);
                             }
                         }
                     }

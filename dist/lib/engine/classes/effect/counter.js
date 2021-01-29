@@ -30,7 +30,7 @@ class Counter extends base_1.Effect {
             const casterChar = this.arenaReference.findCharacterById(this.caster)
                 .char;
             const targetsIndex = isTriggered.indexes;
-            this.applyLinkedEffects(origin, casterIndex, targetsIndex, isTriggered.times);
+            this.applyLinkedEffects(origin, casterIndex, targetsIndex, this.targets);
         }
     }
     OffensiveCounter(target, origin) {
