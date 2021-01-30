@@ -468,7 +468,7 @@ export class Effect {
           nEffect.triggerRate = 100;
           nEffect.setTargets([caster]);
         } else if (trigger.victim) {
-          log.info("xxxxxx trigger under victim");
+          log.info("xxxxxx trigger under victim", nEffect);
           nEffect.triggerRate = 100;
           nEffect.setTargets(victims);
         } else if (trigger.target) {
@@ -476,7 +476,7 @@ export class Effect {
           nEffect.triggerRate = 100;
           nEffect.setTargets(targets);
         }
-        nEffect.value *= times;
+        nEffect.value *= times || 1;
         origin.effects.push(nEffect);
       }
     }

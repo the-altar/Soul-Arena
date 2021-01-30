@@ -340,7 +340,7 @@ class Effect {
                     nEffect.setTargets([caster]);
                 }
                 else if (trigger.victim) {
-                    logger_1.log.info("xxxxxx trigger under victim");
+                    logger_1.log.info("xxxxxx trigger under victim", nEffect);
                     nEffect.triggerRate = 100;
                     nEffect.setTargets(victims);
                 }
@@ -349,7 +349,7 @@ class Effect {
                     nEffect.triggerRate = 100;
                     nEffect.setTargets(targets);
                 }
-                nEffect.value *= times;
+                nEffect.value *= times || 1;
                 origin.effects.push(nEffect);
             }
         }

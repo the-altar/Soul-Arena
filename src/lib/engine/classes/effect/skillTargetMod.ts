@@ -74,6 +74,7 @@ export class SkillCostChange extends Effect {
       }
     } else {
       for (const s of char.skills) {
+        log.info(`[COST CHANGE] original cost mod: ${s.mods.costChange[this.reiatsuCostType]}, change: ${this.value}`);
         s.mods.costChange[this.reiatsuCostType] += this.value;
       }
     }

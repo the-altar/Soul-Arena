@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IncreaseTargetSkillDuration = exports.IncreaseCasterSkillDuration = exports.ReplaceSkillCost = exports.SkillCostChange = exports.SkillTargetMod = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
+const logger_1 = require("../../../logger");
 class SkillTargetMod extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -56,6 +57,7 @@ class SkillCostChange extends base_1.Effect {
         }
         else {
             for (const s of char.skills) {
+                logger_1.log.info(`[COST CHANGE] original cost mod: ${s.mods.costChange[this.reiatsuCostType]}, change: ${this.value}`);
                 s.mods.costChange[this.reiatsuCostType] += this.value;
             }
         }
