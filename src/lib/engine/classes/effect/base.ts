@@ -126,7 +126,13 @@ export class Effect {
               const skill = this.arenaReference.characters[temp.caster].skills[
                 temp.skill
               ];
+
               if (temp.targets.includes(char.myIndex) && skill.isHarmful()) {
+                log.info(
+                  `xxx APPLY ${
+                    skill.name
+                  } harmful status: ${skill.isHarmful()} on ${char.name}`
+                );
                 this.applyLinkedEffects(
                   origin,
                   this.caster,
@@ -287,10 +293,8 @@ export class Effect {
 
         case effectTargetBehavior.IfAllyIncludingSelf:
           {
-            const { char, index } = this.arenaReference.findCharacterById(
-              this.caster
-            );
-            this.activateOnTarget(char, origin, t, index);
+            const { char } = this.arenaReference.findCharacterById(this.caster);
+            this.activateOnTarget(char, origin, t, char.myIndex);
             const allies = char.getAllies();
             for (const i of this.targets) {
               if (allies.includes(i)) {
@@ -452,19 +456,23 @@ export class Effect {
     targets: Array<number>,
     times?: number
   ) {
-    //log.info(this.triggerLinkedEffects)
     for (const trigger of this.triggerLinkedEffects) {
+      log.info(`xxxx LINKED EFFECT under: `, trigger);
       for (const effect of origin.inactiveEffects) {
+        log.info("xxxxxx disabled id ", effect.id);
+        if (effect.id !== trigger.id) continue;
         const nEffect = effectFactory(effect, effect.caster);
-        if (nEffect.id !== trigger.id) continue;
-
+        log.info(`xxxxx new effect: ${nEffect.id}`);
         if (trigger.self) {
+          log.info("xxxxxx trigger under self");
           nEffect.triggerRate = 100;
           nEffect.setTargets([caster]);
         } else if (trigger.victim) {
+          log.info("xxxxxx trigger under victim");
           nEffect.triggerRate = 100;
           nEffect.setTargets(victims);
         } else if (trigger.target) {
+          log.info("xxxxxx trigger under target");
           nEffect.triggerRate = 100;
           nEffect.setTargets(targets);
         }

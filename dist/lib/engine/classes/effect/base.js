@@ -65,6 +65,7 @@ class Effect {
                         for (const temp of this.arenaReference.tempQueue) {
                             const skill = this.arenaReference.characters[temp.caster].skills[temp.skill];
                             if (temp.targets.includes(char.myIndex) && skill.isHarmful()) {
+                                logger_1.log.info(`xxx APPLY ${skill.name} harmful status: ${skill.isHarmful()} on ${char.name}`);
                                 this.applyLinkedEffects(origin, this.caster, [temp.caster], [char.myIndex], 1);
                             }
                         }
@@ -191,8 +192,8 @@ class Effect {
                     break;
                 case enums_1.effectTargetBehavior.IfAllyIncludingSelf:
                     {
-                        const { char, index } = this.arenaReference.findCharacterById(this.caster);
-                        this.activateOnTarget(char, origin, t, index);
+                        const { char } = this.arenaReference.findCharacterById(this.caster);
+                        this.activateOnTarget(char, origin, t, char.myIndex);
                         const allies = char.getAllies();
                         for (const i of this.targets) {
                             if (allies.includes(i)) {
@@ -325,21 +326,26 @@ class Effect {
     }
     apply(char, origin) { }
     applyLinkedEffects(origin, caster, victims, targets, times) {
-        //log.info(this.triggerLinkedEffects)
         for (const trigger of this.triggerLinkedEffects) {
+            logger_1.log.info(`xxxx LINKED EFFECT under: `, trigger);
             for (const effect of origin.inactiveEffects) {
-                const nEffect = index_1.effectFactory(effect, effect.caster);
-                if (nEffect.id !== trigger.id)
+                logger_1.log.info("xxxxxx disabled id ", effect.id);
+                if (effect.id !== trigger.id)
                     continue;
+                const nEffect = index_1.effectFactory(effect, effect.caster);
+                logger_1.log.info(`xxxxx new effect: ${nEffect.id}`);
                 if (trigger.self) {
+                    logger_1.log.info("xxxxxx trigger under self");
                     nEffect.triggerRate = 100;
                     nEffect.setTargets([caster]);
                 }
                 else if (trigger.victim) {
+                    logger_1.log.info("xxxxxx trigger under victim");
                     nEffect.triggerRate = 100;
                     nEffect.setTargets(victims);
                 }
                 else if (trigger.target) {
+                    logger_1.log.info("xxxxxx trigger under target");
                     nEffect.triggerRate = 100;
                     nEffect.setTargets(targets);
                 }
