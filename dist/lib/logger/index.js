@@ -7,7 +7,7 @@ exports.log = void 0;
 const bunyan_1 = __importDefault(require("bunyan"));
 exports.log = bunyan_1.default.createLogger({
     name: "SA",
-    src: process.env.NODE_ENV === "dev" ? true : false,
+    src: true,
     level: process.env.NODE_ENV === "dev" ? bunyan_1.default.INFO : bunyan_1.default.ERROR,
 });
 //# sourceMappingURL=index.js.map

@@ -29,8 +29,6 @@ exports.isHarmful = function (EffectType, exceptDamage) {
             return true;
         case enums_1.effectType.IncreaseTargetSkillDuration:
             return true;
-        case enums_1.effectType.None:
-            return true;
         default:
             return false;
     }
