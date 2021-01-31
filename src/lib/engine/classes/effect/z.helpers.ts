@@ -30,8 +30,6 @@ export const isHarmful = function (
       return true;
     case effectType.IncreaseTargetSkillDuration:
       return true;
-    case effectType.None:
-      return true;
     default:
       return false;
   }
