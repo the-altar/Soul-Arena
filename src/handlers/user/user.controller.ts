@@ -181,6 +181,29 @@ export const defaultAvatar = async (req: Request, res: Response) => {
   }
 };
 
+export const resetStats = async (req: Request, res: Response) => {
+  const query = `
+  update
+    ladderboard
+  set
+    experience = 0,
+    season_level = 1,
+    season_rank = 'Substitute Shinigami',
+    streak = 0,
+    wins = 0,
+    losses = 0
+  where
+    user_id = $1
+  `;
+  try {
+    await pool.query(query, [req.res.locals.id]);
+    return res.status(200).json({});
+  } catch (e) {
+    log.error(e);
+    return res.status(500).json({});
+  }
+};
+
 export const matchHistory = async (req: Request, res: Response) => {
   const query = `
   select gr.game_room, gr.created_at, winner_id, jsonb_agg(jsonb_build_object('username', u2.username, 'id', u2.id)) as players from game_result gr 

@@ -9,6 +9,7 @@ import {
   uploadAvatar,
   defaultAvatar,
   matchHistory,
+  resetStats,
 } from "./user.controller";
 import { authenticate } from "../../middlewares";
 const router: Router = Router();
@@ -20,7 +21,7 @@ router.post("/logout", logout);
 router.post("/:username", user);
 router.post("/avatar/:id", [authenticate], uploadAvatar);
 router.post("/avatar/:id/:filename", [authenticate], defaultAvatar);
-
+router.post("/stats/reset", [authenticate], resetStats);
 router.get("/match-history/:id", matchHistory);
 router.get("/", [loggerMiddleware], mount);
 

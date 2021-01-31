@@ -28,7 +28,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.matchHistory = exports.defaultAvatar = exports.uploadAvatar = exports.user = exports.logout = exports.login = exports.register = exports.mount = exports.loggerMiddleware = void 0;
+exports.matchHistory = exports.resetStats = exports.defaultAvatar = exports.uploadAvatar = exports.user = exports.logout = exports.login = exports.register = exports.mount = exports.loggerMiddleware = void 0;
 const bcrypt_1 = require("bcrypt");
 const jsonwebtoken_1 = require("jsonwebtoken");
 const path_1 = require("path");
@@ -195,6 +195,29 @@ exports.defaultAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
     catch (err) {
         return res.status(500).json({ success: false });
+    }
+});
+exports.resetStats = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `
+  update
+    ladderboard
+  set
+    experience = 0,
+    season_level = 1,
+    season_rank = 'Substitute Shinigami',
+    streak = 0,
+    wins = 0,
+    losses = 0
+  where
+    user_id = $1
+  `;
+    try {
+        yield db_1.pool.query(query, [req.res.locals.id]);
+        return res.status(200).json({});
+    }
+    catch (e) {
+        logger_1.log.error(e);
+        return res.status(500).json({});
     }
 });
 exports.matchHistory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
