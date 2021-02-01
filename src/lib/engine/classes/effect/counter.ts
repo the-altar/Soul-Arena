@@ -44,7 +44,13 @@ export class Counter extends Effect {
       const casterChar = this.arenaReference.findCharacterById(this.caster)
         .char;
       const targetsIndex = isTriggered.indexes;
-      this.applyLinkedEffects(origin, casterIndex, targetsIndex, this.targets);
+      this.applyLinkedEffects(
+        origin,
+        casterIndex,
+        targetsIndex,
+        this.targets,
+        this.applyPerTrigger ? isTriggered.times : undefined
+      );
     }
   }
 
