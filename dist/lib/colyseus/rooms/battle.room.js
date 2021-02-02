@@ -257,7 +257,7 @@ class Battle extends colyseus_1.Room {
     }
     updateGameRecords(winner, loser) {
         return __awaiter(this, void 0, void 0, function* () {
-            const query1 = `INSERT INTO game_stats DEFAULT VALUES;`;
+            const query1 = `INSERT INTO game_stats (winner_id_1, winner_id_2, winner_id_3) VALUES($1, $2, $3);`;
             const query2 = `INSERT INTO game_result (winner_id, loser_id, game_room) VALUES($1, $2, $3);`;
             const query3 = `UPDATE entity SET games_won= games_won + 1 WHERE id=ANY($1)`;
             const query4 = `UPDATE entity SET games_lost= games_lost + 1 WHERE id=ANY($1)`;
@@ -268,7 +268,7 @@ class Battle extends colyseus_1.Room {
             try {
                 yield client.query("BEGIN");
                 if (this.allowMatchCalculations) {
-                    yield client.query(query1);
+                    yield client.query(query1, [winnerIds[0], winnerIds[1], winnerIds[2]]);
                     yield client.query(query3, [winnerIds]);
                     yield client.query(query4, [loserIds]);
                 }
