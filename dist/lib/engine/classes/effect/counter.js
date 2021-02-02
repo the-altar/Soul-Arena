@@ -11,6 +11,7 @@ class Counter extends base_1.Effect {
         this.counterType = data.counterType || false;
         this.counterEffectType = data.counterEffectType || false;
         this.applyPerTrigger = data.applyPerTrigger || true;
+        this.harmfulSkillsOnly = data.harmfulSkillsOnly || false;
     }
     functionality(target, origin) {
         let isTriggered;
@@ -54,6 +55,8 @@ class Counter extends base_1.Effect {
                 (this.counterType === enums_1.SkillClassType.NonStrategic &&
                     skill.class !== enums_1.SkillClassType.Strategic)) &&
                 caster.getId() === target.getId()) {
+                if (this.harmfulSkillsOnly && !skill.isHarmful())
+                    continue;
                 temp[i].cancelled = true;
                 caster.addNotification({
                     msg: "This character has been countered",
@@ -89,6 +92,8 @@ class Counter extends base_1.Effect {
                 skill.class == this.counterType ||
                 (this.counterType === enums_1.SkillClassType.NonStrategic &&
                     skill.class !== enums_1.SkillClassType.Strategic)) {
+                if (this.harmfulSkillsOnly && !skill.isHarmful())
+                    continue;
                 for (const t of cordinates.targets) {
                     const sufferer = this.arenaReference.getCharactersByIndex([t])[0];
                     if (sufferer.getId() === target.getId()) {

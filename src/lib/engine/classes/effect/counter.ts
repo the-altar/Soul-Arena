@@ -21,6 +21,7 @@ export class Counter extends Effect {
     this.counterType = data.counterType || false;
     this.counterEffectType = data.counterEffectType || false;
     this.applyPerTrigger = data.applyPerTrigger || true;
+    this.harmfulSkillsOnly = data.harmfulSkillsOnly || false;
   }
 
   public functionality(target: Character, origin: Skill) {
@@ -77,6 +78,7 @@ export class Counter extends Effect {
             skill.class !== SkillClassType.Strategic)) &&
         caster.getId() === target.getId()
       ) {
+        if (this.harmfulSkillsOnly && !skill.isHarmful()) continue;
         temp[i].cancelled = true;
         caster.addNotification({
           msg: "This character has been countered",
@@ -116,6 +118,7 @@ export class Counter extends Effect {
         (this.counterType === SkillClassType.NonStrategic &&
           skill.class !== SkillClassType.Strategic)
       ) {
+        if (this.harmfulSkillsOnly && !skill.isHarmful()) continue;
         for (const t of cordinates.targets) {
           const sufferer = this.arenaReference.getCharactersByIndex([t])[0];
           if (sufferer.getId() === target.getId()) {
