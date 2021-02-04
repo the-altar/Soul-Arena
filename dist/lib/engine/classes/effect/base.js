@@ -7,7 +7,7 @@ const logger_1 = require("../../../logger");
 class Effect {
     constructor(data, caster) {
         this.value = data.value;
-        this.tick = 0;
+        this.tick = data.tick || 0;
         this.message = data.message || null;
         this.duration = data.duration || 1;
         this.increaseDurationByAlliesAlive =
@@ -334,7 +334,7 @@ class Effect {
                     nEffect.setTargets([caster]);
                 }
                 else if (trigger.victim) {
-                    logger_1.log.info("xxxxxx trigger under victim", nEffect);
+                    logger_1.log.info("xxxxxx trigger under victim");
                     nEffect.triggerRate = 100;
                     nEffect.setTargets(victims);
                 }

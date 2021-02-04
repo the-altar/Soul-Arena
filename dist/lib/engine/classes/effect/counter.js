@@ -6,7 +6,7 @@ const enums_1 = require("../../enums");
 class Counter extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
-        this.tick = 0;
+        this.tick = 1;
         this.isDefensive = data.isDefensive || false;
         this.counterType = data.counterType || false;
         this.counterEffectType = data.counterEffectType || false;

@@ -16,7 +16,7 @@ export class Counter extends Effect {
 
   constructor(data: any, caster: number) {
     super(data, caster);
-    this.tick = 0;
+    this.tick = 1;
     this.isDefensive = data.isDefensive || false;
     this.counterType = data.counterType || false;
     this.counterEffectType = data.counterEffectType || false;

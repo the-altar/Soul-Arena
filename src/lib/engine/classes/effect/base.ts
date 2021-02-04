@@ -58,7 +58,7 @@ export class Effect {
   }>;
   constructor(data: any, caster: number) {
     this.value = data.value;
-    this.tick = 0;
+    this.tick = data.tick || 0;
     this.message = data.message || null;
     this.duration = data.duration || 1;
     this.increaseDurationByAlliesAlive =
@@ -463,7 +463,7 @@ export class Effect {
           nEffect.triggerRate = 100;
           nEffect.setTargets([caster]);
         } else if (trigger.victim) {
-          log.info("xxxxxx trigger under victim", nEffect);
+          log.info("xxxxxx trigger under victim");
           nEffect.triggerRate = 100;
           nEffect.setTargets(victims);
         } else if (trigger.target) {
