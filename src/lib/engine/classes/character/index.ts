@@ -34,7 +34,7 @@ export class Character {
   private hitPoints: number;
   private isTarget: boolean;
   private knockedOut: boolean;
-  private buffs: Buffs;
+  public buffs: Buffs;
   private debuffs: Debuffs;
   private notifications: Array<Notification>;
   private type: Set<CharacterTypes>;
@@ -280,7 +280,6 @@ export class Character {
     this.buffs.clearDecreaseDamageTaken();
     this.buffs.clearAbsorbDamage();
     this.buffs.clearDamageIncreasal();
-    this.buffs.clearIgnoreHarmfulEffects();
     this.buffs.cannotBeKilled = false;
     this.buffs.validateDD();
   }

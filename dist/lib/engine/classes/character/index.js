@@ -213,7 +213,6 @@ class Character {
         this.buffs.clearDecreaseDamageTaken();
         this.buffs.clearAbsorbDamage();
         this.buffs.clearDamageIncreasal();
-        this.buffs.clearIgnoreHarmfulEffects();
         this.buffs.cannotBeKilled = false;
         this.buffs.validateDD();
     }

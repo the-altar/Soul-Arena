@@ -2,6 +2,7 @@ import { Character } from "..";
 import { Effect } from "./base";
 import { Skill } from "../skill";
 import { SkillClassType } from "../../enums";
+import { log } from "../../../logger";
 
 export class Stun extends Effect {
   /* "specific"  refers to a specific skill type. E.g: Fire, Water, Grass...  
@@ -10,11 +11,14 @@ export class Stun extends Effect {
   constructor(data: any, caster: number) {
     super(data, caster);
     this.stunClass = data.stunClass;
-    this.compulsory = true;
   }
 
   public functionality(char: Character, origin: Skill) {
-    if (char.getBuffs().ignoreHarmfulEffects.status) return;
+    log.info("STUN EFFECT ACTIVATE")
+    if (char.getBuffs().ignoreHarmfulEffects.status) {
+      log.info("--- was ignored")
+      return
+    };
     char.disableSkills();
     char.getDebuffs().stun[this.stunClass] = true;
   }

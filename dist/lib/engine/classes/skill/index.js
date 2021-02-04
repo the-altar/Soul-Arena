@@ -32,7 +32,9 @@ class Skill {
         this.turnCost = this.cost.slice();
         this.ignoresInvulnerability = data.ignoresInvulnerability || false;
         try {
+            //log.info(`xx BUILD ${this.name} `);
             for (const e of data.effects) {
+                //log.info(`xxx EFFECT ${effectType[e.type]}`);
                 const built = effect_1.effectFactory(e, caster);
                 built.setArenaReference(this.arenaReference);
                 this.harmful = this.harmful || z_helpers_1.isHarmful(built.getType());
@@ -196,6 +198,11 @@ class Skill {
                     }
                     return t;
                 }
+                case enums_1.targetType.OneRandomEnemy_and_Self: {
+                    const index = this.targetChoices.choice[Math.floor(Math.random() * this.targetChoices.choice.length)];
+                    t.concat(this.targetChoices.auto);
+                    t.push(index);
+                }
             }
         }
         catch (e) {
@@ -235,7 +242,6 @@ class Skill {
     executeEffects() {
         //log.info(`[GAME] Execute effects of ${this.casterReference.name}`);
         for (const effect of this.effects) {
-            effect.tick++;
             //log.info(`[${this.casterReference.name}]`, this.casterReference.getDebuffs().stun)
             if (this.casterReference.isStunned(this)) {
                 if (this.persistence === enums_1.ControlType.Action)
@@ -244,15 +250,16 @@ class Skill {
                     effect.terminate = true;
             }
             effect.shouldApply();
+            logger_1.log.info("effect apply status: ", effect.activate, effect.tick);
             effect.execute(this);
             if (!effect.terminate)
                 effect.generateToolTip();
+            effect.tick++;
         }
     }
     executeInitEffects() {
         //log.info("[GAME] Execute NEW effects")
         for (const effect of this.effects) {
-            effect.tick++;
             effect.extendDuration(this.mods.increaseDuration);
             if (!effect.getTargets().length)
                 effect.setTargets(this.targets);
@@ -265,6 +272,7 @@ class Skill {
             effect.shouldApply();
             effect.execute(this);
             effect.generateToolTip();
+            effect.tick++;
         }
     }
     getCost() {

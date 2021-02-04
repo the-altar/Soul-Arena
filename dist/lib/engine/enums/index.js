@@ -77,8 +77,8 @@ var activationType;
     activationType[activationType["Countered"] = 7] = "Countered";
     activationType[activationType["Reflected"] = 8] = "Reflected";
 })(activationType = exports.activationType || (exports.activationType = {}));
-// Must update getValidatedTargets at src/lib/engine/classes/skill/index.ts
 // and targetSetter at src/lib/engine/classes/skill/targetValidationFactory.ts
+// Must update getValidatedTargets at src/lib/engine/classes/skill/index.ts
 var targetType;
 (function (targetType) {
     targetType[targetType["OneEnemy"] = 0] = "OneEnemy";
@@ -97,6 +97,7 @@ var targetType;
     targetType[targetType["AllAnyAndSelf"] = 13] = "AllAnyAndSelf";
     targetType[targetType["AllAny"] = 14] = "AllAny";
     targetType[targetType["AllAnyExceptSelf"] = 15] = "AllAnyExceptSelf";
+    targetType[targetType["OneRandomEnemy_and_Self"] = 16] = "OneRandomEnemy_and_Self";
 })(targetType = exports.targetType || (exports.targetType = {}));
 var effectTargetBehavior;
 (function (effectTargetBehavior) {
@@ -166,8 +167,8 @@ var ControlType;
 })(ControlType = exports.ControlType || (exports.ControlType = {}));
 var PlayerPhase;
 (function (PlayerPhase) {
-    PlayerPhase[PlayerPhase["EnemyTurn"] = 0] = "EnemyTurn";
-    PlayerPhase[PlayerPhase["MyTurn"] = 1] = "MyTurn";
+    PlayerPhase[PlayerPhase["MyTurn"] = 0] = "MyTurn";
+    PlayerPhase[PlayerPhase["EnemyTurn"] = 1] = "EnemyTurn";
 })(PlayerPhase = exports.PlayerPhase || (exports.PlayerPhase = {}));
 var triggerClauseType;
 (function (triggerClauseType) {

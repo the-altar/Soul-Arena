@@ -4,6 +4,7 @@ import { Character } from "../character";
 import { Skill } from "..";
 import { Arena } from "../../arena";
 import { isHarmful } from "./z.helpers";
+import {log} from "../../../logger"
 
 export class EffectRemoval extends Effect {
   private harmful: boolean;
@@ -104,6 +105,7 @@ export class IgnoreEffects extends Effect {
   }
 
   public functionality(char: Character, origin: Skill) {
+    log.info("IGNORE EFFECT ACTIVE")
     if (this.harmful) {
       if (char.getDebuffs().ignoreBenefitialEffects) return;
       char.getBuffs().ignoreHarmfulEffects = {

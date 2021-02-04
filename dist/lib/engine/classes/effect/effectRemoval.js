@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IgnoreEffects = exports.EffectRemoval = void 0;
 const base_1 = require("./base");
 const z_helpers_1 = require("./z.helpers");
+const logger_1 = require("../../../logger");
 class EffectRemoval extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
@@ -95,6 +96,7 @@ class IgnoreEffects extends base_1.Effect {
         this.includeDamage = data.includeDamage || false;
     }
     functionality(char, origin) {
+        logger_1.log.info("IGNORE EFFECT ACTIVE");
         if (this.harmful) {
             if (char.getDebuffs().ignoreBenefitialEffects)
                 return;

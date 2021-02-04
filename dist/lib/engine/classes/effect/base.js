@@ -7,7 +7,7 @@ const logger_1 = require("../../../logger");
 class Effect {
     constructor(data, caster) {
         this.value = data.value;
-        this.tick = 1;
+        this.tick = 0;
         this.message = data.message || null;
         this.duration = data.duration || 1;
         this.increaseDurationByAlliesAlive =
@@ -115,7 +115,7 @@ class Effect {
         const triggerRate = Math.floor(Math.random() * 101);
         if (triggerRate <= this.triggerRate &&
             this.delay <= 0 &&
-            (this.tick % 2 !== enums_1.PlayerPhase.MyTurn || this.compulsory))
+            (this.tick % 2 === enums_1.PlayerPhase.MyTurn || this.compulsory))
             this.activate = true;
         else
             this.activate = false;
@@ -129,13 +129,6 @@ class Effect {
         else {
             this.delay--;
         }
-        /*  An even tick means it's your opponent's turn, odd means its yours.*/
-        /*  The default behavior is for your skills to activate on odd ticks*/
-        if (this.tick % 2 === enums_1.PlayerPhase.MyTurn) {
-            this.activate = false;
-        }
-        else
-            this.activate = true;
         if (this.duration <= 0 && !this.infinite)
             this.terminate = true;
         else if (this.targets.length === 0)
@@ -302,6 +295,7 @@ class Effect {
             return false;
         return true;
     }
+    // this is only activated once when the effect is applied for the first time
     activateTrigger(char, origin) {
         if (this.triggered)
             return;

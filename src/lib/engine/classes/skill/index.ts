@@ -5,6 +5,7 @@ import {
   SkillClassType,
   triggerClauseType,
   ControlType,
+  effectType,
 } from "../../enums";
 import { effectFactory } from "../effect";
 import { targetSetter } from "./targetValidationFactory";
@@ -71,7 +72,9 @@ export class Skill {
     this.ignoresInvulnerability = data.ignoresInvulnerability || false;
 
     try {
+      //log.info(`xx BUILD ${this.name} `);
       for (const e of data.effects) {
+        //log.info(`xxx EFFECT ${effectType[e.type]}`);
         const built = effectFactory(e, caster);
         built.setArenaReference(this.arenaReference);
 
@@ -255,6 +258,13 @@ export class Skill {
           }
           return t;
         }
+        case targetType.OneRandomEnemy_and_Self: {
+          const index = this.targetChoices.choice[
+            Math.floor(Math.random() * this.targetChoices.choice.length)
+          ];
+          t.concat(this.targetChoices.auto);
+          t.push(index);
+        }
       }
     } catch (e) {
       log.error(e);
@@ -310,9 +320,7 @@ export class Skill {
 
   public executeEffects() {
     //log.info(`[GAME] Execute effects of ${this.casterReference.name}`);
-
     for (const effect of this.effects) {
-      effect.tick++;
       //log.info(`[${this.casterReference.name}]`, this.casterReference.getDebuffs().stun)
       if (this.casterReference.isStunned(this)) {
         if (this.persistence === ControlType.Action) continue;
@@ -321,15 +329,16 @@ export class Skill {
       }
 
       effect.shouldApply();
+      log.info("effect apply status: ", effect.activate, effect.tick);
       effect.execute(this);
       if (!effect.terminate) effect.generateToolTip();
+      effect.tick++;
     }
   }
 
   public executeInitEffects() {
     //log.info("[GAME] Execute NEW effects")
     for (const effect of this.effects) {
-      effect.tick++;
       effect.extendDuration(this.mods.increaseDuration);
       if (!effect.getTargets().length) effect.setTargets(this.targets);
 
@@ -341,6 +350,7 @@ export class Skill {
       effect.shouldApply();
       effect.execute(this);
       effect.generateToolTip();
+      effect.tick++;
     }
   }
 

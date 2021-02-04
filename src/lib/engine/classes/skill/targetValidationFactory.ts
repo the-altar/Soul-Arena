@@ -146,6 +146,15 @@ export const targetSetter = function (
         if (validTarget(characters[self], skill)) choices.choice.push(self);
         return choices;
       }
+
+      case targetType.OneRandomEnemy_and_Self: {
+        const enemies = characters[self].getEnemies();
+        enemies.forEach((char) => {
+          if (validTarget(characters[char], skill)) choices.choice.push(char);
+        });
+        if (validTarget(characters[self], skill)) choices.auto.push(self);
+        return choices;
+      }
     }
   } catch (e) {
     log.error(e);

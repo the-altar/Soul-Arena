@@ -74,8 +74,8 @@ export enum activationType {
   Reflected,
 }
 
-// Must update getValidatedTargets at src/lib/engine/classes/skill/index.ts
 // and targetSetter at src/lib/engine/classes/skill/targetValidationFactory.ts
+// Must update getValidatedTargets at src/lib/engine/classes/skill/index.ts
 export enum targetType {
   OneEnemy,
   AllEnemies,
@@ -93,6 +93,7 @@ export enum targetType {
   AllAnyAndSelf,
   AllAny,
   AllAnyExceptSelf,
+  OneRandomEnemy_and_Self,
 }
 
 export enum effectTargetBehavior {
@@ -162,8 +163,8 @@ export enum ControlType {
 }
 
 export enum PlayerPhase {
-  EnemyTurn,
   MyTurn,
+  EnemyTurn,
 }
 
 export enum triggerClauseType {

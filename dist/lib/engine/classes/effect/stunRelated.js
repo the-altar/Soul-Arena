@@ -3,15 +3,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Stun = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
+const logger_1 = require("../../../logger");
 class Stun extends base_1.Effect {
     constructor(data, caster) {
         super(data, caster);
         this.stunClass = data.stunClass;
-        this.compulsory = true;
     }
     functionality(char, origin) {
-        if (char.getBuffs().ignoreHarmfulEffects.status)
+        logger_1.log.info("STUN EFFECT ACTIVATE");
+        if (char.getBuffs().ignoreHarmfulEffects.status) {
+            logger_1.log.info("--- was ignored");
             return;
+        }
+        ;
         char.disableSkills();
         char.getDebuffs().stun[this.stunClass] = true;
     }
