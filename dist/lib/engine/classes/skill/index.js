@@ -26,6 +26,7 @@ class Skill {
         this.effects = [];
         this.inactiveEffects = [];
         this.mods = new mods_1.SkillMods(data.mods || {});
+        this.interrupted = false;
         this.id = data.id;
         this.arenaReference = world;
         this.casterReference = casterReference;
@@ -244,8 +245,9 @@ class Skill {
         for (const effect of this.effects) {
             //log.info(`[${this.casterReference.name}]`, this.casterReference.getDebuffs().stun)
             if (this.casterReference.isStunned(this)) {
-                if (this.persistence === enums_1.ControlType.Action)
+                if (this.persistence === enums_1.ControlType.Action) {
                     continue;
+                }
                 else if (this.persistence === enums_1.ControlType.Control)
                     effect.terminate = true;
             }

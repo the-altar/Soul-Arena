@@ -64,7 +64,7 @@ class Battle extends colyseus_1.Room {
         this.onMessage("end-game-turn", (client, payload) => __awaiter(this, void 0, void 0, function* () {
             logger_1.log.info(`--- [END TURN] client id: ${client.id}`);
             if (this.arena.isPlayerLocked(client.id)) {
-                logger_1.log.info("xxx Player is locked; can't end a turn");
+                logger_1.log.error("xxx Player is locked; can't end a turn");
                 return;
             }
             logger_1.log.info(" xx [YOU ENDED YOUR TURN] xx");

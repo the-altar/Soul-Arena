@@ -83,7 +83,6 @@ export class Debuffs {
       bySkillClass: {},
       bySkillId: {},
     };
-    this.stun = {};
     this.ignoreDecreaseDamageTaken = false;
     this.ignoreInvulnerability = false;
     this.ignoreBenefitialEffects = false;

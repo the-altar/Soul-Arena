@@ -36,6 +36,7 @@ export class Skill {
   public effects: Array<Effect>;
   private casterReference: Character;
   private targetChoices: { [x: string]: Array<number> };
+  public interrupted: boolean;
   private id: number;
   public caster: number;
   private turnCost: Array<number>;
@@ -65,6 +66,7 @@ export class Skill {
     this.effects = [];
     this.inactiveEffects = [];
     this.mods = new SkillMods(data.mods || {});
+    this.interrupted = false;
     this.id = data.id;
     this.arenaReference = world;
     this.casterReference = casterReference;
@@ -323,8 +325,9 @@ export class Skill {
     for (const effect of this.effects) {
       //log.info(`[${this.casterReference.name}]`, this.casterReference.getDebuffs().stun)
       if (this.casterReference.isStunned(this)) {
-        if (this.persistence === ControlType.Action) continue;
-        else if (this.persistence === ControlType.Control)
+        if (this.persistence === ControlType.Action) {
+          continue;
+        } else if (this.persistence === ControlType.Control)
           effect.terminate = true;
       }
 
