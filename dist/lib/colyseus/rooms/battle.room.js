@@ -62,6 +62,12 @@ class Battle extends colyseus_1.Room {
         this.roomCode = options.roomCode;
         this.setState(new MatchState());
         this.onMessage("end-game-turn", (client, payload) => __awaiter(this, void 0, void 0, function* () {
+            logger_1.log.info(`--- [END TURN] client id: ${client.id}`);
+            if (this.arena.isPlayerLocked(client.id)) {
+                logger_1.log.info("xxx Player is locked; can't end a turn");
+                return;
+            }
+            logger_1.log.info(" xx [YOU ENDED YOUR TURN] xx");
             this.delay.reset();
             this.arena.processTurn(payload);
             this.lifeCycle();
@@ -89,7 +95,7 @@ class Battle extends colyseus_1.Room {
     }
     // When client successfully join the room
     onJoin(client, options, auth) {
-        this.arena.addPlayer(options.player, options.team);
+        this.arena.addPlayer(options.player, options.team, client.id);
         this.constructed++;
         this.playerState[client.sessionId] = options.player.id;
         if (this.constructed === 2) {
@@ -139,6 +145,7 @@ class Battle extends colyseus_1.Room {
         this.state.turnData = JSON.stringify(this.arena.getClientData());
         this.broadcast("game-started", this.arena.getClientData());
         this.delay = this.clock.setInterval(() => {
+            logger_1.log.info("[YOU CLOCKED OUT]");
             this.lifeCycle();
             this.state.turnData = JSON.stringify(this.arena.getClientData());
         }, this.evaluateGroupInterval);

@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Player = void 0;
 class Player {
     constructor(player) {
+        this.clientId;
+        this.locked = false;
         this.username = player.username;
         this.id = player.id;
         this.avatar = player.avatar;

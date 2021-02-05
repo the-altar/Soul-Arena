@@ -24,8 +24,13 @@ export class Arena {
     this.hasUsedSKill = {};
   }
 
-  public addPlayer(player: any, team: Array<iCharacter>): void {
+  public addPlayer(
+    player: any,
+    team: Array<iCharacter>,
+    socketClientId: string
+  ): void {
     const playerInstance = new Player(player);
+    playerInstance.clientId = socketClientId;
     let charIndex: number;
     this.players.push(playerInstance);
 
@@ -97,9 +102,13 @@ export class Arena {
 
   public startGame() {
     //log.info("- [START] increase turn");
+
     this.turnCount++;
-    const nextPlayer = this.players[this.turnCount % 2];
     const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
+
+    currentPlayer.locked = true;
+    const nextPlayer = this.players[this.turnCount % 2];
+    nextPlayer.locked = false;
 
     currentPlayer.turnCount++;
     currentPlayer.setTurn(false);
@@ -517,5 +526,11 @@ export class Arena {
       publicChar.push(char.getPublicData());
     }
     return publicChar;
+  }
+
+  public isPlayerLocked(initiator: string) {
+    for (const p of this.players) {
+      if (p.clientId === initiator && p.locked) return p.locked;
+    }
   }
 }

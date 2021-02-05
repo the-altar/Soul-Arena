@@ -4,7 +4,9 @@ export class Player {
   public id: number;
   private isTurn: boolean;
   public turnCount: number;
+  public locked: boolean;
   public coins: number;
+  public clientId: string;
   public season: {
     elo: number;
     wins: number;
@@ -21,6 +23,8 @@ export class Player {
   public myCharsRealId: Array<number>;
 
   constructor(player: any) {
+    this.clientId;
+    this.locked = false;
     this.username = player.username;
     this.id = player.id;
     this.avatar = player.avatar;

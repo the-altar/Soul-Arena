@@ -14,8 +14,9 @@ class Arena {
         this.renewSkillQueue = [];
         this.hasUsedSKill = {};
     }
-    addPlayer(player, team) {
+    addPlayer(player, team, socketClientId) {
         const playerInstance = new classes_1.Player(player);
+        playerInstance.clientId = socketClientId;
         let charIndex;
         this.players.push(playerInstance);
         if (this.players.length === 1) {
@@ -85,8 +86,10 @@ class Arena {
     startGame() {
         //log.info("- [START] increase turn");
         this.turnCount++;
-        const nextPlayer = this.players[this.turnCount % 2];
         const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
+        currentPlayer.locked = true;
+        const nextPlayer = this.players[this.turnCount % 2];
+        nextPlayer.locked = false;
         currentPlayer.turnCount++;
         currentPlayer.setTurn(false);
         nextPlayer.setTurn(true);
@@ -456,6 +459,12 @@ class Arena {
             publicChar.push(char.getPublicData());
         }
         return publicChar;
+    }
+    isPlayerLocked(initiator) {
+        for (const p of this.players) {
+            if (p.clientId === initiator && p.locked)
+                return p.locked;
+        }
     }
 }
 exports.Arena = Arena;

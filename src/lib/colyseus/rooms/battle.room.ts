@@ -33,6 +33,7 @@ export class Battle extends Room {
   private allowMatchCalculations: boolean;
   private roomCode: number;
   // When room is initialized
+
   onCreate(options: any) {
     this.updateMissions = options.updateMissions;
     this.allowMatchCalculations = options.allowMatchCalculations;
@@ -40,6 +41,12 @@ export class Battle extends Room {
 
     this.setState(new MatchState());
     this.onMessage("end-game-turn", async (client: Client, payload: any) => {
+      log.info(`--- [END TURN] client id: ${client.id}`);
+      if (this.arena.isPlayerLocked(client.id)) {
+        log.error("xxx Player is locked; can't end a turn");
+        return;
+      }
+      log.info(" xx [YOU ENDED YOUR TURN] xx");
       this.delay.reset();
       this.arena.processTurn(payload);
       this.lifeCycle();
@@ -78,7 +85,7 @@ export class Battle extends Room {
 
   // When client successfully join the room
   onJoin(client: Client, options: any, auth: any) {
-    this.arena.addPlayer(options.player, options.team);
+    this.arena.addPlayer(options.player, options.team, client.id);
     this.constructed++;
     this.playerState[client.sessionId] = options.player.id;
     if (this.constructed === 2) {
@@ -134,6 +141,7 @@ export class Battle extends Room {
     this.broadcast("game-started", this.arena.getClientData());
 
     this.delay = this.clock.setInterval(() => {
+      log.info("[YOU CLOCKED OUT]");
       this.lifeCycle();
       this.state.turnData = JSON.stringify(this.arena.getClientData());
     }, this.evaluateGroupInterval);
