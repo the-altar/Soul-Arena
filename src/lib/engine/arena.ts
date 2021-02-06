@@ -6,7 +6,7 @@ import { ControlType, SkillClassType } from "./enums";
 export class Arena {
   private players: Array<Player>;
   public characters: Array<Character>;
-  private turnCount: number;
+  public turnCount: number;
   private skillQueue: Array<Skill>;
   private renewSkillQueue: Array<Skill>;
   public tempQueue: Array<iSkillQueue>;
@@ -100,15 +100,17 @@ export class Arena {
     player.resetPayupCart();
   }
 
-  public startGame() {
-    //log.info("- [START] increase turn");
-
-    this.turnCount++;
+  public lockPlayers() {
     const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
-
     currentPlayer.locked = true;
     const nextPlayer = this.players[this.turnCount % 2];
     nextPlayer.locked = false;
+  }
+
+  public startGame() {
+    //log.info("- [START] increase turn");
+    const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
+    const nextPlayer = this.players[this.turnCount % 2];
 
     currentPlayer.turnCount++;
     currentPlayer.setTurn(false);
@@ -302,6 +304,19 @@ export class Arena {
       payupCart: player.getPayupCart(),
       playerIndex: index,
     };
+  }
+
+  public timeOutTempQueue() {
+    const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
+    for (const coordinate of this.tempQueue) {
+      const char = this.characters[coordinate.caster];
+      const s = char.skills[coordinate.skill];
+
+      currentPlayer.returnEnergy(s.getCost());
+      this.hasUsedSKill[coordinate.caster] = false;
+    }
+    this.tempQueue = [];
+    currentPlayer.resetPayupCart();
   }
 
   public addSkillToTempQueue(cordinates: {

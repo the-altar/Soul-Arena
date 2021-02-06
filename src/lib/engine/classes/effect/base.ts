@@ -356,6 +356,30 @@ export class Effect {
             this.activateOnTarget(char, origin, t, this.targets[index]);
           }
           break;
+        case effectTargetBehavior.OneRandomEnemy: {
+          let index;
+          if (this.triggered) index = 0;
+          else {
+            const { char } = this.arenaReference.findCharacterById(this.caster);
+            let searching = true;
+            while (searching) {
+              const i = this.targets[
+                Math.floor(Math.random() * this.targets.length)
+              ];
+              if (char.getEnemies().includes(i)) {
+                index = i;
+                searching = false;
+              }
+            }
+          }
+
+          this.activateOnTarget(
+            this.arenaReference.characters[index],
+            origin,
+            t,
+            index
+          );
+        }
       }
 
       if (this.mods.increment.isMultiplier && this.mods.increment.value)

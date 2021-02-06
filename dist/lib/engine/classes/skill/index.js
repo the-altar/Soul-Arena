@@ -62,11 +62,20 @@ class Skill {
             else {
                 this.requiresSkillOnTarget = [];
             }
+            if (data.cannotBeUsedOnTargetOf) {
+                this.cannotBeUsedOnTargetOf = data.cannotBeUsedOnTargetOf.map((e) => {
+                    return `${e}-${caster}`;
+                });
+            }
+            else {
+                this.cannotBeUsedOnTargetOf = [];
+            }
         }
         catch (e) {
             logger_1.log.error(e);
             this.inactiveEffects = [];
             this.requiresSkillOnTarget = [];
+            this.cannotBeUsedOnTargetOf = [];
         }
     }
     isDisabled() {
@@ -203,6 +212,7 @@ class Skill {
                     const index = this.targetChoices.choice[Math.floor(Math.random() * this.targetChoices.choice.length)];
                     t.concat(this.targetChoices.auto);
                     t.push(index);
+                    return t;
                 }
             }
         }

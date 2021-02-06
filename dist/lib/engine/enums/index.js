@@ -115,6 +115,7 @@ var effectTargetBehavior;
     effectTargetBehavior[effectTargetBehavior["Fifth"] = 11] = "Fifth";
     effectTargetBehavior[effectTargetBehavior["Sixth"] = 12] = "Sixth";
     effectTargetBehavior[effectTargetBehavior["IfAllyIncludingSelf"] = 13] = "IfAllyIncludingSelf";
+    effectTargetBehavior[effectTargetBehavior["OneRandomEnemy"] = 14] = "OneRandomEnemy";
 })(effectTargetBehavior = exports.effectTargetBehavior || (exports.effectTargetBehavior = {}));
 var DamageType;
 (function (DamageType) {

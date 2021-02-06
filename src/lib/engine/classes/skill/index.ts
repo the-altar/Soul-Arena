@@ -33,6 +33,7 @@ export class Skill {
   public uncounterable: boolean;
   private targetMode: targetType;
   public requiresSkillOnTarget: Array<string>;
+  public cannotBeUsedOnTargetOf: Array<string>;
   public effects: Array<Effect>;
   private casterReference: Character;
   private targetChoices: { [x: string]: Array<number> };
@@ -105,10 +106,21 @@ export class Skill {
       } else {
         this.requiresSkillOnTarget = [];
       }
+
+      if (data.cannotBeUsedOnTargetOf) {
+        this.cannotBeUsedOnTargetOf = data.cannotBeUsedOnTargetOf.map(
+          (e: any) => {
+            return `${e}-${caster}`;
+          }
+        );
+      } else {
+        this.cannotBeUsedOnTargetOf = [];
+      }
     } catch (e) {
       log.error(e);
       this.inactiveEffects = [];
       this.requiresSkillOnTarget = [];
+      this.cannotBeUsedOnTargetOf = [];
     }
   }
 
@@ -266,6 +278,7 @@ export class Skill {
           ];
           t.concat(this.targetChoices.auto);
           t.push(index);
+          return t;
         }
       }
     } catch (e) {

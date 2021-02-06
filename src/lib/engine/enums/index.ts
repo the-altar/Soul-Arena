@@ -111,6 +111,7 @@ export enum effectTargetBehavior {
   Fifth,
   Sixth,
   IfAllyIncludingSelf,
+  OneRandomEnemy
 }
 
 export enum DamageType {

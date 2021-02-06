@@ -83,13 +83,16 @@ class Arena {
         player.consumeEnergy(energySpent);
         player.resetPayupCart();
     }
-    startGame() {
-        //log.info("- [START] increase turn");
-        this.turnCount++;
+    lockPlayers() {
         const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
         currentPlayer.locked = true;
         const nextPlayer = this.players[this.turnCount % 2];
         nextPlayer.locked = false;
+    }
+    startGame() {
+        //log.info("- [START] increase turn");
+        const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
+        const nextPlayer = this.players[this.turnCount % 2];
         currentPlayer.turnCount++;
         currentPlayer.setTurn(false);
         nextPlayer.setTurn(true);
@@ -264,6 +267,17 @@ class Arena {
             payupCart: player.getPayupCart(),
             playerIndex: index,
         };
+    }
+    timeOutTempQueue() {
+        const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
+        for (const coordinate of this.tempQueue) {
+            const char = this.characters[coordinate.caster];
+            const s = char.skills[coordinate.skill];
+            currentPlayer.returnEnergy(s.getCost());
+            this.hasUsedSKill[coordinate.caster] = false;
+        }
+        this.tempQueue = [];
+        currentPlayer.resetPayupCart();
     }
     addSkillToTempQueue(cordinates) {
         const char = this.characters[cordinates.caster];

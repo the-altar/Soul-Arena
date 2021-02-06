@@ -136,18 +136,23 @@ export class Battle extends Room {
   }
 
   gameClock() {
+    this.arena.turnCount++;
     this.arena.startGame();
     this.state.turnData = JSON.stringify(this.arena.getClientData());
     this.broadcast("game-started", this.arena.getClientData());
 
     this.delay = this.clock.setInterval(() => {
       log.info("[YOU CLOCKED OUT]");
-      this.lifeCycle();
+      this.lifeCycle(true);
       this.state.turnData = JSON.stringify(this.arena.getClientData());
     }, this.evaluateGroupInterval);
   }
 
-  lifeCycle() {
+  lifeCycle(clockedOut?: boolean) {
+    this.arena.turnCount++;
+    this.arena.lockPlayers();
+    if (clockedOut) this.arena.timeOutTempQueue();
+
     const isOver = this.arena.startGame();
     this.state.turnData = JSON.stringify(this.arena.getClientData());
     if (isOver) {

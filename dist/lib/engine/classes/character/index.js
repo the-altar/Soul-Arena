@@ -98,8 +98,15 @@ class Character {
     validadeSkillsCompletely(pool, chars, playerId, self) {
         for (const skill of this.skills) {
             skill.setTurnCost();
+            if (skill.cannotBeUsedOnTargetOf) {
+                logger_1.log.info(skill.cannotBeUsedOnTargetOf, this.skillStack);
+            }
             if (this.isStunned(skill)) {
                 skill.disable();
+            }
+            else if (skill.cannotBeUsedOnTargetOf.length &&
+                this.skillStack.isTargetOf(skill.cannotBeUsedOnTargetOf)) {
+                skill.disable;
             }
             else {
                 skill.enable();
@@ -113,6 +120,10 @@ class Character {
         for (const skill of this.skills) {
             if (this.isStunned(skill)) {
                 skill.disable();
+            }
+            else if (skill.cannotBeUsedOnTargetOf.length &&
+                this.skillStack.isTargetOf(skill.cannotBeUsedOnTargetOf)) {
+                skill.disable;
             }
             else {
                 skill.enable();

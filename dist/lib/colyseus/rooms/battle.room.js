@@ -141,16 +141,21 @@ class Battle extends colyseus_1.Room {
         });
     }
     gameClock() {
+        this.arena.turnCount++;
         this.arena.startGame();
         this.state.turnData = JSON.stringify(this.arena.getClientData());
         this.broadcast("game-started", this.arena.getClientData());
         this.delay = this.clock.setInterval(() => {
             logger_1.log.info("[YOU CLOCKED OUT]");
-            this.lifeCycle();
+            this.lifeCycle(true);
             this.state.turnData = JSON.stringify(this.arena.getClientData());
         }, this.evaluateGroupInterval);
     }
-    lifeCycle() {
+    lifeCycle(clockedOut) {
+        this.arena.turnCount++;
+        this.arena.lockPlayers();
+        if (clockedOut)
+            this.arena.timeOutTempQueue();
         const isOver = this.arena.startGame();
         this.state.turnData = JSON.stringify(this.arena.getClientData());
         if (isOver) {
