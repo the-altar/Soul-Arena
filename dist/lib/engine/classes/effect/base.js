@@ -252,7 +252,7 @@ class Effect {
                 case enums_1.effectTargetBehavior.OneRandomEnemy: {
                     let index;
                     if (this.triggered)
-                        index = 0;
+                        index = this.targets[0];
                     else {
                         const { char } = this.arenaReference.findCharacterById(this.caster);
                         let searching = true;

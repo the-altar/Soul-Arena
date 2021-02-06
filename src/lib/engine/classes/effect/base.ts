@@ -356,9 +356,10 @@ export class Effect {
             this.activateOnTarget(char, origin, t, this.targets[index]);
           }
           break;
+
         case effectTargetBehavior.OneRandomEnemy: {
           let index;
-          if (this.triggered) index = 0;
+          if (this.triggered) index = this.targets[0];
           else {
             const { char } = this.arenaReference.findCharacterById(this.caster);
             let searching = true;

@@ -109,6 +109,9 @@ class Buffs {
         this.invulnerability.toSpecificSkill = {};
         this.invulnerability.toSkillClass = {};
     }
+    clearHarmfulInvulnerability() {
+        this.invulnerability.toHarmful = false;
+    }
     clearDamageIncreasal() {
         this.damageIncreasal = { byDamage: {}, bySkillClass: {}, bySkillId: {} };
     }

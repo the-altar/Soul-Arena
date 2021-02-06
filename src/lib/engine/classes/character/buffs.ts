@@ -160,6 +160,10 @@ export class Buffs {
     this.invulnerability.toSkillClass = {};
   }
 
+  public clearHarmfulInvulnerability() {
+    this.invulnerability.toHarmful = false;
+  }
+
   public clearDamageIncreasal() {
     this.damageIncreasal = { byDamage: {}, bySkillClass: {}, bySkillId: {} };
   }

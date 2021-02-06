@@ -382,12 +382,12 @@ export class Arena {
   clearEffectsStack(player: Player, player2: Player) {
     for (const i of player.getMyCharsIndex()) {
       const c = this.characters[i];
-      c.buffs.clearInvulnerability();
       c.buffs.clearCooldownReduction();
       c.buffs.clearDecreaseDamageTaken();
       c.buffs.clearAbsorbDamage();
       c.buffs.clearDamageIncreasal();
       c.buffs.clearIgnoreHarmfulEffects();
+      c.buffs.clearInvulnerability();
       c.buffs.cannotBeKilled = false;
       c.buffs.validateDD();
       c.clearDebuffs();
@@ -398,7 +398,6 @@ export class Arena {
     for (const i of player2.getMyCharsIndex()) {
       const c = this.characters[i];
       c.getDebuffs().clearStuns();
-      c.getBuffs().clearInvulnerability();
       c.getBuffs().clearIgnoreHarmfulEffects();
       c.getBuffs().clearDecreaseDamageTaken();
       c.effectStack.clearStack();
@@ -439,6 +438,7 @@ export class Arena {
     for (const i of myChar) {
       const c = this.characters[i];
       if (!c.isKnockedOut()) {
+        c.buffs.clearHarmfulInvulnerability()
         c.validadeSkillsCompletely(pool, this.characters, player.getId(), i);
         //log.info(`[${c.name}] Effect stack and buffs have been cleared`);
       } else {

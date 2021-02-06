@@ -133,20 +133,26 @@ export class Damage extends Effect {
   }
 
   apply(char: Character, origin: Skill) {
-    const reduction = this.getDamageReductionFromCaster(
+    let reduction = this.getDamageReductionFromCaster(
       this.caster,
       this,
       origin
     );
-    const increasalTaken = this.getIncreasedDamageTaken(char, this, origin);
-    const increasalDealt = this.getIncreasedDamageFromCaster(
+    let increasalTaken = this.getIncreasedDamageTaken(char, this, origin);
+    let increasalDealt = this.getIncreasedDamageFromCaster(
       this.caster,
       this,
       origin
     );
     let decreased = this.getDecreaseDamageTaken(char, this, origin);
 
-    if (char.getDebuffs().ignoreDecreaseDamageTaken) decreased = 0;
+    if (
+      char.getDebuffs().ignoreDecreaseDamageTaken ||
+      this.damageType === DamageType.Piercing ||
+      this.damageType === DamageType.Affliction
+    ) {
+      decreased = 0;
+    }
 
     const { conversionRate } = char.getBuffs().getAbsorbDamage({
       skillType: origin.class,
@@ -156,7 +162,9 @@ export class Damage extends Effect {
     let damage = Number(this.altValue) || this.value;
     damage = damage - (reduction + decreased - increasalTaken - increasalDealt);
 
-    damage = this.destroyDestructibleDefense(char, damage);
+    if (this.damageType !== DamageType.Affliction) {
+      damage = this.destroyDestructibleDefense(char, damage);
+    }
 
     const absorbed = damage * (conversionRate / 100);
     const hp = char.geHitPoints() - damage + Math.round(absorbed / 5) * 5;
