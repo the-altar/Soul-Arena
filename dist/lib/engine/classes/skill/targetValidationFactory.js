@@ -34,6 +34,7 @@ exports.targetSetter = function (skill, targetMode, characters, playerId, self) 
                 return choices;
             }
             case enums_1.targetType.AllEnemies: {
+                logger_1.log.info("SET ALL ENEMIES");
                 const enemies = characters[self].getEnemies();
                 enemies.forEach((i) => {
                     if (validTarget(characters[i], skill))
@@ -160,8 +161,8 @@ function validTarget(char, skill) {
             return false;
         if (!skill.ignoresInvulnerability && isInvulnerable)
             return false;
-        if (skill.requiresSkillOnTarget.length &&
-            !char.skillStack.isTargetOf(skill.requiresSkillOnTarget))
+        const requireList = skill.requiresSkillOnTarget.concat(skill.mods.getAttrValue("requiresSkillOnTarget") || []);
+        if (requireList.length && !char.skillStack.isTargetOf(requireList))
             return false;
         return true;
     }

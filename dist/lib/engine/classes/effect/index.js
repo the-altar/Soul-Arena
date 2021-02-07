@@ -117,6 +117,9 @@ exports.effectFactory = function (effect, caster) {
         case enums_1.effectType.IgnoreDeath: {
             return new healthRelated_1.IgnoreDeath(effect, caster);
         }
+        case enums_1.effectType.SkillMod: {
+            return new skillTargetMod_1.SkillMod(effect, caster);
+        }
         default: {
             return new base_1.Effect(effect, caster);
         }

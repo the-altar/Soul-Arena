@@ -170,7 +170,10 @@ export class Skill {
 
   public getValidatedTargets(choice: number): Array<number> {
     let t: Array<number> = [];
-    const targetMode = this.getTargetMod() || this.targetMode;
+    const targetMode: targetType =
+      this.getTargetMod() ||
+      this.mods.getAttrValue("targetMode") ||
+      this.targetMode;
 
     try {
       switch (targetMode) {
@@ -298,7 +301,8 @@ export class Skill {
     playerId: number,
     self?: number
   ) {
-    const targetMode = this.getTargetMod() || this.targetMode;
+    log.info(this.getTargetMod(), this.mods.meta.targetMode, this.targetMode)
+    const targetMode:targetType = this.getTargetMod() || this.mods.meta.targetMode || this.targetMode;
     this.targetChoices = targetSetter(
       this,
       targetMode,
@@ -510,7 +514,8 @@ export class Skill {
   }
 
   public setTurnCost() {
-    const t = this.mods.costReplacement || this.cost;
+    const t: Array<number> =
+      this.mods.costReplacement || this.mods.getAttrValue("cost") || this.cost;
     for (const i in t) {
       this.turnCost[i] = Math.max(t[i] + this.mods.costChange[i], 0);
     }

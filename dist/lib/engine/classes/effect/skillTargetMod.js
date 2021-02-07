@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IncreaseTargetSkillDuration = exports.IncreaseCasterSkillDuration = exports.ReplaceSkillCost = exports.SkillCostChange = exports.SkillTargetMod = void 0;
+exports.SkillMod = exports.IncreaseTargetSkillDuration = exports.IncreaseCasterSkillDuration = exports.ReplaceSkillCost = exports.SkillCostChange = exports.SkillTargetMod = void 0;
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
 const logger_1 = require("../../../logger");
@@ -211,6 +211,24 @@ class IncreaseTargetSkillDuration extends base_1.Effect {
     }
 }
 exports.IncreaseTargetSkillDuration = IncreaseTargetSkillDuration;
+class SkillMod extends base_1.Effect {
+    constructor(data, caster) {
+        super(data, caster);
+        this.skillId = data.skillId;
+        this.metadata = data.metadata || {};
+    }
+    functionality(char, origin) {
+        logger_1.log.info(this.skillId);
+        const s = char.getRealSkillById(this.skillId);
+        if (s) {
+            s.mods.setByAttribute(this.metadata, char.getId());
+        }
+    }
+    generateToolTip() {
+        this.message = this.message || null;
+    }
+}
+exports.SkillMod = SkillMod;
 function generateMessage(specificIndex, tType, skill) {
     let m = "";
     switch (tType) {

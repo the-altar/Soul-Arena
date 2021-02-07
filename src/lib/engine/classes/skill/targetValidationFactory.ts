@@ -41,6 +41,7 @@ export const targetSetter = function (
       }
 
       case targetType.AllEnemies: {
+        log.info("SET ALL ENEMIES")
         const enemies = characters[self].getEnemies();
         enemies.forEach((i) => {
           if (validTarget(characters[i], skill)) choices.choice.push(i);
@@ -166,10 +167,10 @@ function validTarget(char: Character, skill: Skill) {
   try {
     if (char.isKnockedOut()) return false;
     if (!skill.ignoresInvulnerability && isInvulnerable) return false;
-    if (
-      skill.requiresSkillOnTarget.length &&
-      !char.skillStack.isTargetOf(skill.requiresSkillOnTarget)
-    )
+    const requireList = skill.requiresSkillOnTarget.concat(
+      skill.mods.getAttrValue("requiresSkillOnTarget") || []
+    );
+    if (requireList.length && !char.skillStack.isTargetOf(requireList))
       return false;
 
     return true;

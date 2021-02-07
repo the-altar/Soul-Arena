@@ -64,6 +64,7 @@ var effectType;
     effectType[effectType["IgnoreDeath"] = 31] = "IgnoreDeath";
     effectType[effectType["ApplyEffect"] = 32] = "ApplyEffect";
     effectType[effectType["ReplaceSkill"] = 33] = "ReplaceSkill";
+    effectType[effectType["SkillMod"] = 34] = "SkillMod";
 })(effectType = exports.effectType || (exports.effectType = {}));
 var activationType;
 (function (activationType) {

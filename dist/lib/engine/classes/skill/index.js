@@ -118,7 +118,9 @@ class Skill {
     }
     getValidatedTargets(choice) {
         let t = [];
-        const targetMode = this.getTargetMod() || this.targetMode;
+        const targetMode = this.getTargetMod() ||
+            this.mods.getAttrValue("targetMode") ||
+            this.targetMode;
         try {
             switch (targetMode) {
                 case enums_1.targetType.Any: {
@@ -227,7 +229,8 @@ class Skill {
         }
     }
     setTargetChoices(characters, playerId, self) {
-        const targetMode = this.getTargetMod() || this.targetMode;
+        logger_1.log.info(this.getTargetMod(), this.mods.meta.targetMode, this.targetMode);
+        const targetMode = this.getTargetMod() || this.mods.meta.targetMode || this.targetMode;
         this.targetChoices = targetValidationFactory_1.targetSetter(this, targetMode, characters, playerId, self);
     }
     getTargetChoices() {
@@ -396,7 +399,7 @@ class Skill {
         return Object.assign(Object.assign({}, publicSkill), { effects: copyEffects, inactiveEffects: copyInactiveEffects });
     }
     setTurnCost() {
-        const t = this.mods.costReplacement || this.cost;
+        const t = this.mods.costReplacement || this.mods.getAttrValue("cost") || this.cost;
         for (const i in t) {
             this.turnCost[i] = Math.max(t[i] + this.mods.costChange[i], 0);
         }

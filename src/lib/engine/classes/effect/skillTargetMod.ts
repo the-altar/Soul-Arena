@@ -3,6 +3,7 @@ import { PlayerPhase, ReiatsuTypes, targetType } from "../../enums";
 import { Character } from "../character";
 import { Skill } from "../skill";
 import { log } from "../../../logger";
+import { extend } from "lodash";
 
 export class SkillTargetMod extends Effect {
   private newTarget: targetType;
@@ -74,7 +75,11 @@ export class SkillCostChange extends Effect {
       }
     } else {
       for (const s of char.skills) {
-        log.info(`[COST CHANGE] original cost mod: ${s.mods.costChange[this.reiatsuCostType]}, change: ${this.value}`);
+        log.info(
+          `[COST CHANGE] original cost mod: ${
+            s.mods.costChange[this.reiatsuCostType]
+          }, change: ${this.value}`
+        );
         s.mods.costChange[this.reiatsuCostType] += this.value;
       }
     }
@@ -259,6 +264,29 @@ export class IncreaseTargetSkillDuration extends Effect {
     delete publicData.charReference;
 
     return { ...publicData };
+  }
+}
+
+export class SkillMod extends Effect {
+  private metadata: any;
+  private skillId: number;
+
+  constructor(data: any, caster: any) {
+    super(data, caster);
+    this.skillId = data.skillId;
+    this.metadata = data.metadata || {};
+  }
+
+  public functionality(char: Character, origin: Skill) {
+    log.info(this.skillId);
+    const s = char.getRealSkillById(this.skillId);
+    if (s) {
+      s.mods.setByAttribute(this.metadata, char.getId());
+    }
+  }
+
+  public generateToolTip() {
+    this.message = this.message || null;
   }
 }
 

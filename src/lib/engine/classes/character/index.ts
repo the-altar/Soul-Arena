@@ -121,8 +121,8 @@ export class Character {
 
   public lowerCooldowns(char: Character) {
     for (const skill of this.skills) {
-      skill.lowerCooldown(0);
-      skill.clearMods();
+      skill.lowerCooldown(0)
+      skill.clearMods()
     }
   }
 
@@ -151,10 +151,8 @@ export class Character {
     self?: number
   ) {
     for (const skill of this.skills) {
+      log.info(`[SKILL] ${skill.name}`, skill.mods.meta)
       skill.setTurnCost();
-      if (skill.cannotBeUsedOnTargetOf) {
-        log.info(skill.cannotBeUsedOnTargetOf, this.skillStack);
-      }
       if (this.isStunned(skill)) {
         skill.disable();
       } else if (
@@ -199,7 +197,7 @@ export class Character {
 
   public getRealSkillById(id: number): Skill {
     for (const skill of this.skills) {
-      if (skill.getId() === id) return skill;
+      if (skill.getId() == id) return skill;
     }
     return null;
   }

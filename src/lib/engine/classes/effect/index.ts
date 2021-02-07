@@ -24,6 +24,7 @@ import {
   IncreaseCasterSkillDuration,
   IncreaseTargetSkillDuration,
   ReplaceSkillCost,
+  SkillMod,
 } from "./skillTargetMod";
 import { Counter } from "./counter";
 import { EffectRemoval, IgnoreEffects } from "./effectRemoval";
@@ -127,6 +128,9 @@ export const effectFactory = function (effect: any, caster: number): Effect {
     }
     case effectType.IgnoreDeath: {
       return new IgnoreDeath(effect, caster);
+    }
+    case effectType.SkillMod: {
+      return new SkillMod(effect, caster)
     }
     default: {
       return new Effect(effect, caster);

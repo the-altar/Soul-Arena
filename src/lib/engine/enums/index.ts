@@ -60,6 +60,7 @@ export enum effectType {
   IgnoreDeath,
   ApplyEffect,
   ReplaceSkill,
+  SkillMod,
 }
 
 export enum activationType {
@@ -111,7 +112,7 @@ export enum effectTargetBehavior {
   Fifth,
   Sixth,
   IfAllyIncludingSelf,
-  OneRandomEnemy
+  OneRandomEnemy,
 }
 
 export enum DamageType {

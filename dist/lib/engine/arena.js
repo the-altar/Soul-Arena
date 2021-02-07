@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Arena = void 0;
 const classes_1 = require("./classes");
-const logger_1 = require("../logger");
 const enums_1 = require("./enums");
 class Arena {
     constructor() {
@@ -350,13 +349,7 @@ class Arena {
             c.getBuffs().clearIgnoreHarmfulEffects();
             c.getBuffs().clearDecreaseDamageTaken();
             c.effectStack.clearStack();
-        }
-    }
-    clearSkillMods(p) {
-        logger_1.log.info("cleared skill mods");
-        const arr = p.getMyCharsIndex();
-        for (const i of arr) {
-            this.characters[i].clearSkillMods();
+            c.skillStack.clearStack();
         }
     }
     endPlayerPhase(player) {

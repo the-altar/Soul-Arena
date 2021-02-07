@@ -401,14 +401,7 @@ export class Arena {
       c.getBuffs().clearIgnoreHarmfulEffects();
       c.getBuffs().clearDecreaseDamageTaken();
       c.effectStack.clearStack();
-    }
-  }
-
-  public clearSkillMods(p: Player) {
-    log.info("cleared skill mods");
-    const arr = p.getMyCharsIndex();
-    for (const i of arr) {
-      this.characters[i].clearSkillMods();
+      c.skillStack.clearStack();
     }
   }
 
@@ -438,7 +431,7 @@ export class Arena {
     for (const i of myChar) {
       const c = this.characters[i];
       if (!c.isKnockedOut()) {
-        c.buffs.clearHarmfulInvulnerability()
+        c.buffs.clearHarmfulInvulnerability();
         c.validadeSkillsCompletely(pool, this.characters, player.getId(), i);
         //log.info(`[${c.name}] Effect stack and buffs have been cleared`);
       } else {
