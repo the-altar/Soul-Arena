@@ -50,7 +50,7 @@ export class Skill {
     world: Arena,
     casterReference: Character
   ) {
-    this.caster = data.caster;
+    this.caster = caster;
     this.banner = data.banner;
     this.cooldown = 0 || data.startCooldown;
     this.skillpic = data.skillpic;
@@ -301,8 +301,9 @@ export class Skill {
     playerId: number,
     self?: number
   ) {
-    log.info(this.getTargetMod(), this.mods.meta.targetMode, this.targetMode)
-    const targetMode:targetType = this.getTargetMod() || this.mods.meta.targetMode || this.targetMode;
+    log.info(this.getTargetMod(), this.mods.meta.targetMode, this.targetMode);
+    const targetMode: targetType =
+      this.getTargetMod() || this.mods.meta.targetMode || this.targetMode;
     this.targetChoices = targetSetter(
       this,
       targetMode,
@@ -343,6 +344,7 @@ export class Skill {
       //log.info(`[${this.casterReference.name}]`, this.casterReference.getDebuffs().stun)
       if (this.casterReference.isStunned(this)) {
         if (this.persistence === ControlType.Action) {
+          effect.tick++;
           continue;
         } else if (this.persistence === ControlType.Control)
           effect.terminate = true;
@@ -363,8 +365,10 @@ export class Skill {
       if (!effect.getTargets().length) effect.setTargets(this.targets);
 
       if (this.casterReference.isStunned(this)) {
-        if (this.persistence === ControlType.Action) continue;
-        else if (this.persistence === ControlType.Control)
+        if (this.persistence === ControlType.Action) {
+          effect.tick++;
+          continue;
+        } else if (this.persistence === ControlType.Control)
           effect.terminate = true;
       }
       effect.shouldApply();
@@ -403,11 +407,9 @@ export class Skill {
       effect.progressTurn();
       if (effect.terminate) {
         const e = this.effects.splice(i, 1)[0];
-
-        if (!e.isVisible()) {
-          const chars = world.getCharactersByIndex(e.getTargets());
-
-          for (const char of chars) {
+        const chars = world.getCharactersByIndex(e.getTargets());
+        for (const char of chars) {
+          if (!e.isVisible()) {
             char.addNotification({
               id: origin.getId(),
               msg: "An effect has ended",
@@ -415,6 +417,7 @@ export class Skill {
               skillpic: origin.skillpic,
             });
           }
+          char.effectStack.decrease(e.gameId);
         }
       }
     }

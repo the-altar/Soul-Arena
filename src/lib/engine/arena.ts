@@ -167,12 +167,16 @@ export class Arena {
       const cancelled = skill.isCancelled();
       const terminate = skill.tickEffectsDuration(this, skill);
       if (terminate || cancelled) {
-        this.skillQueue.splice(i, 1);
+        const s = this.skillQueue.splice(i, 1)[0];
+        log.info(`xxxx ${s.name} has ended`)
+        this.characters.forEach((c) => {
+          c.skillStack.remove(s.getId(), s.caster);
+        });
         continue;
       }
       const validated = skill.areTargetsValidated();
       if (!validated || cancelled) {
-        this.skillQueue.splice(i, 1);
+        const s = this.skillQueue.splice(i, 1);
         continue;
       }
     }

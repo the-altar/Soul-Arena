@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SkillStack = void 0;
+const logger_1 = require("../../../logger");
 class SkillStack {
     constructor() {
         this.skills = {};
@@ -9,6 +10,7 @@ class SkillStack {
         this.skills[`${id}-${caster}`] = true;
     }
     remove(id, caster) {
+        logger_1.log.info(`clear skill stack ${id}-${caster}`, this.skills);
         delete this.skills[`${id}-${caster}`];
     }
     clearStack() {

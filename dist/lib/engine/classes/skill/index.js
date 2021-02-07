@@ -9,7 +9,7 @@ const logger_1 = require("../../../logger");
 const z_helpers_1 = require("../effect/z.helpers");
 class Skill {
     constructor(data, caster, world, casterReference) {
-        this.caster = data.caster;
+        this.caster = caster;
         this.banner = data.banner;
         this.cooldown = 0 || data.startCooldown;
         this.skillpic = data.skillpic;
@@ -259,6 +259,7 @@ class Skill {
             //log.info(`[${this.casterReference.name}]`, this.casterReference.getDebuffs().stun)
             if (this.casterReference.isStunned(this)) {
                 if (this.persistence === enums_1.ControlType.Action) {
+                    effect.tick++;
                     continue;
                 }
                 else if (this.persistence === enums_1.ControlType.Control)
@@ -279,8 +280,10 @@ class Skill {
             if (!effect.getTargets().length)
                 effect.setTargets(this.targets);
             if (this.casterReference.isStunned(this)) {
-                if (this.persistence === enums_1.ControlType.Action)
+                if (this.persistence === enums_1.ControlType.Action) {
+                    effect.tick++;
                     continue;
+                }
                 else if (this.persistence === enums_1.ControlType.Control)
                     effect.terminate = true;
             }
@@ -312,9 +315,9 @@ class Skill {
             effect.progressTurn();
             if (effect.terminate) {
                 const e = this.effects.splice(i, 1)[0];
-                if (!e.isVisible()) {
-                    const chars = world.getCharactersByIndex(e.getTargets());
-                    for (const char of chars) {
+                const chars = world.getCharactersByIndex(e.getTargets());
+                for (const char of chars) {
+                    if (!e.isVisible()) {
                         char.addNotification({
                             id: origin.getId(),
                             msg: "An effect has ended",
@@ -322,6 +325,7 @@ class Skill {
                             skillpic: origin.skillpic,
                         });
                     }
+                    char.effectStack.decrease(e.gameId);
                 }
             }
         }

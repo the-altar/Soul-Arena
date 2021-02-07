@@ -97,14 +97,14 @@ class Character {
     }
     validadeSkillsCompletely(pool, chars, playerId, self) {
         for (const skill of this.skills) {
-            logger_1.log.info(`[SKILL] ${skill.name}`, skill.mods.meta);
+            logger_1.log.info(`[SKILL - ${this.name}] ${skill.name}`, this.skillStack);
             skill.setTurnCost();
             if (this.isStunned(skill)) {
                 skill.disable();
             }
             else if (skill.cannotBeUsedOnTargetOf.length &&
                 this.skillStack.isTargetOf(skill.cannotBeUsedOnTargetOf)) {
-                skill.disable;
+                skill.disable();
             }
             else {
                 skill.enable();

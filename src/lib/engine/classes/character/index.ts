@@ -151,7 +151,7 @@ export class Character {
     self?: number
   ) {
     for (const skill of this.skills) {
-      log.info(`[SKILL] ${skill.name}`, skill.mods.meta)
+      log.info(`[SKILL - ${this.name}] ${skill.name}`, this.skillStack)
       skill.setTurnCost();
       if (this.isStunned(skill)) {
         skill.disable();
@@ -159,7 +159,7 @@ export class Character {
         skill.cannotBeUsedOnTargetOf.length &&
         this.skillStack.isTargetOf(skill.cannotBeUsedOnTargetOf)
       ) {
-        skill.disable;
+        skill.disable();
       } else {
         skill.enable();
         skill.validateCoolDown();
