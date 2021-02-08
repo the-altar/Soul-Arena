@@ -66,6 +66,16 @@ export class SkillMods {
   }
 
   public clearMods() {
+    this.targetMod = null;
+    this.increaseDuration = 0;
+    this.costReplacement = null;
+    this.costChange = {
+      [ReiatsuTypes.Hakuda]: 0,
+      [ReiatsuTypes.Kidou]: 0,
+      [ReiatsuTypes.Random]: 0,
+      [ReiatsuTypes.Reiryoku]: 0,
+      [ReiatsuTypes.Zanpakutou]: 0,
+    };
     this.meta = {
       cost: null,
       class: null,

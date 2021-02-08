@@ -50,6 +50,16 @@ class SkillMods {
         }
     }
     clearMods() {
+        this.targetMod = null;
+        this.increaseDuration = 0;
+        this.costReplacement = null;
+        this.costChange = {
+            [enums_1.ReiatsuTypes.Hakuda]: 0,
+            [enums_1.ReiatsuTypes.Kidou]: 0,
+            [enums_1.ReiatsuTypes.Random]: 0,
+            [enums_1.ReiatsuTypes.Reiryoku]: 0,
+            [enums_1.ReiatsuTypes.Zanpakutou]: 0,
+        };
         this.meta = {
             cost: null,
             class: null,
