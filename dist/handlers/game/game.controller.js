@@ -43,7 +43,8 @@ exports.user = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(200).json(user);
     }
     catch (err) {
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.trackMission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -53,8 +54,8 @@ exports.trackMission = (req, res) => __awaiter(void 0, void 0, void 0, function*
         return res.status(200).json({ success: true });
     }
     catch (err) {
-        res.status(501).json({ success: false });
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.missionTracks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -65,8 +66,8 @@ exports.missionTracks = (req, res) => __awaiter(void 0, void 0, void 0, function
         res.status(200).json({ success: true, goals: r.rows });
     }
     catch (err) {
-        res.status(401).json({ success: false });
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.deleteMissionTracks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -77,8 +78,8 @@ exports.deleteMissionTracks = (req, res) => __awaiter(void 0, void 0, void 0, fu
         return res.status(200).json({ success: true });
     }
     catch (err) {
-        res.status(501).json({ success: false });
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.missions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -88,8 +89,8 @@ exports.missions = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         return res.status(200).json(r.rows);
     }
     catch (err) {
-        res.status(501);
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.character = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -104,8 +105,8 @@ exports.character = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.json(r.rows);
     }
     catch (err) {
-        res.status(500).send("Something went wrong...");
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.themes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

@@ -73,11 +73,11 @@ class ClientManager {
             return this.clientList[sortedKey];
         });
         if (roomCode === enums_1.BattleRooms.rankedBattle) {
-            logger_1.log.info("xx [MatchMake] ladder game; filter duplicated IP");
+            logger_1.log.error("xx [MatchMake] ladder game; filter duplicated IP");
             mappedHash = mappedHash.filter((e) => {
                 const ipAddress = this.onlineList[e.player.id];
                 if (seen[ipAddress]) {
-                    logger_1.log.info(`[MatchMake] repeated IP: ${ipAddress}`);
+                    logger_1.log.error(`[MatchMake] repeated IP: ${ipAddress}`);
                     return false;
                 }
                 else {

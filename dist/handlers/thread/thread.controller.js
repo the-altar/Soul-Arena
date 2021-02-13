@@ -27,8 +27,8 @@ exports.news = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(200).json(docs.rows);
     }
     catch (err) {
-        res.status(501).end();
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.findThread = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -48,8 +48,8 @@ exports.findThread = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         return res.status(200).json(docs.rows[0]);
     }
     catch (err) {
-        res.status(501).json({ success: false });
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.postThread = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -60,8 +60,8 @@ exports.postThread = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         return res.status(200).json({ success: true });
     }
     catch (err) {
-        res.status(501).end();
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.updateThread = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -71,7 +71,8 @@ exports.updateThread = (req, res) => __awaiter(void 0, void 0, void 0, function*
         return res.status(200).json({ success: true, content: req.body[1] });
     }
     catch (err) {
-        return res.status(501).json({ success: false });
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.postComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -100,8 +101,8 @@ exports.postComment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
     catch (err) {
         client.query("ROLLBACK");
-        res.status(501).end();
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
     finally {
         client.release();
@@ -140,8 +141,8 @@ exports.getPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         return res.status(200).json(data.rows);
     }
     catch (err) {
-        res.status(501);
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 //# sourceMappingURL=thread.controller.js.map

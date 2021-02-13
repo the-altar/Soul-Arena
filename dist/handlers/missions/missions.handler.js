@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.remove = exports.update = exports.findOne = exports.findAll = exports.create = void 0;
 const db_1 = require("../../db");
 const path_1 = require("path");
+const logger_1 = require("../../lib/logger");
 const fs_1 = require("fs");
 exports.create = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -22,8 +23,8 @@ exports.create = function (req, res) {
             res.status(200).json({ success: true });
         }
         catch (err) {
-            res.status(401).json({ success: false });
-            throw err;
+            logger_1.log.error(err);
+            return res.status(500).json({});
         }
     });
 };
@@ -35,8 +36,8 @@ exports.findAll = function (req, res) {
             return res.status(200).json({ success: true, missions: r.rows });
         }
         catch (err) {
-            res.status(501).json({ success: false });
-            throw err;
+            logger_1.log.error(err);
+            return res.status(500).json({});
         }
     });
 };
@@ -48,8 +49,8 @@ exports.findOne = function (req, res) {
             return res.status(200).json({ success: true, mission: r.rows[0] });
         }
         catch (err) {
-            res.status(401).json({ success: false });
-            throw err;
+            logger_1.log.error(err);
+            return res.status(500).json({});
         }
     });
 };
@@ -63,8 +64,8 @@ exports.update = function (req, res) {
             return res.status(200).json({ success: true });
         }
         catch (err) {
-            res.status(401).json({ success: false });
-            throw err;
+            logger_1.log.error(err);
+            return res.status(500).json({});
         }
     });
 };
@@ -81,8 +82,8 @@ exports.remove = function (req, res) {
             return res.status(200).json({ success: true });
         }
         catch (e) {
-            res.status(501).json({ success: false });
-            throw e;
+            logger_1.log.error(e);
+            return res.status(500).json({});
         }
     });
 };

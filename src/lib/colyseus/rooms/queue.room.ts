@@ -79,11 +79,11 @@ class ClientManager {
         return this.clientList[sortedKey];
       });
     if (roomCode === BattleRooms.rankedBattle) {
-      log.info("xx [MatchMake] ladder game; filter duplicated IP");
+      log.error("xx [MatchMake] ladder game; filter duplicated IP");
       mappedHash = mappedHash.filter((e) => {
         const ipAddress = this.onlineList[e.player.id];
         if (seen[ipAddress]) {
-          log.info(`[MatchMake] repeated IP: ${ipAddress}`);
+          log.error(`[MatchMake] repeated IP: ${ipAddress}`);
           return false;
         } else {
           seen[ipAddress] = true;
@@ -108,7 +108,6 @@ export class Queue extends Room {
     this.setSimulationInterval(async () => {
       try {
         const queue = this.manager.getRankedMap(this.targetRoomCode);
-
         for (let i = 1; i < queue.length; i = i + 2) {
           const room = await matchMaker.createRoom(this.targetRoom, {});
 

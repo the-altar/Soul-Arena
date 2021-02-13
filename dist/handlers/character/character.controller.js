@@ -42,7 +42,8 @@ exports.create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.json({ code: 1 });
     }
     catch (err) {
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.update = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -53,7 +54,8 @@ exports.update = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.json({ code: 1 });
     }
     catch (err) {
-        return res.json({ code: 0 });
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.find = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -64,8 +66,8 @@ exports.find = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.json(char.rows[0]);
     }
     catch (err) {
-        console.error(err);
-        return res.json({ code: 0 });
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.getAll = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -74,8 +76,8 @@ exports.getAll = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.json(docs.rows);
     }
     catch (err) {
-        console.error(err);
-        return res.json(false);
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.getIds = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -85,7 +87,8 @@ exports.getIds = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.json(r.rows);
     }
     catch (err) {
-        return res.status(500).end();
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.purchase = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -101,8 +104,8 @@ exports.purchase = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         return res.status(200).json({ success: true });
     }
     catch (err) {
-        res.json({ success: true });
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.profiles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

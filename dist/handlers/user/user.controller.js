@@ -49,8 +49,8 @@ function loggerMiddleware(req, res, next) {
             next();
         }
         catch (err) {
-            res.status(401).end();
-            throw err;
+            logger_1.log.error(err);
+            return res.status(401).end();
         }
     });
 }
@@ -93,6 +93,7 @@ exports.register = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
     catch (err) {
         yield client.query("ROLLBACK");
+        logger_1.log.error(err);
         return res.status(500).json({ success: false, err: err });
     }
     finally {
@@ -132,7 +133,8 @@ exports.login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.json({ userData: response, success: true });
     }
     catch (err) {
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -162,7 +164,8 @@ exports.user = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(200).json(doc.rows[0]);
     }
     catch (err) {
-        throw err;
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.uploadAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -194,7 +197,8 @@ exports.defaultAvatar = (req, res) => __awaiter(void 0, void 0, void 0, function
         return res.status(200).json({ success: true });
     }
     catch (err) {
-        return res.status(500).json({ success: false });
+        logger_1.log.error(err);
+        return res.status(500).json({});
     }
 });
 exports.resetStats = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
