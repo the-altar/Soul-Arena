@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { pool } from "../../db";
 import { join } from "path";
+import {log} from "../../lib/logger"
 import { unlink, existsSync } from "fs";
 
 export const create = async function (req: Request, res: Response) {
@@ -10,8 +11,8 @@ export const create = async function (req: Request, res: Response) {
     pool.query(sql, req.body);
     res.status(200).json({ success: true });
   } catch (err) {
-    res.status(401).json({ success: false });
-    throw err;
+    log.error(err)
+    return res.status(500).json({})
   }
 };
 
@@ -21,8 +22,8 @@ export const findAll = async function (req: Request, res: Response) {
     const r = await pool.query(sql);
     return res.status(200).json({ success: true, missions: r.rows });
   } catch (err) {
-    res.status(501).json({ success: false });
-    throw err;
+    log.error(err)
+    return res.status(500).json({})
   }
 };
 
@@ -32,8 +33,8 @@ export const findOne = async function (req: Request, res: Response) {
     const r = await pool.query(sql, [req.params.id]);
     return res.status(200).json({ success: true, mission: r.rows[0] });
   } catch (err) {
-    res.status(401).json({ success: false });
-    throw err;
+    log.error(err)
+    return res.status(500).json({})
   }
 };
 
@@ -46,8 +47,8 @@ export const update = async function (req: Request, res: Response) {
     await pool.query(sql, req.body);
     return res.status(200).json({ success: true });
   } catch (err) {
-    res.status(401).json({ success: false });
-    throw err;
+    log.error(err)
+    return res.status(500).json({})
   }
 };
 
@@ -63,7 +64,7 @@ export const remove = async function (req: Request, res: Response) {
     }
     return res.status(200).json({ success: true });
   } catch (e) {
-    res.status(501).json({ success: false });
-    throw e;
+    log.error(e)
+    return res.status(500).json({})
   }
 };

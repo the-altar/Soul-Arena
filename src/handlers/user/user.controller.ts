@@ -20,8 +20,8 @@ export async function loggerMiddleware(
     } else req.res.locals.guest = true;
     next();
   } catch (err) {
-    res.status(401).end();
-    throw err;
+    log.error(err)
+    return res.status(401).end();
   }
 }
 
@@ -67,6 +67,7 @@ export const register = async (req: Request, res: Response) => {
     });
   } catch (err) {
     await client.query("ROLLBACK");
+    log.error(err)
     return res.status(500).json({ success: false, err: err });
   } finally {
     client.release();

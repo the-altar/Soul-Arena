@@ -17,8 +17,8 @@ export const news = async (req: Request, res: Response) => {
     const docs = await pool.query(text);
     res.status(200).json(docs.rows);
   } catch (err) {
-    res.status(501).end();
-    throw err;
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 
@@ -40,8 +40,8 @@ export const findThread = async (req: Request, res: Response) => {
     const docs = await pool.query(text, [id, siteArea]);
     return res.status(200).json(docs.rows[0]);
   } catch (err) {
-    res.status(501).json({ success: false });
-    throw err;
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 
@@ -52,8 +52,8 @@ export const postThread = async (req: Request, res: Response) => {
     await pool.query(text, req.body);
     return res.status(200).json({ success: true });
   } catch (err) {
-    res.status(501).end();
-    throw err;
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 
@@ -63,7 +63,8 @@ export const updateThread = async (req: Request, res: Response) => {
     await pool.query(text, req.body);
     return res.status(200).json({ success: true, content: req.body[1] });
   } catch (err) {
-    return res.status(501).json({ success: false });
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 
@@ -93,8 +94,8 @@ export const postComment = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true });
   } catch (err) {
     client.query("ROLLBACK");
-    res.status(501).end();
-    throw err;
+    log.error(err);
+    return res.status(500).json({});
   } finally {
     client.release();
   }
@@ -133,7 +134,7 @@ export const getPosts = async (req: Request, res: Response) => {
     const data = await pool.query(sql, [threadId]);
     return res.status(200).json(data.rows);
   } catch (err) {
-    res.status(501);
-    throw err;
+    log.error(err);
+    return res.status(500).json({});
   }
 };

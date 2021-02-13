@@ -14,7 +14,8 @@ export const create = async (req: Request, res: Response) => {
     await pool.query(text, req.body);
     return res.json({ code: 1 });
   } catch (err) {
-    throw err;
+    log.error(err)
+    return res.status(500).json({})
   }
 };
 
@@ -26,7 +27,8 @@ export const update = async (req: Request, res: Response) => {
     await pool.query(text, req.body);
     return res.json({ code: 1 });
   } catch (err) {
-    return res.json({ code: 0 });
+    log.error(err)
+    return res.status(500).json({})
   }
 };
 
@@ -37,8 +39,8 @@ export const find = async (req: Request, res: Response) => {
     ]);
     return res.json(char.rows[0]);
   } catch (err) {
-    console.error(err);
-    return res.json({ code: 0 });
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 
@@ -47,8 +49,8 @@ export const getAll = async (req: Request, res: Response) => {
     const docs = await pool.query("SELECT * from entity");
     return res.json(docs.rows);
   } catch (err) {
-    console.error(err);
-    return res.json(false);
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 
@@ -58,7 +60,8 @@ export const getIds = async (req: Request, res: Response) => {
     const r = await pool.query(text);
     return res.json(r.rows);
   } catch (err) {
-    return res.status(500).end();
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 
@@ -74,8 +77,8 @@ export const purchase = async (req: Request, res: Response) => {
     await pool.query(sql2, [req.body.characterId, req.body.userId]);
     return res.status(200).json({ success: true });
   } catch (err) {
-    res.json({ success: true });
-    throw err;
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 
