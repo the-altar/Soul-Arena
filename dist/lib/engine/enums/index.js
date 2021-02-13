@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.triggerClauseType = exports.PlayerPhase = exports.ControlType = exports.SkillClassType = exports.CostTypes = exports.DebuffTypes = exports.BuffTypes = exports.DamageType = exports.effectTargetBehavior = exports.targetType = exports.activationType = exports.effectType = exports.CharacterTypes = exports.ReiatsuTypes = exports.memberRank = void 0;
+exports.BattleRooms = exports.triggerClauseType = exports.PlayerPhase = exports.ControlType = exports.SkillClassType = exports.CostTypes = exports.DebuffTypes = exports.BuffTypes = exports.DamageType = exports.effectTargetBehavior = exports.targetType = exports.activationType = exports.effectType = exports.CharacterTypes = exports.ReiatsuTypes = exports.memberRank = void 0;
 var memberRank;
 (function (memberRank) {
     memberRank[memberRank["Guest"] = 0] = "Guest";
@@ -183,4 +183,10 @@ var triggerClauseType;
     triggerClauseType[triggerClauseType["UsesANewSkill"] = 6] = "UsesANewSkill";
     triggerClauseType[triggerClauseType["UsesANewNonStrategicSkill"] = 7] = "UsesANewNonStrategicSkill";
 })(triggerClauseType = exports.triggerClauseType || (exports.triggerClauseType = {}));
+var BattleRooms;
+(function (BattleRooms) {
+    BattleRooms[BattleRooms["rankedBattle"] = 0] = "rankedBattle";
+    BattleRooms[BattleRooms["quickBattle"] = 1] = "quickBattle";
+    BattleRooms[BattleRooms["privateBattle"] = 2] = "privateBattle";
+})(BattleRooms = exports.BattleRooms || (exports.BattleRooms = {}));
 //# sourceMappingURL=index.js.map

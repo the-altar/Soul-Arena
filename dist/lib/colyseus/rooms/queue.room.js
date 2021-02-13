@@ -12,15 +12,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Queue = void 0;
 const colyseus_1 = require("colyseus");
 const db_1 = require("../../../db");
+const enums_1 = require("../../engine/enums");
+const logger_1 = require("../../logger");
 class ClientManager {
     constructor() {
         this.clientList = {};
         this.onlineList = {};
+        this.ipCheck = {};
     }
     isClientConnected(pid) {
         if (this.onlineList[pid] !== undefined)
             return true;
         return false;
+    }
+    addIpAddress(ip, playerId) {
+        this.ipCheck[ip] = playerId;
+        this.onlineList[playerId] = ip;
     }
     addClient(id, payload, connection) {
         this.clientList[id] = {
@@ -30,7 +37,6 @@ class ClientManager {
             }),
             connection: connection,
         };
-        this.onlineList[payload.player.id] = true;
     }
     getClientConnectionBySessionId(id) {
         return this.clientList[id];
@@ -49,20 +55,37 @@ class ClientManager {
             return;
         }
         const playerId = this.clientList[id].player.id;
+        const ip = this.onlineList[playerId];
         delete this.onlineList[playerId];
         delete this.clientList[id];
+        delete this.ipCheck[ip];
     }
     countPlayersOnline() {
         return Object.keys(this.clientList).length;
     }
-    getRankedMap() {
-        const mappedHash = Object.keys(this.clientList)
+    getRankedMap(roomCode) {
+        const seen = {};
+        let mappedHash = Object.keys(this.clientList)
             .sort((a, b) => {
             return this.clientList[a].player.elo - this.clientList[b].player.elo;
         })
             .map((sortedKey) => {
             return this.clientList[sortedKey];
         });
+        if (roomCode === enums_1.BattleRooms.rankedBattle) {
+            logger_1.log.info("xx [MatchMake] ladder game; filter duplicated IP");
+            mappedHash = mappedHash.filter((e) => {
+                const ipAddress = this.onlineList[e.player.id];
+                if (seen[ipAddress]) {
+                    logger_1.log.info(`[MatchMake] repeated IP: ${ipAddress}`);
+                    return false;
+                }
+                else {
+                    seen[ipAddress] = true;
+                    return true;
+                }
+            });
+        }
         return mappedHash;
     }
 }
@@ -70,15 +93,16 @@ class Queue extends colyseus_1.Room {
     constructor() {
         super(...arguments);
         this.manager = new ClientManager();
-        this.evaluateGroupInterval = 5000;
+        this.evaluateGroupInterval = 20000;
     }
     // When room is initialized
     onCreate(options) {
         this.targetRoom = options.targetRoom;
+        this.targetRoomCode = enums_1.BattleRooms[options.targetRoom];
         this.setPatchRate(null);
         this.setSimulationInterval(() => __awaiter(this, void 0, void 0, function* () {
             try {
-                const queue = this.manager.getRankedMap();
+                const queue = this.manager.getRankedMap(this.targetRoomCode);
                 for (let i = 1; i < queue.length; i = i + 2) {
                     const room = yield colyseus_1.matchMaker.createRoom(this.targetRoom, {});
                     for (let j = i - 1; j <= i; j++) {
@@ -101,6 +125,7 @@ class Queue extends colyseus_1.Room {
     onAuth(client, options, request) {
         if (this.manager.isClientConnected(options.player.id))
             return false;
+        this.manager.addIpAddress(request.connection.remoteAddress, options.player.id);
         return true;
     }
     // When client successfully join the room
@@ -129,16 +154,18 @@ class Queue extends colyseus_1.Room {
             try {
                 options.team = (yield db_1.pool.query(sql, options.team)).rows;
                 this.manager.addClient(client.sessionId, options, client);
-                client.send("connected_clients", this.manager.countPlayersOnline());
+                this.broadcast("connected_clients", this.manager.countPlayersOnline());
             }
             catch (err) {
-                throw err;
+                client.close();
+                logger_1.log.error(err);
             }
         });
     }
     // When a client leaves the room
     onLeave(client, consented) {
         this.manager.removeClientBySessionId(client.sessionId);
+        this.broadcast("connected_clients", this.manager.countPlayersOnline());
     }
     onDispose() {
         return __awaiter(this, void 0, void 0, function* () { });

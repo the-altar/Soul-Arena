@@ -179,3 +179,9 @@ export enum triggerClauseType {
   UsesANewSkill,
   UsesANewNonStrategicSkill,
 }
+
+export enum BattleRooms {
+  rankedBattle,
+  quickBattle,
+  privateBattle
+}

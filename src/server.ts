@@ -3,6 +3,7 @@ import { createServer } from "http";
 import { App } from "./express";
 import { pool } from "./db";
 import { Battle, Lobby, Queue } from "./lib/colyseus";
+import { BattleRooms } from "./lib/engine/enums";
 import { log } from "./lib/logger";
 
 export const Coliseum = class {

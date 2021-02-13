@@ -1,21 +1,29 @@
 import http from "http";
 import { Room, Client, matchMaker } from "colyseus";
 import { pool } from "../../../db";
+import { BattleRooms } from "../../engine/enums";
+import { log } from "../../logger";
 
 class ClientManager {
   private clientList: {
     [key: string]: { player: any; team: any; connection: Client };
   };
-  private onlineList: { [key: string]: boolean };
-
+  private onlineList: { [key: string]: string };
+  private ipCheck: { [x: string]: string };
   constructor() {
     this.clientList = {};
     this.onlineList = {};
+    this.ipCheck = {};
   }
 
   isClientConnected(pid: string): boolean {
     if (this.onlineList[pid] !== undefined) return true;
     return false;
+  }
+
+  public addIpAddress(ip: string, playerId: string) {
+    this.ipCheck[ip] = playerId;
+    this.onlineList[playerId] = ip;
   }
 
   public addClient(id: string, payload: any, connection: Client): void {
@@ -26,7 +34,6 @@ class ClientManager {
       }),
       connection: connection,
     };
-    this.onlineList[payload.player.id] = true;
   }
 
   public getClientConnectionBySessionId(id: string) {
@@ -52,37 +59,55 @@ class ClientManager {
       return;
     }
     const playerId = this.clientList[id].player.id;
+    const ip = this.onlineList[playerId];
     delete this.onlineList[playerId];
     delete this.clientList[id];
+    delete this.ipCheck[ip];
   }
 
   public countPlayersOnline(): number {
     return Object.keys(this.clientList).length;
   }
 
-  public getRankedMap() {
-    const mappedHash = Object.keys(this.clientList)
+  public getRankedMap(roomCode: any) {
+    const seen: { [x: string]: boolean } = {};
+    let mappedHash = Object.keys(this.clientList)
       .sort((a, b) => {
         return this.clientList[a].player.elo - this.clientList[b].player.elo;
       })
       .map((sortedKey) => {
         return this.clientList[sortedKey];
       });
+    if (roomCode === BattleRooms.rankedBattle) {
+      log.info("xx [MatchMake] ladder game; filter duplicated IP");
+      mappedHash = mappedHash.filter((e) => {
+        const ipAddress = this.onlineList[e.player.id];
+        if (seen[ipAddress]) {
+          log.info(`[MatchMake] repeated IP: ${ipAddress}`);
+          return false;
+        } else {
+          seen[ipAddress] = true;
+          return true;
+        }
+      });
+    }
     return mappedHash;
   }
 }
 
 export class Queue extends Room {
   private manager: ClientManager = new ClientManager();
-  private evaluateGroupInterval: number = 5000;
+  private evaluateGroupInterval: number = 20000;
   private targetRoom: string;
+  private targetRoomCode: string | number;
   // When room is initialized
   onCreate(options: any) {
     this.targetRoom = options.targetRoom;
+    this.targetRoomCode = BattleRooms[options.targetRoom];
     this.setPatchRate(null);
     this.setSimulationInterval(async () => {
       try {
-        const queue = this.manager.getRankedMap();
+        const queue = this.manager.getRankedMap(this.targetRoomCode);
 
         for (let i = 1; i < queue.length; i = i + 2) {
           const room = await matchMaker.createRoom(this.targetRoom, {});
@@ -107,6 +132,10 @@ export class Queue extends Room {
   // Authorize client based on provided options before WebSocket handshake is complete
   onAuth(client: Client, options: any, request: http.IncomingMessage): boolean {
     if (this.manager.isClientConnected(options.player.id)) return false;
+    this.manager.addIpAddress(
+      request.connection.remoteAddress,
+      options.player.id
+    );
     return true;
   }
 
@@ -135,15 +164,17 @@ export class Queue extends Room {
     try {
       options.team = (await pool.query(sql, options.team)).rows;
       this.manager.addClient(client.sessionId, options, client);
-      client.send("connected_clients", this.manager.countPlayersOnline())
+      this.broadcast("connected_clients", this.manager.countPlayersOnline());
     } catch (err) {
-      throw err;
+      client.close();
+      log.error(err);
     }
   }
 
   // When a client leaves the room
   onLeave(client: Client, consented: boolean) {
     this.manager.removeClientBySessionId(client.sessionId);
+    this.broadcast("connected_clients", this.manager.countPlayersOnline());
   }
 
   async onDispose() {}
