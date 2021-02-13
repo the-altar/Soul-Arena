@@ -4,6 +4,7 @@ import { join } from "path";
 import * as query from "./character.queries";
 import { pool } from "../../db";
 import { log } from "../../lib/logger";
+import { parse } from "dotenv/types";
 
 export const create = async (req: Request, res: Response) => {
   // Req.body = [released, charData, isFree]
@@ -62,12 +63,16 @@ export const getIds = async (req: Request, res: Response) => {
 };
 
 export const purchase = async (req: Request, res: Response) => {
+  const sql0 = `SELECT coins from users where id=$1`;
   const sql1 = `UPDATE users SET coins = coins - $1 where id = $2`;
   const sql2 = `INSERT into obtained_entity (entity_id, user_id) VALUES ($1, $2)`;
   try {
+    const data = await pool.query(sql0, [req.body.userId]);
+    if (data.rows[0].coins <= parseInt(req.body.coins))
+      return res.status(406).json({});
     await pool.query(sql1, [req.body.coins, req.body.userId]);
     await pool.query(sql2, [req.body.characterId, req.body.userId]);
-    return res.json({ success: true });
+    return res.status(200).json({ success: true });
   } catch (err) {
     res.json({ success: true });
     throw err;

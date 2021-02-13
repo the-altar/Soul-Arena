@@ -89,12 +89,16 @@ exports.getIds = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.purchase = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const sql0 = `SELECT coins from users where id=$1`;
     const sql1 = `UPDATE users SET coins = coins - $1 where id = $2`;
     const sql2 = `INSERT into obtained_entity (entity_id, user_id) VALUES ($1, $2)`;
     try {
+        const data = yield db_1.pool.query(sql0, [req.body.userId]);
+        if (data.rows[0].coins <= parseInt(req.body.coins))
+            return res.status(406).json({});
         yield db_1.pool.query(sql1, [req.body.coins, req.body.userId]);
         yield db_1.pool.query(sql2, [req.body.characterId, req.body.userId]);
-        return res.json({ success: true });
+        return res.status(200).json({ success: true });
     }
     catch (err) {
         res.json({ success: true });

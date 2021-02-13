@@ -86,6 +86,9 @@ class Battle extends colyseus_1.Room {
         this.onMessage("surrender", (client, id) => __awaiter(this, void 0, void 0, function* () {
             yield this.surrender(id);
         }));
+        this.onMessage("send-message", (client, payload) => __awaiter(this, void 0, void 0, function* () {
+            this.broadcast("sent-message", payload);
+        }));
     }
     // Authorize client based on provided options before WebSocket handshake is complete
     onAuth(client, options, request) {

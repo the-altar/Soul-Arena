@@ -75,6 +75,13 @@ export class Battle extends Room {
     this.onMessage("surrender", async (client: Client, id: number) => {
       await this.surrender(id);
     });
+
+    this.onMessage(
+      "send-message",
+      async (client: Client, payload: { username: string; msg: string }) => {
+        this.broadcast("sent-message", payload);
+      }
+    );
   }
 
   // Authorize client based on provided options before WebSocket handshake is complete
