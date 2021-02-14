@@ -21,7 +21,7 @@ class ClientManager {
     return false;
   }
 
-  public addIpAddress(ip: string, playerId: string) {
+  public addIpAddress(ip: any, playerId: string) {
     this.ipCheck[ip] = playerId;
     this.onlineList[playerId] = ip;
   }
@@ -129,13 +129,8 @@ export class Queue extends Room {
   // Authorize client based on provided options before WebSocket handshake is complete
   onAuth(client: Client, options: any, request: http.IncomingMessage): boolean {
     if (this.manager.isClientConnected(options.player.id)) return false;
-    log.error(
-      request.headers["x-forwarded-for"], request.connection.remoteAddress
-    );
-    this.manager.addIpAddress(
-      request.connection.remoteAddress,
-      options.player.id
-    );
+    const ip = request.headers["x-forwarded-for"];
+    this.manager.addIpAddress(ip, options.player.id);
     return true;
   }
 
