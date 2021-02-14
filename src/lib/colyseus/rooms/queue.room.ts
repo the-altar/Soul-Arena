@@ -82,6 +82,7 @@ class ClientManager {
       log.error("xx [MatchMake] ladder game; filter duplicated IP");
       mappedHash = mappedHash.filter((e) => {
         const ipAddress = this.onlineList[e.player.id];
+        log.error(ipAddress, e.player.id)
         if (seen[ipAddress]) {
           log.error(`[MatchMake] repeated IP: ${ipAddress}`);
           return false;
@@ -97,7 +98,7 @@ class ClientManager {
 
 export class Queue extends Room {
   private manager: ClientManager = new ClientManager();
-  private evaluateGroupInterval: number = 20000;
+  private evaluateGroupInterval: number = 5000;
   private targetRoom: string;
   private targetRoomCode: string | number;
   // When room is initialized
@@ -131,6 +132,9 @@ export class Queue extends Room {
   // Authorize client based on provided options before WebSocket handshake is complete
   onAuth(client: Client, options: any, request: http.IncomingMessage): boolean {
     if (this.manager.isClientConnected(options.player.id)) return false;
+    log.info(
+      request.headers["x-forwarded-for"] || request.connection.remoteAddress
+    );
     this.manager.addIpAddress(
       request.connection.remoteAddress,
       options.player.id

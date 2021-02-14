@@ -76,6 +76,7 @@ class ClientManager {
             logger_1.log.error("xx [MatchMake] ladder game; filter duplicated IP");
             mappedHash = mappedHash.filter((e) => {
                 const ipAddress = this.onlineList[e.player.id];
+                logger_1.log.error(ipAddress, e.player.id);
                 if (seen[ipAddress]) {
                     logger_1.log.error(`[MatchMake] repeated IP: ${ipAddress}`);
                     return false;
@@ -93,7 +94,7 @@ class Queue extends colyseus_1.Room {
     constructor() {
         super(...arguments);
         this.manager = new ClientManager();
-        this.evaluateGroupInterval = 20000;
+        this.evaluateGroupInterval = 5000;
     }
     // When room is initialized
     onCreate(options) {
@@ -125,6 +126,7 @@ class Queue extends colyseus_1.Room {
     onAuth(client, options, request) {
         if (this.manager.isClientConnected(options.player.id))
             return false;
+        logger_1.log.info(request.headers["x-forwarded-for"] || request.connection.remoteAddress);
         this.manager.addIpAddress(request.connection.remoteAddress, options.player.id);
         return true;
     }
