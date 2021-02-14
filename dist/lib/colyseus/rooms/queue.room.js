@@ -123,8 +123,8 @@ class Queue extends colyseus_1.Room {
     onAuth(client, options, request) {
         if (this.manager.isClientConnected(options.player.id))
             return false;
-        logger_1.log.error(request.headers["x-forwarded-for"], request.connection.remoteAddress);
-        this.manager.addIpAddress(request.connection.remoteAddress, options.player.id);
+        const ip = request.headers["x-forwarded-for"];
+        this.manager.addIpAddress(ip, options.player.id);
         return true;
     }
     // When client successfully join the room
