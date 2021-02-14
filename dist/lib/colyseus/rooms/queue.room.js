@@ -73,12 +73,9 @@ class ClientManager {
             return this.clientList[sortedKey];
         });
         if (roomCode === enums_1.BattleRooms.rankedBattle) {
-            logger_1.log.error("xx [MatchMake] ladder game; filter duplicated IP");
             mappedHash = mappedHash.filter((e) => {
                 const ipAddress = this.onlineList[e.player.id];
-                logger_1.log.error(ipAddress, e.player.id);
                 if (seen[ipAddress]) {
-                    logger_1.log.error(`[MatchMake] repeated IP: ${ipAddress}`);
                     return false;
                 }
                 else {
@@ -126,7 +123,7 @@ class Queue extends colyseus_1.Room {
     onAuth(client, options, request) {
         if (this.manager.isClientConnected(options.player.id))
             return false;
-        logger_1.log.info(request.headers["x-forwarded-for"] || request.connection.remoteAddress);
+        logger_1.log.error(request.headers["x-forwarded-for"], request.connection.remoteAddress);
         this.manager.addIpAddress(request.connection.remoteAddress, options.player.id);
         return true;
     }
