@@ -97,7 +97,7 @@ exports.purchase = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const sql2 = `INSERT into obtained_entity (entity_id, user_id) VALUES ($1, $2)`;
     try {
         const data = yield db_1.pool.query(sql0, [req.body.userId]);
-        if (data.rows[0].coins <= parseInt(req.body.coins))
+        if (data.rows[0].coins < parseInt(req.body.coins))
             return res.status(406).json({});
         yield db_1.pool.query(sql1, [req.body.coins, req.body.userId]);
         yield db_1.pool.query(sql2, [req.body.characterId, req.body.userId]);

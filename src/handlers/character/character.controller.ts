@@ -71,7 +71,7 @@ export const purchase = async (req: Request, res: Response) => {
   const sql2 = `INSERT into obtained_entity (entity_id, user_id) VALUES ($1, $2)`;
   try {
     const data = await pool.query(sql0, [req.body.userId]);
-    if (data.rows[0].coins <= parseInt(req.body.coins))
+    if (data.rows[0].coins < parseInt(req.body.coins))
       return res.status(406).json({});
     await pool.query(sql1, [req.body.coins, req.body.userId]);
     await pool.query(sql2, [req.body.characterId, req.body.userId]);
