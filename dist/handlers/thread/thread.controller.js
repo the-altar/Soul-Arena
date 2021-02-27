@@ -33,14 +33,26 @@ exports.news = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.newsBanner = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const text = `
-        SELECT t.id, t.created_at, t.title, t."content", t.post_count, t.meta, t.locked,
-            JSON_BUILD_OBJECT('username', u.username, 'avatar', u.avatar) as "author" 
-        FROM thread AS t 
-        LEFT JOIN users AS u 
-            ON t.author = u.id 	
-        WHERE t.site_area=0 and (t.meta->'bannerUrl') is not null
-        ORDER BY created_at DESC
-        limit 5;`;
+    select
+      t.id,
+      t.created_at,
+      t.title,
+      t."content",
+      t.post_count,
+      t.meta,
+      t.locked,
+      JSON_BUILD_OBJECT('username', u.username, 'avatar', u.avatar) as "author"
+    from
+      thread as t
+    left join users as u on
+      t.author = u.id
+    where
+      t.site_area = 0
+      and length(t.meta->>'bannerUrl')>0
+    order by
+      created_at desc
+    limit 5;
+  `;
     try {
         const docs = yield db_1.pool.query(text);
         res.status(200).json(docs.rows);
