@@ -45,7 +45,6 @@ class App {
             .use(express_subdomain_1.default("game", express_1.default
             .Router()
             .use(express_1.default.static("public/game/build", {
-            maxAge: "7d",
             index: false,
         }))
             .use(express_1.default.static("public/game", { maxAge: "7d" }))

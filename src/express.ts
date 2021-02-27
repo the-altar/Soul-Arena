@@ -51,7 +51,6 @@ export class App {
             .Router()
             .use(
               express.static("public/game/build", {
-                maxAge: "7d",
                 index: false,
               })
             )

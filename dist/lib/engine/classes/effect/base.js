@@ -84,7 +84,7 @@ class Effect {
                     break;
                 case enums_1.triggerClauseType.UsesANewNonStrategicSkill:
                     {
-                        logger_1.log.info(this.arenaReference.tempQueue.length);
+                        //log.info(this.arenaReference.tempQueue.length);
                         for (const temp of this.arenaReference.tempQueue) {
                             const skill = this.arenaReference.characters[temp.caster].skills[temp.skill];
                             if (temp.caster === char.myIndex &&
@@ -355,7 +355,7 @@ class Effect {
         const trigger = this.triggerLinkedEffects[linkIndex];
         for (const effect of origin.inactiveEffects) {
             if (effect.id !== trigger.id) {
-                logger_1.log.info("--> [REJECTED]", effect.id, trigger.id);
+                //log.info("--> [REJECTED]", effect.id, trigger.id);
                 continue;
             }
             const nEffect = index_1.effectFactory(effect, effect.caster);
