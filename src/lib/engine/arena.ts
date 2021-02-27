@@ -168,7 +168,7 @@ export class Arena {
       const terminate = skill.tickEffectsDuration(this, skill);
       if (terminate || cancelled) {
         const s = this.skillQueue.splice(i, 1)[0];
-        log.info(`xxxx ${s.name} has ended`)
+        //log.info(`xxxx ${s.name} has ended`)
         this.characters.forEach((c) => {
           c.skillStack.remove(s.getId(), s.caster);
         });
@@ -287,7 +287,7 @@ export class Arena {
   }) {
     const char = this.characters[cordinates.caster];
     const id = char.getOwner();
-    const s = char.skills[cordinates.skill];
+    const s = char.skillByIndex(cordinates.skill)
     const { player, index } = this.findPlayerById(id);
 
     player.returnEnergy(s.getCost());
@@ -314,7 +314,7 @@ export class Arena {
     const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
     for (const coordinate of this.tempQueue) {
       const char = this.characters[coordinate.caster];
-      const s = char.skills[coordinate.skill];
+      const s = char.skillByIndex(coordinate.skill);
 
       currentPlayer.returnEnergy(s.getCost());
       this.hasUsedSKill[coordinate.caster] = false;
@@ -335,7 +335,7 @@ export class Arena {
     }
 
     const id = char.getOwner();
-    const s = char.skills[cordinates.skill];
+    const s = char.skillByIndex(cordinates.skill);
     const { player, index } = this.findPlayerById(id);
 
     player.consumeEnergy(s.getCost());

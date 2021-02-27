@@ -20,7 +20,7 @@ export async function loggerMiddleware(
     } else req.res.locals.guest = true;
     next();
   } catch (err) {
-    log.error(err)
+    log.error(err);
     return res.status(401).end();
   }
 }
@@ -67,7 +67,7 @@ export const register = async (req: Request, res: Response) => {
     });
   } catch (err) {
     await client.query("ROLLBACK");
-    log.error(err)
+    log.error(err);
     return res.status(500).json({ success: false, err: err });
   } finally {
     client.release();
@@ -108,8 +108,8 @@ export const login = async (req: Request, res: Response) => {
 
     return res.json({ userData: response, success: true });
   } catch (err) {
-    log.error(err)
-    return res.status(500).json({})
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 
@@ -146,8 +146,8 @@ export const user = async (req: Request, res: Response) => {
     const doc = await pool.query(text, [username]);
     res.status(200).json(doc.rows[0]);
   } catch (err) {
-    log.error(err)
-    return res.status(500).json({})
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 
@@ -180,8 +180,8 @@ export const defaultAvatar = async (req: Request, res: Response) => {
     ]);
     return res.status(200).json({ success: true });
   } catch (err) {
-    log.error(err)
-    return res.status(500).json({})
+    log.error(err);
+    return res.status(500).json({});
   }
 };
 

@@ -20,6 +20,8 @@ import { Effect } from "../effect";
 
 export class Character {
   public name: string;
+  /** This ID is unique to the game instance */
+  private id: number;
   /** The actual ID of the character on the database*/
   public literalId: number;
   private facepic: string;
@@ -29,8 +31,6 @@ export class Character {
   private enemies: Array<number>;
   public skillStack: SkillStack;
   public counterStack: CounterStack;
-  /** This ID is unique to the game instance */
-  private id: number;
   private hitPoints: number;
   private isTarget: boolean;
   private knockedOut: boolean;
@@ -121,8 +121,8 @@ export class Character {
 
   public lowerCooldowns(char: Character) {
     for (const skill of this.skills) {
-      skill.lowerCooldown(0)
-      skill.clearMods()
+      skill.lowerCooldown(0);
+      skill.clearMods();
     }
   }
 
@@ -151,7 +151,7 @@ export class Character {
     self?: number
   ) {
     for (const skill of this.skills) {
-      log.info(`[SKILL - ${this.name}] ${skill.name}`, this.skillStack)
+      //log.info(`[SKILL - ${this.name}] ${skill.name}`, this.skillStack);
       skill.setTurnCost();
       if (this.isStunned(skill)) {
         skill.disable();
@@ -187,12 +187,12 @@ export class Character {
   }
 
   public getCopySkillByIndex(index: number): Skill {
-    const newObj = JSON.parse(JSON.stringify(this.skills[index].getCopyData()));
+    const newObj = JSON.parse(JSON.stringify(this.skillByIndex(index).getCopyData()));
     return new Skill(newObj, this.id, this.arenaReference, this);
   }
 
   public getRealSkillByIndex(index: number): Skill {
-    return this.skills[index];
+    return this.skillByIndex(index);
   }
 
   public getRealSkillById(id: number): Skill {
@@ -205,10 +205,10 @@ export class Character {
   public setSkillCooldownByIndex(index: number) {
     const cdr1 = this.buffs.cooldownReduction.ofAllSkills || 0;
     const cdr2 =
-      this.buffs.cooldownReduction.ofSkillId[this.skills[index].getId()] || 0;
+      this.buffs.cooldownReduction.ofSkillId[this.skillByIndex(index).getId()] || 0;
 
     const n = this.debuffs.getCooldownIncreasal() - (cdr1 + cdr2);
-    this.skills[index].startCooldown(n);
+    this.skillByIndex(index).startCooldown(n);
   }
 
   public enableSkills() {
@@ -354,6 +354,11 @@ export class Character {
     for (const skill of this.skills) {
       if (skill.getId() === id) return skill;
     }
+  }
+
+  public skillByIndex(index:number):Skill{
+    if(this.skills[index].mods.replacedBy) return this.skills[index].mods.replacedBy
+    else return this.skills[index]
   }
 
   public getPublicData() {

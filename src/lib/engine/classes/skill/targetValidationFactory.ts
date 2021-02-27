@@ -41,7 +41,7 @@ export const targetSetter = function (
       }
 
       case targetType.AllEnemies: {
-        log.info("SET ALL ENEMIES")
+        //log.info("SET ALL ENEMIES")
         const enemies = characters[self].getEnemies();
         enemies.forEach((i) => {
           if (validTarget(characters[i], skill)) choices.choice.push(i);

@@ -7,11 +7,13 @@ import {
   postComment,
   getPosts,
   deletePost,
+  newsBanner,
 } from "./thread.controller";
 import { authenticate } from "../../middlewares";
 const router: Router = Router();
 
 router.get("/news", news);
+router.get("/news/heading", newsBanner);
 router.get("/:id/:siteArea", findThread);
 router.get("/:id/comments/:limit", getPosts);
 

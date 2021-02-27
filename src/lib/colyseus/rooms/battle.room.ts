@@ -41,12 +41,12 @@ export class Battle extends Room {
 
     this.setState(new MatchState());
     this.onMessage("end-game-turn", async (client: Client, payload: any) => {
-      log.info(`--- [END TURN] client id: ${client.id}`);
+      //log.info(`--- [END TURN] client id: ${client.id}`);
       if (this.arena.isPlayerLocked(client.id)) {
         log.error("xxx Player is locked; can't end a turn");
         return;
       }
-      log.info(" xx [YOU ENDED YOUR TURN] xx");
+      //log.info(" xx [YOU ENDED YOUR TURN] xx");
       this.delay.reset();
       this.arena.processTurn(payload);
       this.lifeCycle();

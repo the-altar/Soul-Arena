@@ -17,6 +17,10 @@ class Buffs {
             },
             toSpecificSkill: {},
         };
+        this.increaseHealthHealed = {
+            bySkillClass: {},
+            bySkillId: {},
+        };
         this.cooldownReduction = { ofAllSkills: 0, ofSkillId: {} };
         this.decreaseDamageTaken = {
             byDamage: {},
@@ -118,6 +122,10 @@ class Buffs {
     clearDecreaseDamageTaken() {
         this.decreaseDamageTaken = {
             byDamage: {},
+            bySkillClass: {},
+            bySkillId: {},
+        };
+        this.increaseHealthHealed = {
             bySkillClass: {},
             bySkillId: {},
         };

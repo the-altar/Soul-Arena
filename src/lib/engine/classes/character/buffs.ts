@@ -29,6 +29,7 @@ export class Buffs {
     };
   };
 
+  increaseHealthHealed: { bySkillClass: any; bySkillId: any };
   cannotBeKilled: boolean;
   decreaseDamageTaken: { byDamage: any; bySkillClass: any; bySkillId: any };
   damageIncreasal: { byDamage: any; bySkillClass: any; bySkillId: any };
@@ -52,6 +53,10 @@ export class Buffs {
         [SkillClassType.Strategic]: false,
       },
       toSpecificSkill: {},
+    };
+    this.increaseHealthHealed = {
+      bySkillClass: {},
+      bySkillId: {},
     };
     this.cooldownReduction = { ofAllSkills: 0, ofSkillId: {} };
     this.decreaseDamageTaken = {
@@ -171,6 +176,10 @@ export class Buffs {
   public clearDecreaseDamageTaken() {
     this.decreaseDamageTaken = {
       byDamage: {},
+      bySkillClass: {},
+      bySkillId: {},
+    };
+    this.increaseHealthHealed = {
       bySkillClass: {},
       bySkillId: {},
     };

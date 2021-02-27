@@ -62,12 +62,12 @@ class Battle extends colyseus_1.Room {
         this.roomCode = options.roomCode;
         this.setState(new MatchState());
         this.onMessage("end-game-turn", (client, payload) => __awaiter(this, void 0, void 0, function* () {
-            logger_1.log.info(`--- [END TURN] client id: ${client.id}`);
+            //log.info(`--- [END TURN] client id: ${client.id}`);
             if (this.arena.isPlayerLocked(client.id)) {
                 logger_1.log.error("xxx Player is locked; can't end a turn");
                 return;
             }
-            logger_1.log.info(" xx [YOU ENDED YOUR TURN] xx");
+            //log.info(" xx [YOU ENDED YOUR TURN] xx");
             this.delay.reset();
             this.arena.processTurn(payload);
             this.lifeCycle();

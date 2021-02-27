@@ -1,9 +1,8 @@
 import { Effect } from "./base";
-import { PlayerPhase, ReiatsuTypes, targetType } from "../../enums";
+import { ReiatsuTypes, targetType } from "../../enums";
 import { Character } from "../character";
 import { Skill } from "../skill";
 import { log } from "../../../logger";
-import { extend } from "lodash";
 
 export class SkillTargetMod extends Effect {
   private newTarget: targetType;

@@ -10,13 +10,18 @@ import {
   AbsorbDamage,
   IgnoreDecreaseDamageTaken,
 } from "./damageRelated";
-import { Healing, HealthDrain, IgnoreDeath } from "./healthRelated";
+import {
+  Healing,
+  HealthDrain,
+  IgnoreDeath,
+  IncreaseHealthHealed,
+} from "./healthRelated";
 import {
   CooldownReduction,
   CooldownIncreasal,
   ResetCooldown,
 } from "./cooldownRelated";
-import { EnergyGain, EnergyRemoval } from "./energyRelated";
+import { EnergyGain, EnergyRemoval, EnergySteal } from "./energyRelated";
 import { Stun } from "./stunRelated";
 import {
   SkillCostChange,
@@ -34,6 +39,7 @@ import {
   EnableEffects,
 } from "./alterEffectValue";
 import { DestructibleDefense } from "./destructibleDefense";
+import { ReplaceSkill } from "./replaceSkill";
 
 export * from "./base";
 
@@ -130,7 +136,16 @@ export const effectFactory = function (effect: any, caster: number): Effect {
       return new IgnoreDeath(effect, caster);
     }
     case effectType.SkillMod: {
-      return new SkillMod(effect, caster)
+      return new SkillMod(effect, caster);
+    }
+    case effectType.ReplaceSkill: {
+      return new ReplaceSkill(effect, caster);
+    }
+    case effectType.EnergySteal: {
+      return new EnergySteal(effect, caster);
+    }
+    case effectType.IncreaseHealthHealed: {
+      return new IncreaseHealthHealed(effect, caster);
     }
     default: {
       return new Effect(effect, caster);

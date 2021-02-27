@@ -14,7 +14,7 @@ export class Stun extends Effect {
   }
 
   public functionality(char: Character, origin: Skill) {
-    log.info("STUN EFFECT ACTIVATE")
+    //log.info("STUN EFFECT ACTIVATE")
     if (char.getBuffs().ignoreHarmfulEffects.status) {
       log.info("--- was ignored")
       return

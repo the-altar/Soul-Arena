@@ -34,7 +34,7 @@ exports.targetSetter = function (skill, targetMode, characters, playerId, self) 
                 return choices;
             }
             case enums_1.targetType.AllEnemies: {
-                logger_1.log.info("SET ALL ENEMIES");
+                //log.info("SET ALL ENEMIES")
                 const enemies = characters[self].getEnemies();
                 enemies.forEach((i) => {
                     if (validTarget(characters[i], skill))

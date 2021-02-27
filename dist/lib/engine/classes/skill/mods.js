@@ -24,6 +24,7 @@ class SkillMods {
             requiresSkillOnTarget: [],
             cannotBeUsedOnTargetOf: [],
         };
+        this.replacedBy = null;
     }
     setTargetMod(target) {
         this.targetMod = target;

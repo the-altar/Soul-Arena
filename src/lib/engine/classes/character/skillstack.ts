@@ -9,7 +9,7 @@ export class SkillStack {
     this.skills[`${id}-${caster}`] = true;
   }
   remove(id: number, caster: number) {
-    log.info(`clear skill stack ${id}-${caster}`, this.skills);
+    //log.info(`clear skill stack ${id}-${caster}`, this.skills);
     delete this.skills[`${id}-${caster}`];
   }
   clearStack() {

@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Arena = void 0;
 const classes_1 = require("./classes");
-const logger_1 = require("../logger");
 const enums_1 = require("./enums");
 class Arena {
     constructor() {
@@ -143,7 +142,7 @@ class Arena {
             const terminate = skill.tickEffectsDuration(this, skill);
             if (terminate || cancelled) {
                 const s = this.skillQueue.splice(i, 1)[0];
-                logger_1.log.info(`xxxx ${s.name} has ended`);
+                //log.info(`xxxx ${s.name} has ended`)
                 this.characters.forEach((c) => {
                     c.skillStack.remove(s.getId(), s.caster);
                 });
@@ -254,7 +253,7 @@ class Arena {
     removeSkillFromTempQueue(cordinates) {
         const char = this.characters[cordinates.caster];
         const id = char.getOwner();
-        const s = char.skills[cordinates.skill];
+        const s = char.skillByIndex(cordinates.skill);
         const { player, index } = this.findPlayerById(id);
         player.returnEnergy(s.getCost());
         player.removeFromPayupCart(s.getCost());
@@ -276,7 +275,7 @@ class Arena {
         const currentPlayer = this.players[((this.turnCount % 2) + 1) % 2];
         for (const coordinate of this.tempQueue) {
             const char = this.characters[coordinate.caster];
-            const s = char.skills[coordinate.skill];
+            const s = char.skillByIndex(coordinate.skill);
             currentPlayer.returnEnergy(s.getCost());
             this.hasUsedSKill[coordinate.caster] = false;
         }
@@ -290,7 +289,7 @@ class Arena {
             return;
         }
         const id = char.getOwner();
-        const s = char.skills[cordinates.skill];
+        const s = char.skillByIndex(cordinates.skill);
         const { player, index } = this.findPlayerById(id);
         player.consumeEnergy(s.getCost());
         player.addToPayupCart(s.getCost());

@@ -101,7 +101,8 @@ export class Effect {
   public functionality(char: Character, origin?: Skill) {
     if (!this.triggerLinkedEffects.length) return;
 
-    for (const linked of this.triggerLinkedEffects) {
+    for (let i = 0; i < this.triggerLinkedEffects.length; i++) {
+      const linked = this.triggerLinkedEffects[i]
       switch (linked.condition) {
         case triggerClauseType.IfTargeted:
           {
@@ -113,13 +114,13 @@ export class Effect {
                   this.caster,
                   [temp.caster],
                   [char.myIndex],
-                  1
+                  1,
+                  i
                 );
               }
             }
           }
           break;
-
         case triggerClauseType.IfTargetedByHarmfulSkill:
           {
             for (const temp of this.arenaReference.tempQueue) {
@@ -138,7 +139,8 @@ export class Effect {
                   this.caster,
                   [temp.caster],
                   [char.myIndex],
-                  1
+                  1,
+                  i
                 );
               }
             }
@@ -153,16 +155,17 @@ export class Effect {
                   this.caster,
                   [temp.caster],
                   [char.myIndex],
-                  1
+                  1,
+                  i
                 );
                 break;
               }
             }
           }
           break;
-
         case triggerClauseType.UsesANewNonStrategicSkill:
           {
+            //log.info(this.arenaReference.tempQueue.length);
             for (const temp of this.arenaReference.tempQueue) {
               const skill = this.arenaReference.characters[temp.caster].skills[
                 temp.skill
@@ -176,13 +179,29 @@ export class Effect {
                   this.caster,
                   [temp.caster],
                   [char.myIndex],
-                  1
+                  1,
+                  i
                 );
                 break;
               }
             }
           }
           break;
+        case triggerClauseType.BothAlliesAreDead: {
+          const count = origin.casterReference.getAllies().filter((c) => {
+            return this.arenaReference.characters[c].isKnockedOut();
+          });
+          if (count.length == 2) {
+            this.applyLinkedEffects(
+              origin,
+              this.caster,
+              this.targets,
+              [char.myIndex],
+              1,
+              i
+            );
+          }
+        }
       }
     }
   }
@@ -409,23 +428,27 @@ export class Effect {
     targetList: Array<number>,
     charIndex: number
   ) {
-    char.skillStack.add(origin.getId(), this.caster);
-    if ((!this.triggered || this.activate) && !char.addEffectStack(this)) {
-      return;
-    }
+    try {
+      char.skillStack.add(origin.getId(), this.caster);
+      if ((!this.triggered || this.activate) && !char.addEffectStack(this)) {
+        return;
+      }
 
-    if (
-      origin.persistence === ControlType.Control &&
-      !this.ignoresInvulnerability &&
-      char.isInvulnerable(origin)
-    )
-      return;
-    targetList.push(charIndex);
-    if (!this.ignoresInvulnerability && char.isInvulnerable(origin)) return;
-    if (char.isKnockedOut()) return;
-    this.activateTrigger(char, origin);
-    if (!this.activate) return;
-    this.functionality(char, origin);
+      if (
+        origin.persistence === ControlType.Control &&
+        !this.ignoresInvulnerability &&
+        char.isInvulnerable(origin)
+      )
+        return;
+      targetList.push(charIndex);
+      if (!this.ignoresInvulnerability && char.isInvulnerable(origin)) return;
+      if (char.isKnockedOut()) return;
+      this.activateTrigger(char, origin);
+      if (!this.activate) return;
+      this.functionality(char, origin);
+    } catch (e) {
+      log.error(e);
+    }
   }
 
   protected effectConclusion() {}
@@ -474,31 +497,32 @@ export class Effect {
     caster: number,
     victims: Array<number>,
     targets: Array<number>,
-    times?: number
+    times: number,
+    linkIndex: number
   ) {
-    for (const trigger of this.triggerLinkedEffects) {
-      log.info(`xxxx LINKED EFFECT under: `, trigger);
-      for (const effect of origin.inactiveEffects) {
-        log.info("xxxxxx disabled id ", effect.id);
-        if (effect.id !== trigger.id) continue;
-        const nEffect = effectFactory(effect, effect.caster);
-        log.info(`xxxxx new effect: ${nEffect.id}`);
-        if (trigger.self) {
-          log.info("xxxxxx trigger under self");
-          nEffect.triggerRate = 100;
-          nEffect.setTargets([caster]);
-        } else if (trigger.victim) {
-          log.info("xxxxxx trigger under victim");
-          nEffect.triggerRate = 100;
-          nEffect.setTargets(victims);
-        } else if (trigger.target) {
-          log.info("xxxxxx trigger under target");
-          nEffect.triggerRate = 100;
-          nEffect.setTargets(targets);
-        }
-        nEffect.value *= times || 1;
-        origin.effects.push(nEffect);
+    const trigger = this.triggerLinkedEffects[linkIndex];
+    for (const effect of origin.inactiveEffects) {
+      if (effect.id !== trigger.id) {
+        //log.info("--> [REJECTED]", effect.id, trigger.id);
+        continue;
       }
+      const nEffect = effectFactory(effect, effect.caster);
+      if (trigger.self) {
+        log.info("--> [trigger under self]");
+        nEffect.triggerRate = 100;
+        nEffect.setTargets([caster]);
+      } else if (trigger.victim) {
+        log.info("--> [trigger under victim]");
+        nEffect.triggerRate = 100;
+        nEffect.setTargets(victims);
+      } else if (trigger.target) {
+        log.info("--> [trigger under target]");
+        nEffect.triggerRate = 100;
+        nEffect.setTargets(targets);
+      }
+      nEffect.value *= times || 1;
+      origin.effects.push(nEffect);
+      log.info();
     }
   }
 }

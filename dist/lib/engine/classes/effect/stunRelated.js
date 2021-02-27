@@ -10,7 +10,7 @@ class Stun extends base_1.Effect {
         this.stunClass = data.stunClass;
     }
     functionality(char, origin) {
-        logger_1.log.info("STUN EFFECT ACTIVATE");
+        //log.info("STUN EFFECT ACTIVATE")
         if (char.getBuffs().ignoreHarmfulEffects.status) {
             logger_1.log.info("--- was ignored");
             return;

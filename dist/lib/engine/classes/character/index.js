@@ -97,7 +97,7 @@ class Character {
     }
     validadeSkillsCompletely(pool, chars, playerId, self) {
         for (const skill of this.skills) {
-            logger_1.log.info(`[SKILL - ${this.name}] ${skill.name}`, this.skillStack);
+            //log.info(`[SKILL - ${this.name}] ${skill.name}`, this.skillStack);
             skill.setTurnCost();
             if (this.isStunned(skill)) {
                 skill.disable();
@@ -131,11 +131,11 @@ class Character {
         }
     }
     getCopySkillByIndex(index) {
-        const newObj = JSON.parse(JSON.stringify(this.skills[index].getCopyData()));
+        const newObj = JSON.parse(JSON.stringify(this.skillByIndex(index).getCopyData()));
         return new skill_1.Skill(newObj, this.id, this.arenaReference, this);
     }
     getRealSkillByIndex(index) {
-        return this.skills[index];
+        return this.skillByIndex(index);
     }
     getRealSkillById(id) {
         for (const skill of this.skills) {
@@ -146,9 +146,9 @@ class Character {
     }
     setSkillCooldownByIndex(index) {
         const cdr1 = this.buffs.cooldownReduction.ofAllSkills || 0;
-        const cdr2 = this.buffs.cooldownReduction.ofSkillId[this.skills[index].getId()] || 0;
+        const cdr2 = this.buffs.cooldownReduction.ofSkillId[this.skillByIndex(index).getId()] || 0;
         const n = this.debuffs.getCooldownIncreasal() - (cdr1 + cdr2);
-        this.skills[index].startCooldown(n);
+        this.skillByIndex(index).startCooldown(n);
     }
     enableSkills() {
         this.skills.forEach((s) => {
@@ -269,6 +269,12 @@ class Character {
             if (skill.getId() === id)
                 return skill;
         }
+    }
+    skillByIndex(index) {
+        if (this.skills[index].mods.replacedBy)
+            return this.skills[index].mods.replacedBy;
+        else
+            return this.skills[index];
     }
     getPublicData() {
         const publicData = Object.assign({}, this);

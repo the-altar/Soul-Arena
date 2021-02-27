@@ -22,6 +22,27 @@ export const news = async (req: Request, res: Response) => {
   }
 };
 
+
+export const newsBanner = async (req: Request, res: Response) => {
+  const text = `
+        SELECT t.id, t.created_at, t.title, t."content", t.post_count, t.meta, t.locked,
+            JSON_BUILD_OBJECT('username', u.username, 'avatar', u.avatar) as "author" 
+        FROM thread AS t 
+        LEFT JOIN users AS u 
+            ON t.author = u.id 	
+        WHERE t.site_area=0 and (t.meta->'bannerUrl') is not null
+        ORDER BY created_at DESC
+        limit 5;`;
+
+  try {
+    const docs = await pool.query(text);
+    res.status(200).json(docs.rows);
+  } catch (err) {
+    log.error(err);
+    return res.status(500).json({});
+  }
+};
+
 export const findThread = async (req: Request, res: Response) => {
   const id = Number(req.params.id);
   const siteArea = Number(req.params.siteArea);

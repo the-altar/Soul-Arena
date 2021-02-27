@@ -65,6 +65,7 @@ var effectType;
     effectType[effectType["ApplyEffect"] = 32] = "ApplyEffect";
     effectType[effectType["ReplaceSkill"] = 33] = "ReplaceSkill";
     effectType[effectType["SkillMod"] = 34] = "SkillMod";
+    effectType[effectType["IncreaseHealthHealed"] = 35] = "IncreaseHealthHealed";
 })(effectType = exports.effectType || (exports.effectType = {}));
 var activationType;
 (function (activationType) {
@@ -182,6 +183,7 @@ var triggerClauseType;
     triggerClauseType[triggerClauseType["IfTargetedByHarmfulSkill"] = 5] = "IfTargetedByHarmfulSkill";
     triggerClauseType[triggerClauseType["UsesANewSkill"] = 6] = "UsesANewSkill";
     triggerClauseType[triggerClauseType["UsesANewNonStrategicSkill"] = 7] = "UsesANewNonStrategicSkill";
+    triggerClauseType[triggerClauseType["BothAlliesAreDead"] = 8] = "BothAlliesAreDead";
 })(triggerClauseType = exports.triggerClauseType || (exports.triggerClauseType = {}));
 var BattleRooms;
 (function (BattleRooms) {

@@ -21,28 +21,28 @@ export class Skill {
   public disabled?: boolean;
   public skillpic: string;
   public name: string;
-  private description: string;
+  public description: string;
   public class: SkillClassType;
   public persistence: ControlType;
   public inactiveEffects: Array<Effect>;
-  private cooldown: number;
-  private baseCooldown: number;
-  private harmful: boolean;
+  public cooldown: number;
+  public baseCooldown: number;
+  public harmful: boolean;
   public mods: SkillMods;
-  private targets: Array<number>;
+  public targets: Array<number>;
   public uncounterable: boolean;
-  private targetMode: targetType;
+  public targetMode: targetType;
   public requiresSkillOnTarget: Array<string>;
   public cannotBeUsedOnTargetOf: Array<string>;
   public effects: Array<Effect>;
-  private casterReference: Character;
-  private targetChoices: { [x: string]: Array<number> };
+  public casterReference: Character;
+  public targetChoices: { [x: string]: Array<number> };
   public interrupted: boolean;
-  private id: number;
+  public id: number;
   public caster: number;
-  private turnCost: Array<number>;
+  public turnCost: Array<number>;
   public ignoresInvulnerability: boolean;
-  private arenaReference: Arena;
+  public arenaReference: Arena;
 
   constructor(
     data: any,
@@ -301,7 +301,7 @@ export class Skill {
     playerId: number,
     self?: number
   ) {
-    log.info(this.getTargetMod(), this.mods.meta.targetMode, this.targetMode);
+    //log.info(this.getTargetMod(), this.mods.meta.targetMode, this.targetMode);
     const targetMode: targetType =
       this.getTargetMod() || this.mods.meta.targetMode || this.targetMode;
     this.targetChoices = targetSetter(
@@ -351,7 +351,7 @@ export class Skill {
       }
 
       effect.shouldApply();
-      log.info("effect apply status: ", effect.activate, effect.tick);
+      //log.info("effect apply status: ", effect.activate, effect.tick);
       effect.execute(this);
       if (!effect.terminate) effect.generateToolTip();
       effect.tick++;
@@ -478,7 +478,8 @@ export class Skill {
   }
 
   public getPublicData() {
-    const publicData = { ...this };
+    const skill = this.mods.replacedBy ? this.mods.replacedBy : this;
+    const publicData = { ...skill };
     delete publicData.arenaReference;
     delete publicData.casterReference;
     delete publicData.effects;
@@ -486,26 +487,28 @@ export class Skill {
     delete publicData.mods;
 
     const publicEffects = [];
-    for (const e of this.effects) {
+    for (const e of skill.effects) {
       publicEffects.push(e.getPublicData());
     }
     return { ...publicData, effects: publicEffects };
   }
 
   public getCopyData() {
-    const publicSkill = { ...this };
+    const skill = this.mods.replacedBy ? this.mods.replacedBy : this;
+
+    let publicSkill = { ...skill };
     delete publicSkill.casterReference;
     delete publicSkill.arenaReference;
     delete publicSkill.effects;
     delete publicSkill.inactiveEffects;
 
     const copyEffects = [];
-    for (const effect of this.effects) {
+    for (const effect of skill.effects) {
       copyEffects.push(effect.getPublicData());
     }
 
     const copyInactiveEffects = [];
-    for (const effect of this.inactiveEffects) {
+    for (const effect of skill.inactiveEffects) {
       copyInactiveEffects.push(effect.getPublicData());
     }
 

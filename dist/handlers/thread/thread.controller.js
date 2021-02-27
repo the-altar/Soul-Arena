@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPosts = exports.deletePost = exports.postComment = exports.updateThread = exports.postThread = exports.findThread = exports.news = void 0;
+exports.getPosts = exports.deletePost = exports.postComment = exports.updateThread = exports.postThread = exports.findThread = exports.newsBanner = exports.news = void 0;
 const logger_1 = require("../../lib/logger");
 const db_1 = require("../../db");
 exports.news = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -20,6 +20,25 @@ exports.news = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         LEFT JOIN users AS u 
             ON t.author = u.id 	
         WHERE t.site_area=0
+        ORDER BY created_at DESC
+        limit 5;`;
+    try {
+        const docs = yield db_1.pool.query(text);
+        res.status(200).json(docs.rows);
+    }
+    catch (err) {
+        logger_1.log.error(err);
+        return res.status(500).json({});
+    }
+});
+exports.newsBanner = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const text = `
+        SELECT t.id, t.created_at, t.title, t."content", t.post_count, t.meta, t.locked,
+            JSON_BUILD_OBJECT('username', u.username, 'avatar', u.avatar) as "author" 
+        FROM thread AS t 
+        LEFT JOIN users AS u 
+            ON t.author = u.id 	
+        WHERE t.site_area=0 and (t.meta->'bannerUrl') is not null
         ORDER BY created_at DESC
         limit 5;`;
     try {

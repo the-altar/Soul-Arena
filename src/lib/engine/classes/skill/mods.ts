@@ -1,4 +1,5 @@
 import { log } from "../../../logger";
+import { Skill } from "./index";
 import { effectType, targetType, ReiatsuTypes, ControlType } from "../../enums";
 export class SkillMods {
   private targetMod: targetType;
@@ -7,7 +8,7 @@ export class SkillMods {
   public costChange: {
     [x: number]: number;
   };
-
+  public replacedBy: Skill;
   public meta: {
     [x: string]: any;
   };
@@ -32,6 +33,7 @@ export class SkillMods {
       requiresSkillOnTarget: [],
       cannotBeUsedOnTargetOf: [],
     };
+    this.replacedBy = null
   }
 
   public setTargetMod(target: targetType) {

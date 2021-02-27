@@ -229,7 +229,7 @@ class Skill {
         }
     }
     setTargetChoices(characters, playerId, self) {
-        logger_1.log.info(this.getTargetMod(), this.mods.meta.targetMode, this.targetMode);
+        //log.info(this.getTargetMod(), this.mods.meta.targetMode, this.targetMode);
         const targetMode = this.getTargetMod() || this.mods.meta.targetMode || this.targetMode;
         this.targetChoices = targetValidationFactory_1.targetSetter(this, targetMode, characters, playerId, self);
     }
@@ -266,7 +266,7 @@ class Skill {
                     effect.terminate = true;
             }
             effect.shouldApply();
-            logger_1.log.info("effect apply status: ", effect.activate, effect.tick);
+            //log.info("effect apply status: ", effect.activate, effect.tick);
             effect.execute(this);
             if (!effect.terminate)
                 effect.generateToolTip();
@@ -374,30 +374,32 @@ class Skill {
         return this.harmful;
     }
     getPublicData() {
-        const publicData = Object.assign({}, this);
+        const skill = this.mods.replacedBy ? this.mods.replacedBy : this;
+        const publicData = Object.assign({}, skill);
         delete publicData.arenaReference;
         delete publicData.casterReference;
         delete publicData.effects;
         delete publicData.inactiveEffects;
         delete publicData.mods;
         const publicEffects = [];
-        for (const e of this.effects) {
+        for (const e of skill.effects) {
             publicEffects.push(e.getPublicData());
         }
         return Object.assign(Object.assign({}, publicData), { effects: publicEffects });
     }
     getCopyData() {
-        const publicSkill = Object.assign({}, this);
+        const skill = this.mods.replacedBy ? this.mods.replacedBy : this;
+        let publicSkill = Object.assign({}, skill);
         delete publicSkill.casterReference;
         delete publicSkill.arenaReference;
         delete publicSkill.effects;
         delete publicSkill.inactiveEffects;
         const copyEffects = [];
-        for (const effect of this.effects) {
+        for (const effect of skill.effects) {
             copyEffects.push(effect.getPublicData());
         }
         const copyInactiveEffects = [];
-        for (const effect of this.inactiveEffects) {
+        for (const effect of skill.inactiveEffects) {
             copyInactiveEffects.push(effect.getPublicData());
         }
         return Object.assign(Object.assign({}, publicSkill), { effects: copyEffects, inactiveEffects: copyInactiveEffects });

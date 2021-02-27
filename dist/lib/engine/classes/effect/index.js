@@ -24,6 +24,7 @@ const counter_1 = require("./counter");
 const effectRemoval_1 = require("./effectRemoval");
 const alterEffectValue_1 = require("./alterEffectValue");
 const destructibleDefense_1 = require("./destructibleDefense");
+const replaceSkill_1 = require("./replaceSkill");
 __exportStar(require("./base"), exports);
 exports.effectFactory = function (effect, caster) {
     switch (effect.type) {
@@ -119,6 +120,15 @@ exports.effectFactory = function (effect, caster) {
         }
         case enums_1.effectType.SkillMod: {
             return new skillTargetMod_1.SkillMod(effect, caster);
+        }
+        case enums_1.effectType.ReplaceSkill: {
+            return new replaceSkill_1.ReplaceSkill(effect, caster);
+        }
+        case enums_1.effectType.EnergySteal: {
+            return new energyRelated_1.EnergySteal(effect, caster);
+        }
+        case enums_1.effectType.IncreaseHealthHealed: {
+            return new healthRelated_1.IncreaseHealthHealed(effect, caster);
         }
         default: {
             return new base_1.Effect(effect, caster);

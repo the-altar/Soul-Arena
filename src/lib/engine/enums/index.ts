@@ -61,6 +61,7 @@ export enum effectType {
   ApplyEffect,
   ReplaceSkill,
   SkillMod,
+  IncreaseHealthHealed
 }
 
 export enum activationType {
@@ -178,6 +179,7 @@ export enum triggerClauseType {
   IfTargetedByHarmfulSkill,
   UsesANewSkill,
   UsesANewNonStrategicSkill,
+  BothAlliesAreDead
 }
 
 export enum BattleRooms {

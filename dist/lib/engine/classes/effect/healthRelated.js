@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IgnoreDeath = exports.HealthDrain = exports.Healing = void 0;
+exports.IncreaseHealthHealed = exports.IgnoreDeath = exports.HealthDrain = exports.Healing = void 0;
 const damageRelated_1 = require("./damageRelated");
 const base_1 = require("./base");
 const enums_1 = require("../../enums");
@@ -11,7 +11,8 @@ class Healing extends base_1.Effect {
     functionality(char, origin) {
         if (char.getDebuffs().ignoreBenefitialEffects)
             return;
-        const hp = char.geHitPoints() + this.value;
+        const buff = char.buffs.increaseHealthHealed.bySkillId[origin.id] || 0;
+        const hp = char.geHitPoints() + this.value + buff;
         char.setHitPoints(hp);
     }
     generateToolTip() {
@@ -86,4 +87,44 @@ class IgnoreDeath extends base_1.Effect {
     }
 }
 exports.IgnoreDeath = IgnoreDeath;
+class IncreaseHealthHealed extends base_1.Effect {
+    constructor(data, caster) {
+        super(data, caster);
+        this.skillType = data.skillType || false;
+        this.specificSkill = data.specificSkill || false;
+    }
+    functionality(char, origin) {
+        let blocked = false;
+        blocked = char.getDebuffs().ignoreBenefitialEffects;
+        const buff = char.getBuffs().increaseHealthHealed;
+        if (blocked) {
+            if (this.specificSkill) {
+                this.specificSkillName = this.arenaReference
+                    .findCharacterById(this.caster)
+                    .char.findSkillById(this.specificSkill).name;
+            }
+            return;
+        }
+        if (this.skillType) {
+            buff.bySkillClass[this.skillType] =
+                (buff.bySkillClass[this.skillType] || 0) + this.value;
+        }
+        else if (this.specificSkill) {
+            buff.bySkillId[this.specificSkill] =
+                (buff.bySkillId[this.specificSkill] || 0) + this.value;
+            this.specificSkillName = this.arenaReference
+                .findCharacterById(this.caster)
+                .char.findSkillById(this.specificSkill).name;
+        }
+    }
+    generateToolTip() {
+        if (this.skillType) {
+            this.message = `This character will be healed ${this.value} more health by ${enums_1.SkillClassType[this.skillType]} skills`;
+        }
+        else if (this.specificSkill) {
+            this.message = `'${this.specificSkillName}' will heal ${this.value} more health`;
+        }
+    }
+}
+exports.IncreaseHealthHealed = IncreaseHealthHealed;
 //# sourceMappingURL=healthRelated.js.map
