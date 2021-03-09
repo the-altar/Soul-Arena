@@ -118,6 +118,9 @@ var effectTargetBehavior;
     effectTargetBehavior[effectTargetBehavior["Sixth"] = 12] = "Sixth";
     effectTargetBehavior[effectTargetBehavior["IfAllyIncludingSelf"] = 13] = "IfAllyIncludingSelf";
     effectTargetBehavior[effectTargetBehavior["OneRandomEnemy"] = 14] = "OneRandomEnemy";
+    effectTargetBehavior[effectTargetBehavior["First_Ally"] = 15] = "First_Ally";
+    effectTargetBehavior[effectTargetBehavior["Second_Ally"] = 16] = "Second_Ally";
+    effectTargetBehavior[effectTargetBehavior["Third_Ally"] = 17] = "Third_Ally";
 })(effectTargetBehavior = exports.effectTargetBehavior || (exports.effectTargetBehavior = {}));
 var DamageType;
 (function (DamageType) {

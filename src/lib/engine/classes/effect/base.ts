@@ -102,7 +102,7 @@ export class Effect {
     if (!this.triggerLinkedEffects.length) return;
 
     for (let i = 0; i < this.triggerLinkedEffects.length; i++) {
-      const linked = this.triggerLinkedEffects[i]
+      const linked = this.triggerLinkedEffects[i];
       switch (linked.condition) {
         case triggerClauseType.IfTargeted:
           {
@@ -373,6 +373,64 @@ export class Effect {
               this.targets[index],
             ])[0];
             this.activateOnTarget(char, origin, t, this.targets[index]);
+          }
+          break;
+
+        case effectTargetBehavior.First_Ally:
+          {
+            let char;
+            let targeted = 0;
+            if (!this.triggered)
+              for (let i = 0; i < this.targets.length; i++) {
+                if (
+                  origin.casterReference.getAllies().includes(this.targets[i])
+                ) {
+                  targeted = i;
+                  break;
+                }
+              }
+            char = this.arenaReference.characters[this.targets[targeted]];
+            if (char) this.activateOnTarget(char, origin, t, this.targets[targeted]);
+          }
+          break;
+
+        case effectTargetBehavior.Second_Ally:
+          {
+            //log.info(this.targets)
+            let char = null;
+            let targeted = 0;
+            if (!this.triggered)
+              for (let i = 0; i < this.targets.length; i++) {
+                if (
+                  origin.casterReference.getAllies().includes(this.targets[i])
+                ) {
+                  targeted = i+1;
+                  break;
+                }
+              }
+            char = this.arenaReference.characters[this.targets[targeted]];
+            if (!char) break;
+            this.activateOnTarget(char, origin, t, this.targets[targeted]);
+          }
+          break;
+
+        case effectTargetBehavior.Third_Ally:
+          {
+            let char = null;
+            let targeted = 0;
+            if (!this.triggered)
+              for (let i = 0; i < this.targets.length; i++) {
+                if (
+                  origin.casterReference.getAllies().includes(this.targets[i])
+                ) {
+                  targeted = i+2;
+                  break;
+                }
+              }
+
+            char = this.arenaReference.characters[this.targets[targeted]];
+            if (!char) break;
+            this.activateOnTarget(char, origin, t, this.targets[targeted]);
           }
           break;
 

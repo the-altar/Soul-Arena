@@ -259,6 +259,57 @@ class Effect {
                         this.activateOnTarget(char, origin, t, this.targets[index]);
                     }
                     break;
+                case enums_1.effectTargetBehavior.First_Ally:
+                    {
+                        let char;
+                        let targeted = 0;
+                        if (!this.triggered)
+                            for (let i = 0; i < this.targets.length; i++) {
+                                if (origin.casterReference.getAllies().includes(this.targets[i])) {
+                                    targeted = i;
+                                    break;
+                                }
+                            }
+                        char = this.arenaReference.characters[this.targets[targeted]];
+                        if (char)
+                            this.activateOnTarget(char, origin, t, this.targets[targeted]);
+                    }
+                    break;
+                case enums_1.effectTargetBehavior.Second_Ally:
+                    {
+                        //log.info(this.targets)
+                        let char = null;
+                        let targeted = 0;
+                        if (!this.triggered)
+                            for (let i = 0; i < this.targets.length; i++) {
+                                if (origin.casterReference.getAllies().includes(this.targets[i])) {
+                                    targeted = i + 1;
+                                    break;
+                                }
+                            }
+                        char = this.arenaReference.characters[this.targets[targeted]];
+                        if (!char)
+                            break;
+                        this.activateOnTarget(char, origin, t, this.targets[targeted]);
+                    }
+                    break;
+                case enums_1.effectTargetBehavior.Third_Ally:
+                    {
+                        let char = null;
+                        let targeted = 0;
+                        if (!this.triggered)
+                            for (let i = 0; i < this.targets.length; i++) {
+                                if (origin.casterReference.getAllies().includes(this.targets[i])) {
+                                    targeted = i + 2;
+                                    break;
+                                }
+                            }
+                        char = this.arenaReference.characters[this.targets[targeted]];
+                        if (!char)
+                            break;
+                        this.activateOnTarget(char, origin, t, this.targets[targeted]);
+                    }
+                    break;
                 case enums_1.effectTargetBehavior.OneRandomEnemy: {
                     let index;
                     if (this.triggered)

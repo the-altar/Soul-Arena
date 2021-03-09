@@ -1,9 +1,0 @@
-{
-  "postgres": {
-    "host": "sa-db-cluster-do-user-8474129-0.b.db.ondigitalocean.com",
-    "port": 25060,
-    "database": "SaPool",
-    "password": "p88a9086rpoesfoi",
-    "user": "sa"
-  }
-}
